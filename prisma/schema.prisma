@@ -1,0 +1,266 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// 用户表
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique @db.VarChar(50)
+  email     String   @unique @db.VarChar(100)
+  passwordHash String @map("password_hash") @db.VarChar(255)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // 关联关系
+  domains         Domain[]
+  categories      DomainCategory[]
+  tags            DomainTag[]
+  portfolios      Portfolio[]
+  registrars      Registrar[]
+  watchedDomains  WatchedDomain[]
+  aiPrompts       AiPrompt[]
+  systemSettings  SystemSetting[]
+
+  @@map("users")
+}
+
+// 注册商表
+model Registrar {
+  id         Int      @id @default(autoincrement())
+  userId     Int      @map("user_id")
+  name       String   @db.VarChar(100)
+  websiteUrl String?  @map("website_url") @db.VarChar(255)
+  loginUrl   String?  @map("login_url") @db.VarChar(255)
+  accountId  String?  @map("account_id") @db.VarChar(100)
+  notes      String?  @db.Text
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  // 关联关系
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  domains Domain[]
+
+  @@unique([userId, name])
+  @@map("registrars")
+}
+
+// 域名分类表
+model DomainCategory {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @map("user_id")
+  name        String   @db.VarChar(100)
+  description String?  @db.Text
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // 关联关系
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  domains Domain[]
+
+  @@unique([userId, name])
+  @@map("domain_categories")
+}
+
+// 域名标签表
+model DomainTag {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  name      String   @db.VarChar(50)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // 关联关系
+  user    User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  domains DomainTagMap[]
+
+  @@unique([userId, name])
+  @@map("domain_tags")
+}
+
+// 域名表
+model Domain {
+  id                  Int      @id @default(autoincrement())
+  userId              Int      @map("user_id")
+  domainName          String   @map("domain_name") @db.VarChar(255)
+  registrarId         Int?     @map("registrar_id")
+  creationDate        DateTime? @map("creation_date") @db.Date
+  expiryDate          DateTime? @map("expiry_date") @db.Date
+  nameServers         String?  @map("name_servers") @db.Text
+  purchasePrice       Decimal? @map("purchase_price") @db.Decimal(10, 2)
+  holderInfo          String?  @map("holder_info") @db.Text
+  notes               String?  @db.Text
+  domainStatus        Int?     @map("domain_status") @db.TinyInt @default(1)
+  salesStatus         Int?     @map("sales_status") @db.TinyInt @default(1)
+  categoryId          Int?     @map("category_id")
+  landingPageType     String?  @map("landing_page_type") @db.VarChar(20)
+  landingPageContent  String?  @map("landing_page_content") @db.Text
+  landingPagePrice    Decimal? @map("landing_page_price") @db.Decimal(10, 2)
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  // 关联关系
+  user       User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  registrar  Registrar?         @relation(fields: [registrarId], references: [id], onDelete: SetNull)
+  category   DomainCategory?    @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  tags       DomainTagMap[]
+  costs      DomainCost[]
+  inquiries  Inquiry[]
+  portfolios PortfolioDomainMap[]
+
+  @@unique([userId, domainName])
+  @@map("domains")
+}
+
+// 域名标签关联表
+model DomainTagMap {
+  domainId Int @map("domain_id")
+  tagId    Int @map("tag_id")
+
+  // 关联关系
+  domain Domain    @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  tag    DomainTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([domainId, tagId])
+  @@map("domain_tag_map")
+}
+
+// 域名成本表
+model DomainCost {
+  id           Int      @id @default(autoincrement())
+  domainId     Int      @map("domain_id")
+  costDate     DateTime @map("cost_date") @db.Date
+  amount       Decimal  @db.Decimal(10, 2)
+  costType     String   @map("cost_type") @db.VarChar(20)
+  renewalYears Int?     @map("renewal_years")
+  notes        String?  @db.Text
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  // 关联关系
+  domain Domain @relation(fields: [domainId], references: [id], onDelete: Cascade)
+
+  @@map("domain_costs")
+}
+
+// 米表表
+model Portfolio {
+  id              Int      @id @default(autoincrement())
+  userId          Int      @map("user_id")
+  name            String   @db.VarChar(100)
+  slug            String   @db.VarChar(100)
+  isDefault       Boolean  @default(false) @map("is_default")
+  layoutTemplate  String   @default("list") @map("layout_template") @db.VarChar(50)
+  colorTheme      String?  @map("color_theme") @db.VarChar(50)
+  headerInfo      String?  @map("header_info") @db.Text
+  footerInfo      String?  @map("footer_info") @db.Text
+  showPrice       Boolean  @default(true) @map("show_price")
+  showDescription Boolean  @default(false) @map("show_description")
+  showTags        Boolean  @default(false) @map("show_tags")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // 关联关系
+  user      User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  domains   PortfolioDomainMap[]
+  inquiries Inquiry[]
+
+  @@unique([userId, slug])
+  @@map("portfolios")
+}
+
+// 米表域名关联表
+model PortfolioDomainMap {
+  portfolioId          Int     @map("portfolio_id")
+  domainId             Int     @map("domain_id")
+  displayPriceOverride Decimal? @map("display_price_override") @db.Decimal(10, 2)
+  displayOrder         Int     @default(0) @map("display_order")
+
+  // 关联关系
+  portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  domain    Domain    @relation(fields: [domainId], references: [id], onDelete: Cascade)
+
+  @@id([portfolioId, domainId])
+  @@map("portfolio_domain_map")
+}
+
+// 询盘表
+model Inquiry {
+  id           Int      @id @default(autoincrement())
+  domainId     Int?     @map("domain_id")
+  portfolioId  Int?     @map("portfolio_id")
+  visitorName  String?  @map("visitor_name") @db.VarChar(100)
+  visitorEmail String   @map("visitor_email") @db.VarChar(255)
+  visitorPhone String?  @map("visitor_phone") @db.VarChar(50)
+  offerPrice   Decimal? @map("offer_price") @db.Decimal(10, 2)
+  message      String   @db.Text
+  status       String   @default("new") @db.VarChar(20)
+  ipAddress    String?  @map("ip_address") @db.VarChar(45)
+  userAgent    String?  @map("user_agent") @db.Text
+  submittedAt  DateTime @default(now()) @map("submitted_at")
+
+  // 关联关系
+  domain    Domain?    @relation(fields: [domainId], references: [id], onDelete: SetNull)
+  portfolio Portfolio? @relation(fields: [portfolioId], references: [id], onDelete: SetNull)
+
+  @@map("inquiries")
+}
+
+// 关注域名表
+model WatchedDomain {
+  id                   Int      @id @default(autoincrement())
+  userId               Int      @map("user_id")
+  domainName           String   @map("domain_name") @db.VarChar(255)
+  lastWhoisCheck       DateTime? @map("last_whois_check")
+  currentWhoisSummary  String?  @map("current_whois_summary") @db.Text
+  monitoringLevel      String?  @map("monitoring_level") @db.VarChar(50)
+  notes                String?  @db.Text
+  notifyOnChange       Boolean  @default(true) @map("notify_on_change")
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+
+  // 关联关系
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, domainName])
+  @@map("watched_domains")
+}
+
+// AI 提示词表
+model AiPrompt {
+  id                  Int      @id @default(autoincrement())
+  userId              Int      @map("user_id")
+  sceneCode           String   @map("scene_code") @db.VarChar(100)
+  sceneName           String   @map("scene_name") @db.VarChar(200)
+  systemPromptDefault String   @map("system_prompt_default") @db.Text
+  userPromptCustom    String?  @map("user_prompt_custom") @db.Text
+  isActiveCustom      Boolean  @default(false) @map("is_active_custom")
+  modelPreference     String?  @map("model_preference") @db.VarChar(100)
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  // 关联关系
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, sceneCode])
+  @@map("ai_prompts")
+}
+
+// 系统设置表
+model SystemSetting {
+  settingKey   String @id @map("setting_key") @db.VarChar(100)
+  settingValue String @map("setting_value") @db.Text
+  userId       Int?   @map("user_id")
+
+  // 关联关系
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("system_settings")
+} 

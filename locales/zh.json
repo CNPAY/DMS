@@ -1,0 +1,10 @@
+{
+  "welcome": "欢迎使用 DMS",
+  "login": "登录",
+  "logout": "退出登录",
+  "dashboard": "仪表盘",
+  "domains": "域名管理",
+  "portfolios": "米表管理",
+  "inquiries": "询盘管理",
+  "settings": "系统设置"
+} 

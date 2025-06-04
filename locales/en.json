@@ -1,0 +1,10 @@
+{
+  "welcome": "Welcome to DMS",
+  "login": "Login",
+  "logout": "Logout", 
+  "dashboard": "Dashboard",
+  "domains": "Domain Management",
+  "portfolios": "Portfolio Management",
+  "inquiries": "Inquiry Management",
+  "settings": "System Settings"
+} 
