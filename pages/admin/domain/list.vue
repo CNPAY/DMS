@@ -50,41 +50,20 @@
     </el-card>
 
     <!-- 工具栏 -->
-    <el-card class="mb8">
-      <el-row :gutter="10" class="mb8">
-        <el-col :span="1.5">
-          <el-button
-            type="primary"
-            plain
-            icon="Plus"
-            @click="handleAdd"
-          >
-            新增
-          </el-button>
-        </el-col>
-        <el-col :span="1.5">
-          <el-button
-            type="danger"
-            plain
-            icon="Delete"
-            :disabled="multiple"
-            @click="handleDelete"
-          >
-            删除
-          </el-button>
-        </el-col>
-        <el-col :span="1.5">
-          <el-button
-            type="info"
-            plain
-            icon="Search"
-            @click="showSearch = !showSearch"
-          >
-            搜索
-          </el-button>
-        </el-col>
-      </el-row>
-    </el-card>
+    <el-row class="mb8" style="display: flex; justify-content: space-between; align-items: center;">
+      <div style="display: flex;">
+        <el-button type="primary" plain icon="Plus" @click="handleAdd">新增</el-button>
+        <el-button type="danger" plain icon="Delete" :disabled="multiple" @click="handleDelete">删除</el-button>
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <el-button circle @click="showSearch = !showSearch">
+          <el-icon><Search /></el-icon>
+        </el-button>
+        <el-button circle @click="getList">
+          <el-icon><Refresh /></el-icon>
+        </el-button>
+      </div>
+    </el-row>
 
     <!-- 数据表格 -->
     <el-card>
