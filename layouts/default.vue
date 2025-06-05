@@ -24,6 +24,11 @@
   </div>
 </template>
 
+<style lang="scss">
+// 导入门户专用的轻量级样式
+@import '~/assets/styles/portal.scss';
+</style>
+
 <style scoped lang="scss">
 .main-container {
   min-height: 100vh;

@@ -6,21 +6,23 @@ export default defineNuxtConfig({
   // 基础模块
   modules: [
     '@pinia/nuxt',
-    '@nuxtjs/i18n',
-    // 条件加载 Element Plus - 只在需要时加载
-    ...(process.env.NODE_ENV === 'development' ? ['@element-plus/nuxt'] : [])
+    '@nuxtjs/i18n'
+    // 暂时移除Element Plus的自动导入，避免SCSS冲突
+    // ...(process.env.NODE_ENV === 'development' ? ['@element-plus/nuxt'] : [])
   ],
 
-  // Element Plus 配置 - 只导入需要的组件
-  elementPlus: {
-    importStyle: 'scss',
-    themes: ['dark']
-  },
+  // Element Plus 配置 - 暂时禁用自动导入
+  // elementPlus: {
+  //   importStyle: 'css',
+  //   themes: ['dark']
+  // },
 
   // CSS
   css: [
-    '~/assets/css/main.scss'
+    // 移除全局样式，改为在对应的布局中按需导入
+    // '~/assets/styles/index.scss'
   ],
+
 
   // Runtime config
   runtimeConfig: {
@@ -108,13 +110,13 @@ export default defineNuxtConfig({
     vueI18n: './i18n.config.ts'
   },
 
-  // Vite configuration - 移除全局SCSS变量注入
+  // Vite configuration
   vite: {
     css: {
       preprocessorOptions: {
         scss: {
-          // 移除全局变量注入，避免与Element Plus冲突
-          // additionalData: '@use "~/assets/css/variables.scss" as *;'
+          // 移除全局变量导入，避免与Element Plus的@use规则冲突
+          // additionalData: `@import "~/assets/styles/mixin.scss";`
         }
       }
     }

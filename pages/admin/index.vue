@@ -17,7 +17,9 @@
       <div class="stats-grid">
         <el-card class="stats-card">
           <div class="stats-content">
-            <div class="stats-icon domain-icon">🌐</div>
+            <div class="stats-icon domain-icon">
+              <svg-icon icon-class="server" size="32px" />
+            </div>
             <div class="stats-info">
               <div class="stats-number">0</div>
               <div class="stats-label">总域名数量</div>
@@ -27,7 +29,9 @@
 
         <el-card class="stats-card">
           <div class="stats-content">
-            <div class="stats-icon portfolio-icon">📋</div>
+            <div class="stats-icon portfolio-icon">
+              <svg-icon icon-class="table" size="32px" />
+            </div>
             <div class="stats-info">
               <div class="stats-number">0</div>
               <div class="stats-label">米表数量</div>
@@ -37,7 +41,9 @@
 
         <el-card class="stats-card">
           <div class="stats-content">
-            <div class="stats-icon inquiry-icon">💬</div>
+            <div class="stats-icon inquiry-icon">
+              <svg-icon icon-class="message" size="32px" />
+            </div>
             <div class="stats-info">
               <div class="stats-number">0</div>
               <div class="stats-label">待处理询盘</div>
@@ -47,7 +53,9 @@
 
         <el-card class="stats-card">
           <div class="stats-content">
-            <div class="stats-icon value-icon">💰</div>
+            <div class="stats-icon value-icon">
+              <svg-icon icon-class="money" size="32px" />
+            </div>
             <div class="stats-info">
               <div class="stats-number">¥0</div>
               <div class="stats-label">总资产价值</div>
@@ -62,10 +70,12 @@
         <div class="actions-grid">
           <el-card class="action-card">
             <div class="action-content">
-              <div class="action-icon">➕</div>
+              <div class="action-icon">
+                <svg-icon icon-class="plus" size="24px" type="element" />
+              </div>
               <h3>添加域名</h3>
               <p>录入新的域名信息</p>
-              <el-button type="primary" @click="navigateTo('/admin/domains/create')">
+              <el-button type="primary" @click="navigateTo('/admin/domain/register')">
                 立即添加
               </el-button>
             </div>
@@ -73,10 +83,12 @@
 
           <el-card class="action-card">
             <div class="action-content">
-              <div class="action-icon">📊</div>
+              <div class="action-icon">
+                <svg-icon icon-class="chart" size="24px" />
+              </div>
               <h3>查看报表</h3>
               <p>分析域名投资数据</p>
-              <el-button type="primary" @click="navigateTo('/admin/reports/sales')">
+              <el-button type="primary" @click="navigateTo('/admin/report/sales')">
                 查看报表
               </el-button>
             </div>
@@ -84,10 +96,12 @@
 
           <el-card class="action-card">
             <div class="action-content">
-              <div class="action-icon">🤖</div>
+              <div class="action-icon">
+                <svg-icon icon-class="build" size="24px" />
+              </div>
               <h3>AI 助手</h3>
               <p>获取智能投资建议</p>
-              <el-button type="primary" @click="navigateTo('/admin/ai/chat')">
+              <el-button type="primary" @click="navigateTo('/admin/ai/chatbot')">
                 开始对话
               </el-button>
             </div>
@@ -95,10 +109,12 @@
 
           <el-card class="action-card">
             <div class="action-content">
-              <div class="action-icon">⚙️</div>
+              <div class="action-icon">
+                <svg-icon icon-class="system" size="24px" />
+              </div>
               <h3>系统设置</h3>
               <p>配置系统参数</p>
-              <el-button type="primary" @click="navigateTo('/admin/settings')">
+              <el-button type="primary" @click="navigateTo('/admin/system/registrar')">
                 前往设置
               </el-button>
             </div>
@@ -112,7 +128,8 @@
 <script setup lang="ts">
 // 设置管理后台布局
 definePageMeta({
-  layout: 'admin'
+  layout: 'admin',
+  title: '管理仪表盘'
 })
 
 // 使用智能 UI 库管理器
