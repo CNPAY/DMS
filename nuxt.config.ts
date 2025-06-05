@@ -27,8 +27,8 @@ export default defineNuxtConfig({
   // Runtime config
   runtimeConfig: {
     // Private keys (only available on server-side)
-    jwtSecret: process.env.JWT_SECRET || 'default-secret',
-    databaseUrl: process.env.DATABASE_URL,
+    jwtSecret: process.env.JWT_SECRET || 'dms-super-secret-jwt-key-2024',
+    databaseUrl: process.env.DATABASE_URL || 'mysql://dms:m6thWexeTjw3e5JJ@43.154.106.167:3306/dms',
     smtpHost: process.env.SMTP_HOST,
     smtpPort: process.env.SMTP_PORT,
     smtpUser: process.env.SMTP_USER,

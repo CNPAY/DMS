@@ -159,6 +159,20 @@ const useUserStore = defineStore('user', {
       });
     },
     
+    // 设置用户信息
+    setUserInfo(user: any,token: string): Promise<void> {
+      return new Promise((resolve) => {
+        this.id = user.id?.toString() || '';
+        this.name = user.username || user.name || '';
+        this.avatar = user.avatar || defAva;
+        this.roles = user.roles || ['admin'];
+        this.permissions = user.permissions || ['*:*:*'];
+        this.token = token || '';
+        setToken(token);
+        resolve();
+      });
+    },
+
     // 退出系统
     logOut(): Promise<void> {
       return new Promise((resolve, reject) => {

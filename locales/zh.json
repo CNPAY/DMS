@@ -6,5 +6,20 @@
   "domains": "域名管理",
   "portfolios": "米表管理",
   "inquiries": "询盘管理",
-  "settings": "系统设置"
+  "settings": "系统设置",
+  "auth": {
+    "welcome": "欢迎使用 DMS",
+    "loginToManage": "登录到管理后台",
+    "email": "邮箱",
+    "password": "密码",
+    "login": "登录",
+    "loggingIn": "登录中...",
+    "loginSuccess": "登录成功",
+    "loginFailed": "登录失败",
+    "emailRequired": "请输入邮箱地址",
+    "emailInvalid": "请输入有效的邮箱地址",
+    "passwordRequired": "请输入密码",
+    "passwordMinLength": "密码长度不能少于6位",
+    "demoHint": "演示账户信息："
+  }
 } 

@@ -6,5 +6,20 @@
   "domains": "Domain Management",
   "portfolios": "Portfolio Management",
   "inquiries": "Inquiry Management",
-  "settings": "System Settings"
+  "settings": "System Settings",
+  "auth": {
+    "welcome": "Welcome to DMS",
+    "loginToManage": "Login to Admin Panel",
+    "email": "Email",
+    "password": "Password",
+    "login": "Login",
+    "loggingIn": "Logging in...",
+    "loginSuccess": "Login successful",
+    "loginFailed": "Login failed",
+    "emailRequired": "Please enter email address",
+    "emailInvalid": "Please enter a valid email address",
+    "passwordRequired": "Please enter password",
+    "passwordMinLength": "Password must be at least 6 characters",
+    "demoHint": "Demo account information:"
+  }
 } 

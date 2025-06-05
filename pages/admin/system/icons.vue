@@ -104,10 +104,11 @@
 </template>
 
 <script setup lang="ts">
-// 定义布局
+// 定义布局和认证保护
 definePageMeta({
   layout: 'admin',
-  title: '图标库'
+  title: '图标库',
+  middleware: 'auth'
 })
 
 // 获取所有可用的 SVG 图标

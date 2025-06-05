@@ -13,7 +13,9 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:push": "prisma db push",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "db:init": "node scripts/init-db.js",
+    "db:setup": "prisma db push && node scripts/init-db.js"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",

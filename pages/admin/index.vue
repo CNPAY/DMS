@@ -126,10 +126,11 @@
 </template>
 
 <script setup lang="ts">
-// 设置管理后台布局
+// 设置管理后台布局和认证保护
 definePageMeta({
   layout: 'admin',
-  title: '管理仪表盘'
+  title: '仪表盘',
+  middleware: 'auth'
 })
 
 // 使用智能 UI 库管理器
@@ -167,6 +168,7 @@ useHead({
 <style scoped lang="scss">
 .admin-dashboard {
   min-height: 100%;
+  padding: 15px;
 }
 
 .loading-container {
