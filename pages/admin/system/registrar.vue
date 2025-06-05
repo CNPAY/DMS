@@ -178,15 +178,21 @@ const { queryParams, form, rules } = toRefs(data)
 async function getList() {
   loading.value = true
   try {
-    const response = await $fetch('/api/admin/registrars', {
+    const response = await $fetch('/api/admin/registrars/list', {
       query: {
         page: queryParams.value.pageNum,
         limit: queryParams.value.pageSize,
         search: queryParams.value.name || queryParams.value.websiteUrl
       }
     })
-    registrarList.value = response.data
-    total.value = response.pagination?.total || 0
+    
+    // 通过code字段判断成功失败
+    if (response.code === 200) {
+      registrarList.value = response.data.registrars
+      total.value = response.data.pagination?.total || 0
+    } else {
+      ElMessage.error(response.message || '获取注册商列表失败')
+    }
   } catch (error) {
     console.error('获取注册商列表失败:', error)
     ElMessage.error('获取注册商列表失败')
@@ -239,17 +245,18 @@ function handleAdd() {
 // 修改按钮操作
 async function handleUpdate(row) {
   reset()
-  const registrarId = row?.id || ids.value[0]
   
-  try {
-    const response = await $fetch(`/api/admin/registrars/${registrarId}`)
-    form.value = response.data
-    open.value = true
-    title.value = '修改注册商'
-  } catch (error) {
-    console.error('获取注册商详情失败:', error)
-    ElMessage.error('获取注册商详情失败')
+  // 直接设置表单数据，不需要额外的详情接口
+  form.value = { 
+    id: row.id,
+    name: row.name,
+    websiteUrl: row.websiteUrl,
+    loginUrl: row.loginUrl,
+    accountId: row.accountId,
+    notes: row.notes
   }
+  open.value = true
+  title.value = '修改注册商'
 }
 
 // 提交按钮
@@ -257,24 +264,23 @@ function submitForm() {
   registrarRef.value?.validate(async (valid) => {
     if (valid) {
       try {
-        if (form.value.id != null) {
-          await $fetch(`/api/admin/registrars/${form.value.id}`, {
-            method: 'PUT',
-            body: form.value
-          })
-          ElMessage.success('修改成功')
+        // 统一使用save接口，通过是否有id来判断新增还是编辑
+        const response = await $fetch('/api/admin/registrars/save', {
+          method: 'POST',
+          body: form.value
+        })
+        
+        // 通过code字段判断成功失败
+        if (response.code === 200) {
+          ElMessage.success(response.message || '操作成功')
+          open.value = false
+          getList()
         } else {
-          await $fetch('/api/admin/registrars', {
-            method: 'POST',
-            body: form.value
-          })
-          ElMessage.success('新增成功')
+          ElMessage.error(response.message || '操作失败')
         }
-        open.value = false
-        getList()
       } catch (error) {
         console.error('保存失败:', error)
-        ElMessage.error(error.data?.message || '保存失败')
+        ElMessage.error('保存失败')
       }
     }
   })
@@ -306,20 +312,40 @@ async function handleDelete(row) {
 
     if (Array.isArray(registrarIds)) {
       // 批量删除
-      await Promise.all(registrarIds.map(id => 
-        $fetch(`/api/admin/registrars/${id}`, { method: 'DELETE' })
-      ))
+      const deletePromises = registrarIds.map(id => 
+        $fetch('/api/admin/registrars/delete', { 
+          method: 'POST',
+          body: { id }
+        })
+      )
+      const responses = await Promise.all(deletePromises)
+      
+      // 检查所有响应的code字段
+      const hasError = responses.some(response => response.code !== 200)
+      if (hasError) {
+        ElMessage.error('部分注册商删除失败')
+      } else {
+        ElMessage.success('删除成功')
+      }
     } else {
       // 单个删除
-      await $fetch(`/api/admin/registrars/${registrarIds}`, { method: 'DELETE' })
+      const response = await $fetch('/api/admin/registrars/delete', { 
+        method: 'POST',
+        body: { id: registrarIds }
+      })
+      
+      if (response.code === 200) {
+        ElMessage.success('删除成功')
+      } else {
+        ElMessage.error(response.message || '删除失败')
+      }
     }
 
-    ElMessage.success('删除成功')
     getList()
   } catch (error) {
     if (error === 'cancel') return
     console.error('删除注册商失败:', error)
-    ElMessage.error(error.data?.message || '删除失败')
+    ElMessage.error('删除失败')
   }
 }
 

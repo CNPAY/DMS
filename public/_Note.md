@@ -533,4 +533,166 @@ if (response.code === 200) {
 
 ---
 
-## 2024-12-26 17:47 - API响应格式统一化完成 
+## 2024-12-26 17:47 - API响应格式统一化完成
+
+## 2024-12-26 18:15 - 域名标签管理功能完成
+
+### 用户提示词
+```
+继续
+```
+
+### 改动总结
+完成了域名标签管理的完整功能开发：
+
+**1. 域名标签CRUD API开发**
+- `GET /api/admin/tags` - 标签列表查询，支持分页和搜索
+- `POST /api/admin/tags` - 新增标签，包含重名检查
+- `GET /api/admin/tags/[id]` - 获取单个标签详情
+- `PUT /api/admin/tags/[id]` - 更新标签，防止重名
+- `DELETE /api/admin/tags/[id]` - 删除标签，包含依赖检查
+
+**2. 数据验证和业务逻辑**
+- 使用Joi进行数据验证（标签名称1-50个字符）
+- 标签名称重复检查（同一用户下唯一）
+- 删除前检查域名依赖关系（通过DomainTagMap表统计使用次数）
+- 统一使用ResponseData返回标准格式
+
+**3. 前端界面开发**
+- 创建 `pages/admin/domain/tag.vue` 标签管理页面
+- 完整的CRUD操作界面（列表、新增、修改、删除）
+- 支持搜索、分页、批量操作功能
+- 标签名称以Tag样式显示，使用次数统计
+- 使用 `response.code === 200` 判断接口成功失败
+
+**4. 功能特性**
+- 🔍 按标签名称搜索
+- 📄 分页展示
+- ✏️表单验证（前后端双重验证）
+- 🔒 重名检查
+- 🛡️ 依赖检查（防止删除正在使用的标签）
+- 🏷️ 标签可视化显示
+- 📊 使用次数统计
+
+**5. 数据库设计验证**
+- DomainTag表：存储标签基本信息
+- DomainTagMap表：处理域名与标签的多对多关系
+- 通过关联查询统计每个标签的使用次数
+
+**技术收获**
+- 多对多关系的API设计和依赖检查
+- 标签系统的前端可视化展示
+- 统一的CRUD模式复用，加快开发效率
+
+阶段一任务6（域名标签管理）已全面完成！
+
+---
+
+## 2024-12-26 18:05 - API响应格式最终统一完成
+
+## 2025-01-02 23:26 - API接口路径规范化与前端适配完成
+
+### 用户提示
+用户反馈"所有vue页面调用也得改"，要求更新前端页面适配新的接口路径结构。
+
+### 完成的工作
+
+#### 1. 接口路径规范化背景
+基于之前的技术文档更新，将传统 RESTful 风格改为更清晰的功能导向路径：
+- 列表查询：`GET /api/{module}/list`
+- 保存操作：`POST /api/{module}/save` (新增/编辑通用)
+- 删除操作：`POST /api/{module}/delete`
+
+#### 2. 前端页面API调用适配
+
+**分类管理页面** (`pages/admin/domain/category.vue`)：
+- ✅ 列表获取：`/api/admin/categories` → `/api/admin/categories/list`
+- ✅ 保存操作：合并 POST/PUT 为统一的 `/api/admin/categories/save`
+- ✅ 删除操作：`DELETE /api/admin/categories/{id}` → `POST /api/admin/categories/delete`
+- ✅ 编辑数据获取：移除单独的详情接口调用，直接使用列表数据
+
+**标签管理页面** (`pages/admin/domain/tag.vue`)：
+- ✅ 列表获取：`/api/admin/tags` → `/api/admin/tags/list`
+- ✅ 保存操作：合并 POST/PUT 为统一的 `/api/admin/tags/save`
+- ✅ 删除操作：`DELETE /api/admin/tags/{id}` → `POST /api/admin/tags/delete`
+- ✅ 编辑数据获取：移除单独的详情接口调用，直接使用列表数据
+
+**注册商管理页面** (`pages/admin/system/registrar.vue`)：
+- ✅ 列表获取：`/api/admin/registrars` → `/api/admin/registrars/list`
+- ✅ 保存操作：合并 POST/PUT 为统一的 `/api/admin/registrars/save`
+- ✅ 删除操作：`DELETE /api/admin/registrars/{id}` → `POST /api/admin/registrars/delete`
+- ✅ 编辑数据获取：移除单独的详情接口调用，直接使用列表数据
+- ✅ 响应处理：适配统一的 `{ code, message, data }` 响应格式
+
+#### 3. 优化亮点
+
+**简化编辑流程**：
+- 移除额外的详情接口调用
+- 直接使用列表数据进行编辑表单初始化
+- 减少网络请求，提升用户体验
+
+**统一保存逻辑**：
+- 前端只需一个 `save` 方法处理新增和编辑
+- 后端通过 `id` 字段自动判断操作类型
+- 简化前端代码逻辑，提高可维护性
+
+**响应格式一致性**：
+- 所有接口统一返回 `{ code: number, message: string, data: any }`
+- 前端通过 `response.code === 200` 判断操作成功
+- 统一错误处理机制
+
+#### 4. 技术收益
+- **代码简化**：前端逻辑更清晰，减少重复代码
+- **性能优化**：减少不必要的详情查询请求
+- **维护性提升**：接口命名更语义化，易于理解和维护
+- **扩展性增强**：为后续模块开发建立了清晰的开发模式
+
+### 当前接口文件结构
+```
+server/api/admin/
+├── categories/
+│   ├── list.get.ts      # 分类列表查询  
+│   ├── save.post.ts     # 分类保存(新增/编辑)
+│   └── delete.post.ts   # 分类删除
+├── tags/
+│   ├── list.get.ts      # 标签列表查询
+│   ├── save.post.ts     # 标签保存(新增/编辑) 
+│   └── delete.post.ts   # 标签删除
+└── registrars/
+    ├── list.get.ts      # 注册商列表查询
+    ├── save.post.ts     # 注册商保存(新增/编辑)
+    └── delete.post.ts   # 注册商删除
+```
+
+### 补充修复
+用户发现注册商API中的 `list.get.ts` 没有使用统一的响应格式工具：
+- ✅ 修复 `server/api/admin/registrars/list.get.ts`
+- ✅ 添加 `import { ResponseData } from '~/server/utils/response'`
+- ✅ 统一响应格式为 `{ code, message, data }` 结构
+- ✅ 统一错误处理机制
+
+现在所有API接口都使用了统一的响应格式工具，保证了接口规范的一致性。
+
+### 数据验证修复
+用户反馈所有创建操作都提示 `"id" must be a number` 错误：
+- **问题原因**：前端新增时传递 `id: null`，但 Joi schema 中 `id` 字段只设置了 `optional()`，没有允许 `null` 值
+- ✅ 修复分类API：`server/api/admin/categories/save.post.ts` - 添加 `.allow(null)`
+- ✅ 修复标签API：`server/api/admin/tags/save.post.ts` - 添加 `.allow(null)`  
+- ✅ 修复注册商API：`server/api/admin/registrars/save.post.ts` - 添加 `.allow(null)`
+- **技术要点**：Joi 的 `optional()` 不会自动允许 `null` 值，需要显式添加 `.allow(null)`
+
+现在新增操作可以正常通过数据验证，不会再出现类型错误。
+
+### 表单重置问题修复
+用户反馈"修改注册商信息后，再点新建会带入旧的数据"：
+- **问题原因**：可能是表单重置逻辑有问题，导致新增时残留旧数据
+- **解决方案**：用户建议直接调用 `reset()` 函数即可，无需复杂化
+- ✅ 简化分类管理：`pages/admin/domain/category.vue` - `handleAdd()` 中直接调用 `reset()`
+- ✅ 简化标签管理：`pages/admin/domain/tag.vue` - `handleAdd()` 中直接调用 `reset()`
+- ✅ 简化注册商管理：`pages/admin/system/registrar.vue` - `handleAdd()` 中直接调用 `reset()`
+- **技术要点**：保持代码简洁，复用已有的 `reset()` 函数，避免重复代码
+
+现在所有管理页面的新建功能使用统一的重置逻辑，代码更简洁清晰。
+
+### 下一步计划
+继续开发阶段一任务7：域名信息管理 CRUD API & 后台界面，按照新的接口规范进行开发。 

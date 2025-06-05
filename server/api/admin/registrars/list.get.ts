@@ -1,4 +1,5 @@
 import prisma from '~/server/utils/db'
+import { ResponseData } from '~/server/utils/response'
 
 export default defineEventHandler(async (event) => {
   try {
@@ -30,21 +31,17 @@ export default defineEventHandler(async (event) => {
       orderBy: { createdAt: 'desc' }
     })
 
-    return {
-      success: true,
-      data: registrars,
+    return ResponseData.success({
+      registrars,
       pagination: {
         page,
         limit,
         total,
         pages: Math.ceil(total / limit)
       }
-    }
-  } catch (error) {
+    }, '获取注册商列表成功')
+  } catch (error: any) {
     console.error('获取注册商列表失败:', error)
-    throw createError({
-      statusCode: 500,
-      statusMessage: '获取注册商列表失败'
-    })
+    return ResponseData.error('获取注册商列表失败', 500)
   }
 }) 

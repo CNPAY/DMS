@@ -2,11 +2,8 @@
   <div class="app-container">
     <!-- 搜索面板 -->
     <el-form :model="queryParams" class="search-panel" ref="queryRef" :inline="true" v-show="showSearch" label-width="100px">
-      <el-form-item label="分类名称" prop="name" style="width: 280px">
-        <el-input v-model="queryParams.name" placeholder="请输入分类名称" clearable @keyup.enter="handleQuery" />
-      </el-form-item>
-      <el-form-item label="描述" prop="description" style="width: 280px">
-        <el-input v-model="queryParams.description" placeholder="请输入描述" clearable @keyup.enter="handleQuery" />
+      <el-form-item label="标签名称" prop="name" style="width: 280px">
+        <el-input v-model="queryParams.name" placeholder="请输入标签名称" clearable @keyup.enter="handleQuery" />
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
@@ -32,16 +29,14 @@
     </el-row>
 
     <!-- 数据表格 -->
-    <el-table v-loading="loading" :data="categoryList" @selection-change="handleSelectionChange">
+    <el-table v-loading="loading" :data="tagList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="分类名称" align="center" prop="name" min-width="150" />
-      <el-table-column label="描述" align="center" prop="description" min-width="200">
+      <el-table-column label="标签名称" align="center" prop="name" min-width="150">
         <template #default="{ row }">
-          <span v-if="row.description">{{ row.description }}</span>
-          <span v-else class="text-gray-400">-</span>
+          <el-tag type="primary">{{ row.name }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="域名数量" align="center" prop="domainCount" width="120">
+      <el-table-column label="使用次数" align="center" prop="domainCount" width="120">
         <template #default="{ row }">
           <el-tag v-if="row._count?.domains > 0" type="success">{{ row._count.domains }}</el-tag>
           <el-tag v-else type="info">0</el-tag>
@@ -83,19 +78,11 @@
       />
     </div>
 
-    <!-- 添加或修改分类对话框 -->
-    <el-dialog :title="title" v-model="open" width="500px" append-to-body>
-      <el-form ref="categoryRef" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="分类名称" prop="name">
-          <el-input v-model="form.name" placeholder="请输入分类名称" />
-        </el-form-item>
-        <el-form-item label="描述" prop="description">
-          <el-input 
-            v-model="form.description" 
-            type="textarea" 
-            :rows="3"
-            placeholder="请输入分类描述"
-          />
+    <!-- 添加或修改标签对话框 -->
+    <el-dialog :title="title" v-model="open" width="400px" append-to-body>
+      <el-form ref="tagRef" :model="form" :rules="rules" label-width="80px">
+        <el-form-item label="标签名称" prop="name">
+          <el-input v-model="form.name" placeholder="请输入标签名称" />
         </el-form-item>
       </el-form>
       
@@ -109,26 +96,26 @@
   </div>
 </template>
 
-<script setup name="Category">
+<script setup name="Tag">
 import { ElMessage, ElMessageBox } from 'element-plus'
 import dayjs from 'dayjs'
 
 definePageMeta({
   layout: 'admin',
-  title: '域名分类管理',
+  title: '域名标签管理',
   middleware: 'auth'
 })
 
 useHead({
-  title: '域名分类管理 - DMS 管理后台'
+  title: '域名标签管理 - DMS 管理后台'
 })
 
 // refs
 const queryRef = ref()
-const categoryRef = ref()
+const tagRef = ref()
 
 // 响应式数据
-const categoryList = ref([])
+const tagList = ref([])
 const open = ref(false)
 const loading = ref(true)
 const showSearch = ref(true)
@@ -143,44 +130,40 @@ const data = reactive({
   queryParams: {
     pageNum: 1,
     pageSize: 10,
-    name: null,
-    description: null
+    name: null
   },
   rules: {
     name: [
-      { required: true, message: '分类名称不能为空', trigger: 'blur' },
-      { min: 1, max: 100, message: '名称长度在 1 到 100 个字符', trigger: 'blur' }
-    ],
-    description: [
-      { max: 1000, message: '描述不能超过 1000 个字符', trigger: 'blur' }
+      { required: true, message: '标签名称不能为空', trigger: 'blur' },
+      { min: 1, max: 50, message: '名称长度在 1 到 50 个字符', trigger: 'blur' }
     ]
   }
 })
 
 const { queryParams, form, rules } = toRefs(data)
 
-// 获取分类列表
+// 获取标签列表
 async function getList() {
   loading.value = true
   try {
-    const response = await $fetch('/api/admin/categories/list', {
+    const response = await $fetch('/api/admin/tags/list', {
       query: {
         page: queryParams.value.pageNum,
         limit: queryParams.value.pageSize,
-        search: queryParams.value.name || queryParams.value.description
+        search: queryParams.value.name
       }
     })
     
     // 通过code字段判断成功失败
     if (response.code === 200) {
-      categoryList.value = response.data.categories
+      tagList.value = response.data.tags
       total.value = response.data.pagination?.total || 0
     } else {
-      ElMessage.error(response.message || '获取分类列表失败')
+      ElMessage.error(response.message || '获取标签列表失败')
     }
   } catch (error) {
-    console.error('获取分类列表失败:', error)
-    ElMessage.error('获取分类列表失败')
+    console.error('获取标签列表失败:', error)
+    ElMessage.error('获取标签列表失败')
   } finally {
     loading.value = false
   }
@@ -190,11 +173,10 @@ async function getList() {
 function reset() {
   form.value = {
     id: null,
-    name: null,
-    description: null
+    name: null
   }
-  if (categoryRef.value) {
-    categoryRef.value.resetFields()
+  if (tagRef.value) {
+    tagRef.value.resetFields()
   }
 }
 
@@ -223,38 +205,35 @@ function handleSelectionChange(selection) {
 function handleAdd() {
   reset()
   open.value = true
-  title.value = '添加域名分类'
+  title.value = '添加域名标签'
 }
 
 // 修改按钮操作
 async function handleUpdate(row) {
   reset()
-  const id = row?.id || ids.value[0]
   
   // 直接设置表单数据，不需要额外的详情接口
   form.value = { 
     id: row.id,
-    name: row.name, 
-    description: row.description 
+    name: row.name
   }
   open.value = true
-  title.value = '修改域名分类'
+  title.value = '修改域名标签'
 }
 
 // 提交按钮
 function submitForm() {
-  if (!categoryRef.value) return
+  if (!tagRef.value) return
   
-  categoryRef.value.validate(async (valid) => {
+  tagRef.value.validate(async (valid) => {
     if (valid) {
       try {
         // 统一使用save接口，通过是否有id来判断新增还是编辑
-        const response = await $fetch('/api/admin/categories/save', {
+        const response = await $fetch('/api/admin/tags/save', {
           method: 'POST',
           body: {
             id: form.value.id,
-            name: form.value.name,
-            description: form.value.description
+            name: form.value.name
           }
         })
         
@@ -276,19 +255,19 @@ function submitForm() {
 
 // 删除按钮操作
 function handleDelete(row) {
-  const categoryIds = row?.id ? [row.id] : ids.value
-  const categoryNames = row?.name ? [row.name] : categoryList.value.filter(item => categoryIds.includes(item.id)).map(item => item.name)
+  const tagIds = row?.id ? [row.id] : ids.value
+  const tagNames = row?.name ? [row.name] : tagList.value.filter(item => tagIds.includes(item.id)).map(item => item.name)
   
   // 检查是否有域名在使用
-  const hasDomainsUsing = row?._count?.domains > 0 || categoryList.value.filter(item => categoryIds.includes(item.id)).some(item => item._count?.domains > 0)
+  const hasDomainsUsing = row?._count?.domains > 0 || tagList.value.filter(item => tagIds.includes(item.id)).some(item => item._count?.domains > 0)
   
   if (hasDomainsUsing) {
-    ElMessage.warning('选中的分类中有正在使用的分类，无法删除')
+    ElMessage.warning('选中的标签中有正在使用的标签，无法删除')
     return
   }
   
   ElMessageBox.confirm(
-    `是否确认删除分类 "${categoryNames.join('、')}"？`,
+    `是否确认删除标签 "${tagNames.join('、')}"？`,
     '警告',
     {
       confirmButtonText: '确定',
@@ -298,8 +277,8 @@ function handleDelete(row) {
   ).then(async () => {
     try {
       // 执行删除
-      const deletePromises = categoryIds.map(id => 
-        $fetch('/api/admin/categories/delete', { 
+      const deletePromises = tagIds.map(id => 
+        $fetch('/api/admin/tags/delete', { 
           method: 'POST',
           body: { id }
         })
@@ -310,14 +289,14 @@ function handleDelete(row) {
       // 检查所有响应的code字段
       const hasError = responses.some(response => response.code !== 200)
       if (hasError) {
-        ElMessage.error('部分分类删除失败')
+        ElMessage.error('部分标签删除失败')
       } else {
         ElMessage.success('删除成功')
       }
       getList()
     } catch (error) {
-      console.error('删除分类失败:', error)
-      ElMessage.error('删除分类失败')
+      console.error('删除标签失败:', error)
+      ElMessage.error('删除标签失败')
       getList() // 刷新列表
     }
   }).catch(() => {
@@ -369,9 +348,5 @@ onMounted(() => {
   display: flex;
   justify-content: center;
   margin-top: 20px;
-}
-
-.text-gray-400 {
-  color: #9ca3af;
 }
 </style> 

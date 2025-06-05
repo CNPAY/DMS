@@ -1,13 +1,26 @@
 import prisma from '~/server/utils/db'
+import Joi from 'joi'
 import { ResponseData } from '~/server/utils/response'
+
+// 数据验证 schema
+const deleteSchema = Joi.object({
+  id: Joi.number().integer().required().messages({
+    'any.required': '分类ID为必填项',
+    'number.base': '分类ID必须为数字'
+  })
+})
 
 export default defineEventHandler(async (event) => {
   try {
-    const id = parseInt(getRouterParam(event, 'id') as string)
+    const body = await readBody(event)
     
-    if (isNaN(id)) {
-      return ResponseData.error('无效的分类ID', 400)
+    // 数据验证
+    const { error, value } = deleteSchema.validate(body)
+    if (error) {
+      return ResponseData.error(error.details[0].message, 400)
     }
+
+    const id = value.id
 
     // 获取用户信息（从认证中间件或 session）
     const userId = 1 // 临时硬编码，实际应从认证获取
