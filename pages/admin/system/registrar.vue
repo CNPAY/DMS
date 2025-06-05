@@ -211,9 +211,7 @@ function reset() {
     accountId: null,
     notes: null
   }
-  nextTick(() => {
-    registrarRef.value?.resetFields()
-  })
+  registrarRef.value?.resetFields()
 }
 
 // 搜索按钮操作
