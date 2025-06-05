@@ -218,7 +218,7 @@ export const sidebarRoutes: SidebarRoute[] = [
         }
       },
       {
-        path: 'prompt',
+        path: 'prompts',
         name: 'AIPrompt',
         meta: {
           title: 'routes.aiPrompt',
