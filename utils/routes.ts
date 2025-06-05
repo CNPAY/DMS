@@ -103,15 +103,14 @@ export const sidebarRoutes: SidebarRoute[] = [
     ]
   },
   {
-    path: '/admin/inquiry',
-    redirect: '/admin/inquiry/list',
+    path: '/admin/inquiries',
     meta: {
       title: 'routes.inquiryManagement',
       icon: 'message'
     },
     children: [
       {
-        path: 'list',
+        path: '/',
         name: 'InquiryList',
         meta: {
           title: 'routes.inquiryManagement',
