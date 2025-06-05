@@ -21,7 +21,7 @@
               <svg-icon icon-class="server" size="32px" />
             </div>
             <div class="stats-info">
-              <div class="stats-number">0</div>
+              <div class="stats-number">{{ stats.totalDomains }}</div>
               <div class="stats-label">总域名数量</div>
             </div>
           </div>
@@ -33,8 +33,8 @@
               <svg-icon icon-class="table" size="32px" />
             </div>
             <div class="stats-info">
-              <div class="stats-number">0</div>
-              <div class="stats-label">米表数量</div>
+              <div class="stats-number">{{ stats.totalPortfolios }}</div>
+              <div class="stats-label">分类数量</div>
             </div>
           </div>
         </el-card>
@@ -45,7 +45,7 @@
               <svg-icon icon-class="message" size="32px" />
             </div>
             <div class="stats-info">
-              <div class="stats-number">0</div>
+              <div class="stats-number">{{ stats.pendingInquiries }}</div>
               <div class="stats-label">待处理询盘</div>
             </div>
           </div>
@@ -57,7 +57,7 @@
               <svg-icon icon-class="money" size="32px" />
             </div>
             <div class="stats-info">
-              <div class="stats-number">¥0</div>
+              <div class="stats-number">¥{{ formatNumber(stats.totalValue) }}</div>
               <div class="stats-label">总资产价值</div>
             </div>
           </div>
@@ -139,9 +139,24 @@ const { isElementPlusLoaded } = useUILibrary()
 // 检查 Element Plus 是否准备就绪
 const elementPlusReady = ref(false)
 
+// 响应式数据
+const stats = ref({
+  totalDomains: 0,
+  totalPortfolios: 0,
+  pendingInquiries: 0,
+  totalValue: 0
+})
+
+const activities = ref([])
+const expiryAlerts = ref([])
+const loading = ref(true)
+
 // 监听 Element Plus 加载状态
 watch(() => isElementPlusLoaded(), (loaded) => {
   elementPlusReady.value = loaded
+  if (loaded) {
+    loadDashboardData()
+  }
 }, { immediate: true })
 
 // 轮询检查 Element Plus 是否加载完成（备用方案）
@@ -149,6 +164,7 @@ onMounted(() => {
   const checkInterval = setInterval(() => {
     if (isElementPlusLoaded()) {
       elementPlusReady.value = true
+      loadDashboardData()
       clearInterval(checkInterval)
     }
   }, 100)
@@ -158,6 +174,62 @@ onMounted(() => {
     clearInterval(checkInterval)
   }, 5000)
 })
+
+// 加载仪表盘数据
+async function loadDashboardData() {
+  try {
+    loading.value = true
+    
+    // 并发加载统计数据和活动数据
+    const [statsResponse, activitiesResponse] = await Promise.all([
+      $fetch('/api/admin/dashboard/stats'),
+      $fetch('/api/admin/dashboard/activities?limit=8')
+    ])
+    
+    if (statsResponse.code === 200) {
+      stats.value = statsResponse.data
+    }
+    
+    if (activitiesResponse.code === 200) {
+      activities.value = activitiesResponse.data.activities
+      expiryAlerts.value = activitiesResponse.data.expiryAlerts
+    }
+  } catch (error) {
+    console.error('加载仪表盘数据失败:', error)
+    // ElMessage.error('加载仪表盘数据失败')
+  } finally {
+    loading.value = false
+  }
+}
+
+// 格式化数字
+function formatNumber(value: number): string {
+  if (value >= 10000) {
+    return (value / 10000).toFixed(1) + 'w'
+  }
+  return value.toLocaleString()
+}
+
+// 格式化日期
+function formatDate(date: string): string {
+  const now = new Date()
+  const target = new Date(date)
+  const diff = now.getTime() - target.getTime()
+  
+  const minutes = Math.floor(diff / (1000 * 60))
+  const hours = Math.floor(diff / (1000 * 60 * 60))
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+  
+  if (minutes < 60) {
+    return `${minutes} 分钟前`
+  } else if (hours < 24) {
+    return `${hours} 小时前`
+  } else if (days < 7) {
+    return `${days} 天前`
+  } else {
+    return target.toLocaleDateString()
+  }
+}
 
 // 设置页面标题
 useHead({

@@ -114,6 +114,7 @@ model Domain {
   costs      DomainCost[]
   inquiries  Inquiry[]
   portfolios PortfolioDomainMap[]
+  sales      DomainSale[]
 
   @@unique([userId, domainName])
   @@map("domains")
@@ -251,6 +252,33 @@ model AiPrompt {
 
   @@unique([userId, sceneCode])
   @@map("ai_prompts")
+}
+
+// 域名销售记录表
+model DomainSale {
+  id              Int      @id @default(autoincrement())
+  domainId        Int      @map("domain_id")
+  buyerName       String?  @map("buyer_name") @db.VarChar(100)
+  buyerEmail      String?  @map("buyer_email") @db.VarChar(255)
+  buyerPhone      String?  @map("buyer_phone") @db.VarChar(50)
+  buyerCompany    String?  @map("buyer_company") @db.VarChar(200)
+  salePrice       Decimal  @map("sale_price") @db.Decimal(10, 2)
+  saleCurrency    String   @default("CNY") @map("sale_currency") @db.VarChar(10)
+  saleDate        DateTime @map("sale_date") @db.Date
+  paymentMethod   String?  @map("payment_method") @db.VarChar(50)
+  paymentStatus   String   @default("pending") @map("payment_status") @db.VarChar(20)
+  transferStatus  String   @default("pending") @map("transfer_status") @db.VarChar(20)
+  platformFee     Decimal? @map("platform_fee") @db.Decimal(10, 2)
+  platformName    String?  @map("platform_name") @db.VarChar(100)
+  contractFile    String?  @map("contract_file") @db.VarChar(255)
+  notes           String?  @db.Text
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // 关联关系
+  domain Domain @relation(fields: [domainId], references: [id], onDelete: Cascade)
+
+  @@map("domain_sales")
 }
 
 // 系统设置表

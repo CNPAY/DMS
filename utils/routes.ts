@@ -184,7 +184,7 @@ export const sidebarRoutes: SidebarRoute[] = [
         }
       },
       {
-        path: 'cost',
+        path: 'costs',
         name: 'CostReport',
         meta: {
           title: 'routes.costReport',

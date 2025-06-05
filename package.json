@@ -27,6 +27,7 @@
     "@types/joi": "^17.2.2",
     "bcryptjs": "^2.4.3",
     "dayjs": "^1.11.13",
+    "echarts": "^5.6.0",
     "element-plus": "^2.8.0",
     "joi": "^17.13.3",
     "js-cookie": "^3.0.5",
