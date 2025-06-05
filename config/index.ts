@@ -87,6 +87,12 @@ export default config;
 
 // 导出特定配置部分的便捷访问
 export const dbConfig = config.database;
+
+export const jwtConfig = {
+  secret: "dms-super-secret-jwt-key-2024",
+  expiresIn: "7d"
+}
+
 export const cacheConfig = config.cache;
 export const appConfig = config.app;
 export const whoisConfig = config.whois;

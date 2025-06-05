@@ -14,6 +14,20 @@
         <div class="round-item">
           <svg-icon icon-class="n-notification" style="height: 15px; width: 15px" />
         </div>
+        
+        <!-- 语言切换器 -->
+        <el-dropdown @command="handleLanguageChange" trigger="click">
+          <div class="round-item">
+          
+         </div>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item command="en">English</el-dropdown-item>
+              <el-dropdown-item command="zh">中文</el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+        
         <screenfull id="screenfull" class="right-menu-item hover-effect round-item" />
 
         <!-- <el-tooltip content="布局大小" effect="dark" placement="bottom">
@@ -49,19 +63,26 @@
 
 <script setup>
 import { ElMessageBox } from 'element-plus';
-import Breadcrumb from '@/components/Breadcrumb';
-import TopNav from '@/components/TopNav';
-import Hamburger from '@/components/Hamburger';
-import Screenfull from '@/components/Screenfull';
-import SizeSelect from '@/components/SizeSelect';
-import HeaderSearch from '@/components/HeaderSearch';
-import useAppStore from '@/store/modules/app';
-import useUserStore from '@/store/modules/user';
-import useSettingsStore from '@/store/modules/settings';
+import Breadcrumb from '~/components/Breadcrumb';
+import TopNav from '~/components/TopNav';
+import Hamburger from '~/components/Hamburger';
+import Screenfull from '~/components/Screenfull';
+import SizeSelect from '~/components/SizeSelect';
+import HeaderSearch from '~/components/HeaderSearch';
+import useAppStore from '~/store/modules/app';
+import useUserStore from '~/store/modules/user';
+import useSettingsStore from '~/store/modules/settings';
+import { useI18n } from 'vue-i18n';
 
 const appStore = useAppStore();
 const userStore = useUserStore();
 const settingsStore = useSettingsStore();
+const { locale, setLocale } = useI18n();
+
+// 当前语言显示文本
+const currentLanguageText = computed(() => {
+  return locale.value === 'zh' ? '中文' : 'English';
+});
 
 function toggleSideBar() {
   appStore.toggleSideBar();
@@ -88,6 +109,14 @@ function handleCommand(command) {
     default:
       break;
   }
+}
+
+// 处理语言切换
+function handleLanguageChange(lang) {
+  console.log(`🌐 Switching language to: ${lang}`);
+  setLocale(lang);
+    // 只需简单设置locale值，Nuxt i18n会自动处理cookie
+    locale.value = lang;
 }
 function getRoles() {
   var roles = userStore.roles;

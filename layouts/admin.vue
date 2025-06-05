@@ -1,5 +1,5 @@
 <template>
-  <div :class="classObj" class="app-wrapper" :style="{ '--current-color': theme }">
+  <ElConfigProvider :locale="elementLocale">
     <div v-if="device === 'mobile' && sidebar.opened" class="drawer-bg" @click="handleClickOutside" />
     <sidebar v-if="!sidebar.hide" class="sidebar-container" />
     <div :class="{ hasTagsView: needTagsView, sidebarHide: sidebar.hide }" class="main-container">
@@ -13,7 +13,7 @@
       </section>
       <settings ref="settingRef" />
     </div>
-  </div>
+  </ElConfigProvider>
 </template>
 
 <script setup>
@@ -22,13 +22,28 @@ import Sidebar from './layout/components/Sidebar/index.vue';
 import {  Navbar, Settings, TagsView } from './layout/components';
 // import defaultSettings from '@/settings';
 
-import useAppStore from '@/store/modules/app';
-import useSettingsStore from '@/store/modules/settings';
-import useTagsViewStore from '@/store/modules/tagsView';
+import useAppStore from '~/store/modules/app';
+import useSettingsStore from '~/store/modules/settings';
+import useTagsViewStore from '~/store/modules/tagsView';
+
+// Element Plus 国际化
+import { ElConfigProvider } from 'element-plus';
+import zhCn from 'element-plus/es/locale/lang/zh-cn';
+import en from 'element-plus/es/locale/lang/en';
+import { useI18n } from 'vue-i18n';
 
 const tagsViewStore = useTagsViewStore();
-
 const settingsStore = useSettingsStore();
+const { locale } = useI18n();
+
+// Element Plus 语言配置
+const elementLocale = computed(() => {
+  const currentLocale = locale.value.toLowerCase();
+  if (currentLocale === 'zh' || currentLocale === 'zh-cn') {
+    return zhCn;
+  }
+  return en;
+});
 const theme = computed(() => settingsStore.theme);
 const sideTheme = computed(() => settingsStore.sideTheme);
 const sidebar = computed(() => useAppStore().sidebar);

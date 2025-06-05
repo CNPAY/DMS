@@ -21,10 +21,10 @@
 <script setup>
 import Logo from './Logo';
 import SidebarItem from './SidebarItem';
-import variables from '@/assets/styles/variables.module.scss';
-import useAppStore from '@/store/modules/app';
-import useSettingsStore from '@/store/modules/settings';
-import { sidebarRoutes } from '@/utils/routes';
+import variables from '~/assets/styles/variables.module.scss';
+import useAppStore from '~/store/modules/app';
+import useSettingsStore from '~/store/modules/settings';
+import { sidebarRoutes } from '~/utils/routes';
 
 const route = useRoute();
 const appStore = useAppStore();

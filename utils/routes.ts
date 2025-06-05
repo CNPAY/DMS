@@ -1,7 +1,7 @@
 // DMS 域名管理系统静态路由配置
 
 export interface RouteMeta {
-  title: string;
+  title: string; // 支持国际化键，如 'routes.dashboard'
   icon?: string;
   affix?: boolean;
   noCache?: boolean;
@@ -11,98 +11,92 @@ export interface RouteMeta {
 
 export interface RouteChild {
   path: string;
-  component: string;
   name: string;
   meta: RouteMeta;
+  hidden?: boolean;
 }
 
 export interface SidebarRoute {
   path: string;
-  component: string;
   redirect?: string;
   meta: RouteMeta;
+  hidden?: boolean;
   children?: RouteChild[];
 }
 
 export const sidebarRoutes: SidebarRoute[] = [
   {
-    path: '/admin/dashboard',
-    component: 'Layout',
-    redirect: '/admin/dashboard/index',
+    path: '/admin/',
+    redirect: '/admin/index',
     meta: {
-      title: '仪表盘',
+      title: 'routes.dashboard',
       icon: 'dashboard'
     },
-    children: [{
-      path: 'index',
-      component: 'dashboard/index',
-      name: 'Dashboard',
-      meta: {
-        title: '仪表盘',
-        icon: 'dashboard'
-      }
-    }]
+    children: [
+      {
+        path: 'index',
+        name: 'AdminIndex',
+        hidden: true,
+        meta: {
+          title: 'routes.dashboard',
+          icon: 'dashboard'
+        }
+      },
+      ]
   },
   {
     path: '/admin/domain',
-    component: 'Layout',
     redirect: '/admin/domain/list',
     meta: {
-      title: '域名管理',
+      title: 'routes.domainManagement',
       icon: 'user'
     },
     children: [
       {
         path: 'list',
-        component: 'domain/list/index',
         name: 'DomainList',
         meta: {
-          title: '域名信息管理',
+          title: 'routes.domainList',
           icon: 'list'
         }
       },
       {
         path: 'category',
-        component: 'domain/category/index',
         name: 'DomainCategory',
         meta: {
-          title: '分类管理',
+          title: 'routes.domainCategory',
           icon: 'component'
         }
       },
       {
         path: 'tag',
-        component: 'domain/tag/index',
         name: 'DomainTag',
         meta: {
-          title: '标签管理',
+          title: 'routes.domainTag',
           icon: 'star'
         }
       },
       {
         path: 'expiry',
-        component: 'domain/expiry/index',
         name: 'DomainExpiry',
         meta: {
-          title: '到期管理',
+          title: 'routes.domainExpiry',
           icon: 'date'
         }
       },
       {
         path: 'cost',
-        component: 'domain/cost/index',
         name: 'DomainCost',
         meta: {
-          title: '成本与续费',
+          title: 'routes.domainCost',
           icon: 'money'
         }
       },
       {
         path: 'register',
-        component: 'domain/register/index',
         name: 'DomainRegister',
         meta: {
-          title: '注册新域名',
+          title: 'routes.domainRegister',
           icon: 'edit'
         }
       }
@@ -110,19 +104,17 @@ export const sidebarRoutes: SidebarRoute[] = [
   },
   {
     path: '/admin/inquiry',
-    component: 'Layout',
     redirect: '/admin/inquiry/list',
     meta: {
-      title: '询盘管理',
+      title: 'routes.inquiryManagement',
       icon: 'message'
     },
     children: [
       {
         path: 'list',
-        component: 'inquiry/list/index',
         name: 'InquiryList',
         meta: {
-          title: '询盘管理',
+          title: 'routes.inquiryManagement',
           icon: 'message'
         }
       }
@@ -130,19 +122,17 @@ export const sidebarRoutes: SidebarRoute[] = [
   },
   {
     path: '/admin/portfolio',
-    component: 'Layout',
     redirect: '/admin/portfolio/list',
     meta: {
-      title: '米表管理',
+      title: 'routes.portfolioManagement',
       icon: 'table'
     },
     children: [
       {
         path: 'list',
-        component: 'portfolio/list/index',
         name: 'PortfolioList',
         meta: {
-          title: '米表管理',
+          title: 'routes.portfolioManagement',
           icon: 'table'
         }
       }
@@ -150,73 +140,65 @@ export const sidebarRoutes: SidebarRoute[] = [
   },
   {
     path: '/admin/watch',
-    component: 'Layout',
     redirect: '/admin/watch/index',
     meta: {
-      title: '域名关注',
+      title: 'routes.domainWatch',
       icon: 'eye'
     },
     children: [{
       path: 'index',
-      component: 'watch/index',
       name: 'DomainWatch',
       meta: {
-        title: '域名关注',
+        title: 'routes.domainWatch',
         icon: 'eye'
       }
     }]
   },
   {
     path: '/admin/whois',
-    component: 'Layout',
     redirect: '/admin/whois/index',
     meta: {
-      title: 'WHOIS 查询',
+      title: 'routes.whoisQuery',
       icon: 'search'
     },
     children: [{
       path: 'index',
-      component: 'whois/index',
       name: 'WhoisQuery',
       meta: {
-        title: 'WHOIS 查询',
+        title: 'routes.whoisQuery',
         icon: 'search'
       }
     }]
   },
   {
     path: '/admin/report',
-    component: 'Layout',
     redirect: '/admin/report/sales',
     meta: {
-      title: '数据报表',
+      title: 'routes.dataReports',
       icon: 'chart'
     },
     children: [
       {
         path: 'sales',
-        component: 'report/sales/index',
         name: 'SalesReport',
         meta: {
-          title: '销售报表',
+          title: 'routes.salesReport',
           icon: 'shopping'
         }
       },
       {
         path: 'cost',
-        component: 'report/cost/index',
         name: 'CostReport',
         meta: {
-          title: '成本报表',
+          title: 'routes.costReport',
           icon: 'money'
         }
       },
       {
         path: 'visitor',
-        component: 'report/visitor/index',
         name: 'VisitorReport',
         meta: {
-          title: '访问与询盘分析',
+          title: 'routes.visitorReport',
           icon: 'monitor'
         }
       }
@@ -224,37 +206,33 @@ export const sidebarRoutes: SidebarRoute[] = [
   },
   {
     path: '/admin/ai',
-    component: 'Layout',
     redirect: '/admin/ai/config',
     meta: {
-      title: 'AI 助手',
+      title: 'routes.aiAssistant',
       icon: 'build'
     },
     children: [
       {
         path: 'config',
-        component: 'ai/config/index',
         name: 'AIConfig',
         meta: {
-          title: 'AI 服务配置',
+          title: 'routes.aiConfig',
           icon: 'system'
         }
       },
       {
         path: 'prompt',
-        component: 'ai/prompt/index',
         name: 'AIPrompt',
         meta: {
-          title: '提示词管理',
+          title: 'routes.aiPrompt',
           icon: 'edit'
         }
       },
       {
         path: 'chatbot',
-        component: 'ai/chatbot/index',
         name: 'AIChatBot',
         meta: {
-          title: 'ChatBot',
+          title: 'routes.aiChatbot',
           icon: 'message'
         }
       }
@@ -262,64 +240,57 @@ export const sidebarRoutes: SidebarRoute[] = [
   },
   {
     path: '/admin/system',
-    component: 'Layout',
     redirect: '/admin/system/registrar',
     meta: {
-      title: '系统配置',
+      title: 'routes.systemConfig',
       icon: 'system'
     },
     children: [
       {
         path: 'registrar',
-        component: 'system/registrar/index',
         name: 'RegistrarManage',
         meta: {
-          title: '注册商管理',
+          title: 'routes.registrarManage',
           icon: 'server'
         }
       },
       {
         path: 'backup',
-        component: 'system/backup/index',
         name: 'SystemBackup',
         meta: {
-          title: '数据导出与备份',
+          title: 'routes.systemBackup',
           icon: 'download'
         }
       },
       {
         path: 'theme',
-        component: 'system/theme/index',
         name: 'ThemeConfig',
         meta: {
-          title: '界面个性化',
+          title: 'routes.themeConfig',
           icon: 'theme'
         }
       },
       {
         path: 'notification',
-        component: 'system/notification/index',
         name: 'NotificationConfig',
         meta: {
-          title: '通知设置',
+          title: 'routes.notificationConfig',
           icon: 'message'
         }
       },
       {
         path: 'security',
-        component: 'system/security/index',
         name: 'SecurityConfig',
         meta: {
-          title: '账户安全',
+          title: 'routes.securityConfig',
           icon: 'lock'
         }
       },
       {
         path: 'icons',
-        component: 'admin/system/icons',
         name: 'IconLibrary',
         meta: {
-          title: '图标库',
+          title: 'routes.iconLibrary',
           icon: 'star'
         }
       }
