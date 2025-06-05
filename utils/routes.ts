@@ -140,13 +140,12 @@ export const sidebarRoutes: SidebarRoute[] = [
   },
   {
     path: '/admin/watch',
-    redirect: '/admin/watch/index',
     meta: {
       title: 'routes.domainWatch',
       icon: 'eye'
     },
     children: [{
-      path: 'index',
+      path: '/',
       name: 'DomainWatch',
       meta: {
         title: 'routes.domainWatch',
@@ -156,13 +155,12 @@ export const sidebarRoutes: SidebarRoute[] = [
   },
   {
     path: '/admin/whois',
-    redirect: '/admin/whois/index',
     meta: {
       title: 'routes.whoisQuery',
       icon: 'search'
     },
     children: [{
-      path: 'index',
+      path: '/',
       name: 'WhoisQuery',
       meta: {
         title: 'routes.whoisQuery',
