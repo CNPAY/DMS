@@ -54,11 +54,16 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column label="布局模板" align="center" min-width="120">
+      <el-table-column label="主题风格" align="center" min-width="140">
         <template #default="{ row }">
-          <el-tag :type="getTemplateTagType(row.layoutTemplate)">
-            {{ getTemplateLabel(row.layoutTemplate) }}
-          </el-tag>
+          <div style="text-align: center;">
+            <el-tag :type="getTemplateTagType(row.layoutTemplate)" style="margin-bottom: 4px;">
+              {{ getTemplateLabel(row.layoutTemplate) }}
+            </el-tag>
+            <div style="font-size: 12px; color: #666;">
+              {{ getThemeLabel(row.colorTheme) }}
+            </div>
+          </div>
         </template>
       </el-table-column>
       <el-table-column label="创建时间" align="center" prop="createdAt" width="180">
@@ -100,58 +105,239 @@
     </div>
 
     <!-- 添加或修改米表对话框 -->
-    <el-dialog :title="title" v-model="open" width="600px" append-to-body>
-      <el-form ref="portfolioRef" :model="form" :rules="rules" label-width="120px">
-        <el-form-item label="米表名称" prop="name">
-          <el-input v-model="form.name" placeholder="请输入米表名称" />
-        </el-form-item>
-        <el-form-item label="URL标识符" prop="slug">
-          <el-input v-model="form.slug" placeholder="请输入URL标识符" />
-        </el-form-item>
-        <el-form-item label="布局模板" prop="layoutTemplate">
-          <el-select v-model="form.layoutTemplate" style="width: 100%">
-            <el-option
-              v-for="template in layoutTemplates"
-              :key="template.value"
-              :label="template.label"
-              :value="template.value"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="主题颜色" prop="colorTheme">
-          <el-select v-model="form.colorTheme" style="width: 100%">
-            <el-option
-              v-for="theme in colorThemes"
-              :key="theme.value"
-              :label="theme.label"
-              :value="theme.value"
-            />
-          </el-select>
-        </el-form-item>
+    <el-dialog :title="title" v-model="open" width="1200px" append-to-body>
+      <div style="display: flex; gap: 20px; height: 500px;">
+        <!-- 左侧表单区域 -->
+        <div style="flex: 1; overflow-y: auto;">
+          <el-form ref="portfolioRef" :model="form" :rules="rules" label-width="120px">
+            <el-form-item label="米表名称" prop="name">
+              <el-input v-model="form.name" placeholder="请输入米表名称" />
+            </el-form-item>
+            <el-form-item label="URL标识符" prop="slug">
+              <el-input v-model="form.slug" placeholder="请输入URL标识符" />
+            </el-form-item>
+            <el-form-item label="布局模板" prop="layoutTemplate">
+              <el-select v-model="form.layoutTemplate" style="width: 100%">
+                <el-option
+                  v-for="template in layoutTemplates"
+                  :key="template.value"
+                  :label="template.label"
+                  :value="template.value"
+                />
+              </el-select>
+            </el-form-item>
+            <el-form-item label="米表主题" prop="colorTheme">
+              <el-select v-model="form.colorTheme" placeholder="选择米表主题风格" style="width: 100%">
+                <el-option
+                  v-for="theme in colorThemes"
+                  :key="theme.value"
+                  :label="theme.label"
+                  :value="theme.value"
+                >
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>{{ theme.label }}</span>
+                    <span style="color: #999; font-size: 12px;">{{ theme.description }}</span>
+                  </div>
+                </el-option>
+              </el-select>
+            </el-form-item>
 
-        <el-form-item label="设置选项">
-          <el-checkbox v-model="form.isDefault">设为默认米表</el-checkbox>
-          <el-checkbox v-model="form.showPrice">显示价格</el-checkbox>
-          <el-checkbox v-model="form.showDescription">显示描述</el-checkbox>
-          <el-checkbox v-model="form.showTags">显示标签</el-checkbox>
-        </el-form-item>
-        <el-form-item label="头部信息" prop="headerInfo">
-          <el-input 
-            v-model="form.headerInfo" 
-            type="textarea" 
-            :rows="3"
-            placeholder="请输入头部信息"
-          />
-        </el-form-item>
-        <el-form-item label="底部信息" prop="footerInfo">
-          <el-input 
-            v-model="form.footerInfo" 
-            type="textarea" 
-            :rows="3"
-            placeholder="请输入底部信息"
-          />
-        </el-form-item>
-      </el-form>
+            <el-form-item label="设置选项">
+              <el-checkbox v-model="form.isDefault">设为默认米表</el-checkbox>
+              <el-checkbox v-model="form.showPrice">显示价格</el-checkbox>
+              <el-checkbox v-model="form.showDescription">显示描述</el-checkbox>
+              <el-checkbox v-model="form.showTags">显示标签</el-checkbox>
+            </el-form-item>
+            <el-form-item label="头部信息" prop="headerInfo">
+              <el-input 
+                v-model="form.headerInfo" 
+                type="textarea" 
+                :rows="3"
+                placeholder="请输入头部信息"
+              />
+            </el-form-item>
+            <el-form-item label="底部信息" prop="footerInfo">
+              <el-input 
+                v-model="form.footerInfo" 
+                type="textarea" 
+                :rows="3"
+                placeholder="请输入底部信息"
+              />
+            </el-form-item>
+          </el-form>
+        </div>
+        
+        <!-- 右侧预览区域 -->
+        <div style="width: 350px; border-left: 1px solid #e6e6e6; padding-left: 20px;">
+          <div style="margin-bottom: 15px;">
+            <h4 style="margin: 0 0 8px 0; color: #333; font-size: 16px;">🎨 主题预览</h4>
+            <p style="margin: 0; color: #666; font-size: 12px;">实时预览选中主题的视觉效果</p>
+          </div>
+          
+          <!-- 主题预览组件 -->
+          <div class="theme-preview" :class="[`theme-${form.colorTheme}`, `layout-${form.layoutTemplate}`]">
+            <!-- 预览头部 -->
+            <div class="preview-header">
+              <div class="preview-logo">{{ form.name || '米表名称' }}</div>
+              <div class="preview-nav">
+                <span>首页</span>
+                <span>分类</span>
+                <span>关于</span>
+              </div>
+            </div>
+            
+            <!-- 预览内容 -->
+            <div class="preview-content">
+              <div class="preview-header-info" v-if="form.headerInfo">
+                {{ form.headerInfo }}
+              </div>
+              
+              <!-- 布局标识 -->
+              <div class="layout-indicator">
+                <span class="layout-badge">{{ getTemplateLabel(form.layoutTemplate) }}布局</span>
+              </div>
+              
+              <!-- 列表布局 -->
+              <div v-if="form.layoutTemplate === 'list'" class="preview-domain-list list-layout">
+                <div class="preview-domain-item">
+                  <div class="domain-name">example.com</div>
+                  <div class="domain-price" v-if="form.showPrice">¥8,888</div>
+                  <div class="domain-desc" v-if="form.showDescription">优质域名，值得拥有</div>
+                  <div class="domain-tags" v-if="form.showTags">
+                    <span class="tag">精品</span>
+                    <span class="tag">推荐</span>
+                  </div>
+                </div>
+                <div class="preview-domain-item">
+                  <div class="domain-name">shop.net</div>
+                  <div class="domain-price" v-if="form.showPrice">¥6,666</div>
+                  <div class="domain-desc" v-if="form.showDescription">商务首选域名</div>
+                  <div class="domain-tags" v-if="form.showTags">
+                    <span class="tag">热门</span>
+                  </div>
+                </div>
+                <div class="preview-domain-item">
+                  <div class="domain-name">tech.org</div>
+                  <div class="domain-price" v-if="form.showPrice">¥3,999</div>
+                  <div class="domain-desc" v-if="form.showDescription">科技类域名</div>
+                  <div class="domain-tags" v-if="form.showTags">
+                    <span class="tag">新品</span>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- 网格布局 -->
+              <div v-else-if="form.layoutTemplate === 'grid'" class="preview-domain-list grid-layout">
+                <div class="preview-domain-item">
+                  <div class="domain-name">example.com</div>
+                  <div class="domain-price" v-if="form.showPrice">¥8,888</div>
+                  <div class="domain-desc" v-if="form.showDescription">优质域名</div>
+                  <div class="domain-tags" v-if="form.showTags">
+                    <span class="tag">精品</span>
+                  </div>
+                </div>
+                <div class="preview-domain-item">
+                  <div class="domain-name">shop.net</div>
+                  <div class="domain-price" v-if="form.showPrice">¥6,666</div>
+                  <div class="domain-desc" v-if="form.showDescription">商务首选</div>
+                  <div class="domain-tags" v-if="form.showTags">
+                    <span class="tag">热门</span>
+                  </div>
+                </div>
+                <div class="preview-domain-item">
+                  <div class="domain-name">tech.org</div>
+                  <div class="domain-price" v-if="form.showPrice">¥3,999</div>
+                  <div class="domain-desc" v-if="form.showDescription">科技类</div>
+                  <div class="domain-tags" v-if="form.showTags">
+                    <span class="tag">新品</span>
+                  </div>
+                </div>
+                <div class="preview-domain-item">
+                  <div class="domain-name">blog.io</div>
+                  <div class="domain-price" v-if="form.showPrice">¥2,888</div>
+                  <div class="domain-desc" v-if="form.showDescription">博客专用</div>
+                  <div class="domain-tags" v-if="form.showTags">
+                    <span class="tag">特价</span>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- 表格布局 -->
+              <div v-else-if="form.layoutTemplate === 'table'" class="preview-domain-list table-layout">
+                <div class="table-header">
+                  <div class="col-domain">域名</div>
+                  <div class="col-price" v-if="form.showPrice">价格</div>
+                  <div class="col-desc" v-if="form.showDescription">描述</div>
+                  <div class="col-tags" v-if="form.showTags">标签</div>
+                </div>
+                <div class="table-row">
+                  <div class="col-domain">example.com</div>
+                  <div class="col-price" v-if="form.showPrice">¥8,888</div>
+                  <div class="col-desc" v-if="form.showDescription">优质域名</div>
+                  <div class="col-tags" v-if="form.showTags"><span class="tag">精品</span></div>
+                </div>
+                <div class="table-row">
+                  <div class="col-domain">shop.net</div>
+                  <div class="col-price" v-if="form.showPrice">¥6,666</div>
+                  <div class="col-desc" v-if="form.showDescription">商务首选</div>
+                  <div class="col-tags" v-if="form.showTags"><span class="tag">热门</span></div>
+                </div>
+                <div class="table-row">
+                  <div class="col-domain">tech.org</div>
+                  <div class="col-price" v-if="form.showPrice">¥3,999</div>
+                  <div class="col-desc" v-if="form.showDescription">科技类</div>
+                  <div class="col-tags" v-if="form.showTags"><span class="tag">新品</span></div>
+                </div>
+              </div>
+              
+              <!-- 卡片布局 -->
+              <div v-else-if="form.layoutTemplate === 'card'" class="preview-domain-list card-layout">
+                <div class="preview-domain-card">
+                  <div class="card-header">
+                    <div class="domain-name">example.com</div>
+                    <div class="domain-price" v-if="form.showPrice">¥8,888</div>
+                  </div>
+                  <div class="card-body">
+                    <div class="domain-desc" v-if="form.showDescription">优质域名，值得拥有</div>
+                    <div class="domain-tags" v-if="form.showTags">
+                      <span class="tag">精品</span>
+                      <span class="tag">推荐</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="preview-domain-card">
+                  <div class="card-header">
+                    <div class="domain-name">shop.net</div>
+                    <div class="domain-price" v-if="form.showPrice">¥6,666</div>
+                  </div>
+                  <div class="card-body">
+                    <div class="domain-desc" v-if="form.showDescription">商务首选域名</div>
+                    <div class="domain-tags" v-if="form.showTags">
+                      <span class="tag">热门</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="preview-domain-card">
+                  <div class="card-header">
+                    <div class="domain-name">tech.org</div>
+                    <div class="domain-price" v-if="form.showPrice">¥3,999</div>
+                  </div>
+                  <div class="card-body">
+                    <div class="domain-desc" v-if="form.showDescription">科技类域名</div>
+                    <div class="domain-tags" v-if="form.showTags">
+                      <span class="tag">新品</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="preview-footer-info" v-if="form.footerInfo">
+                {{ form.footerInfo }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
       
       <template #footer>
         <div class="dialog-footer">
@@ -192,6 +378,638 @@
     </el-dialog>
   </div>
 </template>
+
+<style scoped>
+/* 主题预览样式 */
+.theme-preview {
+  border: 1px solid #e6e6e6;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+  font-size: 12px;
+  height: 420px;
+  overflow-y: auto;
+}
+
+.preview-header {
+  padding: 12px 15px;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.preview-logo {
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.preview-nav {
+  display: flex;
+  gap: 15px;
+}
+
+.preview-nav span {
+  font-size: 12px;
+  color: #666;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.preview-content {
+  padding: 15px;
+}
+
+.preview-header-info {
+  background: #f8f9fa;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  font-size: 12px;
+  color: #666;
+}
+
+.preview-domain-list {
+  space-y: 10px;
+}
+
+.preview-domain-item {
+  padding: 12px;
+  border: 1px solid #f0f0f0;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.domain-name {
+  font-weight: bold;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+.domain-price {
+  color: #e74c3c;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.domain-desc {
+  color: #666;
+  font-size: 11px;
+  margin-bottom: 6px;
+}
+
+.domain-tags {
+  display: flex;
+  gap: 6px;
+}
+
+.domain-tags .tag {
+  background: #f0f0f0;
+  color: #666;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 10px;
+}
+
+.preview-footer-info {
+  background: #f8f9fa;
+  padding: 10px;
+  border-radius: 4px;
+  margin-top: 15px;
+  font-size: 12px;
+  color: #666;
+}
+
+/* 布局标识 */
+.layout-indicator {
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.layout-badge {
+  background: rgba(0, 0, 0, 0.1);
+  color: #666;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+/* 列表布局样式 */
+.list-layout {
+  /* 默认样式，已经在 .preview-domain-item 中定义 */
+}
+
+/* 网格布局样式 */
+.grid-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.grid-layout .preview-domain-item {
+  padding: 8px;
+  font-size: 11px;
+}
+
+.grid-layout .domain-name {
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+.grid-layout .domain-desc {
+  font-size: 10px;
+  margin-bottom: 4px;
+}
+
+.grid-layout .domain-tags .tag {
+  font-size: 9px;
+  padding: 1px 4px;
+}
+
+/* 表格布局样式 */
+.table-layout {
+  border: 1px solid #e6e6e6;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.table-header {
+  display: flex;
+  background: #f5f5f5;
+  font-weight: bold;
+  font-size: 11px;
+  border-bottom: 1px solid #e6e6e6;
+}
+
+.table-row {
+  display: flex;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 11px;
+}
+
+.table-row:last-child {
+  border-bottom: none;
+}
+
+.table-header > div,
+.table-row > div {
+  padding: 8px 6px;
+  border-right: 1px solid #f0f0f0;
+}
+
+.table-header > div:last-child,
+.table-row > div:last-child {
+  border-right: none;
+}
+
+.col-domain {
+  flex: 2;
+  font-weight: bold;
+}
+
+.col-price {
+  flex: 1;
+  color: #e74c3c;
+  font-weight: bold;
+}
+
+.col-desc {
+  flex: 2;
+  color: #666;
+}
+
+.col-tags {
+  flex: 1;
+}
+
+.table-layout .tag {
+  font-size: 9px;
+  padding: 1px 4px;
+}
+
+/* 卡片布局样式 */
+.card-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.preview-domain-card {
+  border: 1px solid #e6e6e6;
+  border-radius: 6px;
+  overflow: hidden;
+  font-size: 11px;
+}
+
+.card-header {
+  background: #f8f9fa;
+  padding: 8px 10px;
+  border-bottom: 1px solid #e6e6e6;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-header .domain-name {
+  font-weight: bold;
+  font-size: 12px;
+  margin: 0;
+}
+
+.card-header .domain-price {
+  color: #e74c3c;
+  font-weight: bold;
+  margin: 0;
+}
+
+.card-body {
+  padding: 8px 10px;
+}
+
+.card-body .domain-desc {
+  font-size: 10px;
+  margin-bottom: 6px;
+}
+
+.card-body .domain-tags {
+  margin: 0;
+}
+
+.card-body .domain-tags .tag {
+  font-size: 9px;
+  padding: 1px 4px;
+}
+
+/* 🌙 月光白主题 */
+.theme-moonlight {
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+}
+
+.theme-moonlight .preview-header {
+  background: #ffffff;
+  border-bottom-color: #e9ecef;
+}
+
+.theme-moonlight .preview-logo {
+  color: #2c3e50;
+}
+
+.theme-moonlight .preview-nav span:hover {
+  background: #e9ecef;
+  color: #495057;
+}
+
+.theme-moonlight .preview-domain-item {
+  background: #ffffff;
+  border-color: #e9ecef;
+}
+
+/* 🌊 海洋蓝主题 */
+.theme-ocean {
+  background: linear-gradient(135deg, #e3f2fd 0%, #f1f8e9 100%);
+}
+
+.theme-ocean .preview-header {
+  background: linear-gradient(135deg, #2196f3 0%, #4caf50 100%);
+  color: white;
+}
+
+.theme-ocean .preview-logo {
+  color: white;
+}
+
+.theme-ocean .preview-nav span {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.theme-ocean .preview-nav span:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.theme-ocean .domain-price {
+  color: #1976d2;
+}
+
+.theme-ocean .domain-tags .tag {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+/* 🌿 森林绿主题 */
+.theme-forest {
+  background: linear-gradient(135deg, #e8f5e8 0%, #f1f8e9 100%);
+}
+
+.theme-forest .preview-header {
+  background: linear-gradient(135deg, #4caf50 0%, #8bc34a 100%);
+  color: white;
+}
+
+.theme-forest .preview-logo {
+  color: white;
+}
+
+.theme-forest .preview-nav span {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.theme-forest .preview-nav span:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.theme-forest .domain-price {
+  color: #388e3c;
+}
+
+.theme-forest .domain-tags .tag {
+  background: #e8f5e8;
+  color: #388e3c;
+}
+
+/* 🌅 暖阳橙主题 */
+.theme-sunset {
+  background: linear-gradient(135deg, #fff3e0 0%, #ffecb3 100%);
+}
+
+.theme-sunset .preview-header {
+  background: linear-gradient(135deg, #ff9800 0%, #ffc107 100%);
+  color: white;
+}
+
+.theme-sunset .preview-logo {
+  color: white;
+}
+
+.theme-sunset .preview-nav span {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.theme-sunset .preview-nav span:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.theme-sunset .domain-price {
+  color: #f57c00;
+}
+
+.theme-sunset .domain-tags .tag {
+  background: #fff3e0;
+  color: #f57c00;
+}
+
+/* 🌹 玫瑰红主题 */
+.theme-rose {
+  background: linear-gradient(135deg, #fce4ec 0%, #f3e5f5 100%);
+}
+
+.theme-rose .preview-header {
+  background: linear-gradient(135deg, #e91e63 0%, #9c27b0 100%);
+  color: white;
+}
+
+.theme-rose .preview-logo {
+  color: white;
+}
+
+.theme-rose .preview-nav span {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.theme-rose .preview-nav span:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.theme-rose .domain-price {
+  color: #c2185b;
+}
+
+.theme-rose .domain-tags .tag {
+  background: #fce4ec;
+  color: #c2185b;
+}
+
+/* 💜 薰衣草主题 */
+.theme-lavender {
+  background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+}
+
+.theme-lavender .preview-header {
+  background: linear-gradient(135deg, #9c27b0 0%, #673ab7 100%);
+  color: white;
+}
+
+.theme-lavender .preview-logo {
+  color: white;
+}
+
+.theme-lavender .preview-nav span {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.theme-lavender .preview-nav span:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.theme-lavender .domain-price {
+  color: #7b1fa2;
+}
+
+.theme-lavender .domain-tags .tag {
+  background: #f3e5f5;
+  color: #7b1fa2;
+}
+
+/* 🌃 暗夜黑主题 */
+.theme-midnight {
+  background: linear-gradient(135deg, #263238 0%, #37474f 100%);
+  color: #eceff1;
+}
+
+.theme-midnight .preview-header {
+  background: linear-gradient(135deg, #212121 0%, #424242 100%);
+  color: #eceff1;
+  border-bottom-color: #455a64;
+}
+
+.theme-midnight .preview-logo {
+  color: #eceff1;
+}
+
+.theme-midnight .preview-nav span {
+  color: #b0bec5;
+}
+
+.theme-midnight .preview-nav span:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #eceff1;
+}
+
+.theme-midnight .preview-domain-item,
+.theme-midnight .preview-domain-card {
+  background: #37474f;
+  border-color: #455a64;
+  color: #eceff1;
+}
+
+.theme-midnight .domain-price {
+  color: #ffab91;
+}
+
+.theme-midnight .domain-desc {
+  color: #b0bec5;
+}
+
+.theme-midnight .domain-tags .tag {
+  background: #455a64;
+  color: #b0bec5;
+}
+
+.theme-midnight .preview-header-info,
+.theme-midnight .preview-footer-info {
+  background: #455a64;
+  color: #b0bec5;
+}
+
+.theme-midnight .layout-badge {
+  background: rgba(255, 255, 255, 0.2);
+  color: #b0bec5;
+}
+
+.theme-midnight .table-layout {
+  border-color: #455a64;
+}
+
+.theme-midnight .table-header {
+  background: #455a64;
+  color: #eceff1;
+  border-bottom-color: #546e7a;
+}
+
+.theme-midnight .table-row {
+  background: #37474f;
+  color: #eceff1;
+  border-bottom-color: #455a64;
+}
+
+.theme-midnight .table-header > div,
+.theme-midnight .table-row > div {
+  border-right-color: #455a64;
+}
+
+.theme-midnight .card-header {
+  background: #455a64;
+  color: #eceff1;
+  border-bottom-color: #546e7a;
+}
+
+.theme-midnight .card-body {
+  background: #37474f;
+  color: #eceff1;
+}
+
+/* 🌸 樱花粉主题 */
+.theme-sakura {
+  background: linear-gradient(135deg, #fce4ec 0%, #f8bbd9 100%);
+}
+
+.theme-sakura .preview-header {
+  background: linear-gradient(135deg, #f48fb1 0%, #f06292 100%);
+  color: white;
+}
+
+.theme-sakura .preview-logo {
+  color: white;
+}
+
+.theme-sakura .preview-nav span {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.theme-sakura .preview-nav span:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.theme-sakura .domain-price {
+  color: #e91e63;
+}
+
+.theme-sakura .domain-tags .tag {
+  background: #fce4ec;
+  color: #e91e63;
+}
+
+/* 💎 翡翠绿主题 */
+.theme-emerald {
+  background: linear-gradient(135deg, #e0f2f1 0%, #b2dfdb 100%);
+}
+
+.theme-emerald .preview-header {
+  background: linear-gradient(135deg, #00695c 0%, #00796b 100%);
+  color: white;
+}
+
+.theme-emerald .preview-logo {
+  color: white;
+}
+
+.theme-emerald .preview-nav span {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.theme-emerald .preview-nav span:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.theme-emerald .domain-price {
+  color: #00695c;
+}
+
+.theme-emerald .domain-tags .tag {
+  background: #e0f2f1;
+  color: #00695c;
+}
+
+/* ✨ 琥珀金主题 */
+.theme-amber {
+  background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+}
+
+.theme-amber .preview-header {
+  background: linear-gradient(135deg, #ffa000 0%, #ff8f00 100%);
+  color: white;
+}
+
+.theme-amber .preview-logo {
+  color: white;
+}
+
+.theme-amber .preview-nav span {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.theme-amber .preview-nav span:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.theme-amber .domain-price {
+  color: #ff8f00;
+}
+
+.theme-amber .domain-tags .tag {
+  background: #fff8e1;
+  color: #ff8f00;
+}
+</style>
 
 <script setup name="Portfolio">
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -252,13 +1070,16 @@ const layoutTemplates = ref([
 ])
 
 const colorThemes = ref([
-  { value: 'default', label: '默认主题' },
-  { value: 'dark', label: '深色主题' },
-  { value: 'blue', label: '蓝色主题' },
-  { value: 'green', label: '绿色主题' },
-  { value: 'orange', label: '橙色主题' },
-  { value: 'red', label: '红色主题' },
-  { value: 'purple', label: '紫色主题' }
+  { value: 'moonlight', label: '🌙 月光白', description: '简约纯净风格' },
+  { value: 'ocean', label: '🌊 海洋蓝', description: '清新专业风格' },
+  { value: 'forest', label: '🌿 森林绿', description: '自然生机风格' },
+  { value: 'sunset', label: '🌅 暖阳橙', description: '温暖活力风格' },
+  { value: 'rose', label: '🌹 玫瑰红', description: '优雅浪漫风格' },
+  { value: 'lavender', label: '💜 薰衣草', description: '梦幻柔美风格' },
+  { value: 'midnight', label: '🌃 暗夜黑', description: '深沉神秘风格' },
+  { value: 'sakura', label: '🌸 樱花粉', description: '清雅甜美风格' },
+  { value: 'emerald', label: '💎 翡翠绿', description: '典雅高贵风格' },
+  { value: 'amber', label: '✨ 琥珀金', description: '奢华品质风格' }
 ])
 
 // 域名分类和域名数据
@@ -293,6 +1114,11 @@ function getTemplateTagType(template) {
     card: 'warning'
   }
   return typeMap[template] || ''
+}
+
+function getThemeLabel(themeValue) {
+  const theme = colorThemes.value.find(t => t.value === themeValue)
+  return theme ? theme.label : '🌙 月光白'
 }
 
 function formatDate(date) {
@@ -346,7 +1172,7 @@ function reset() {
     slug: null,
     isDefault: false,
     layoutTemplate: 'list',
-    colorTheme: 'default',
+    colorTheme: 'moonlight',
     headerInfo: null,
     footerInfo: null,
     showPrice: true,

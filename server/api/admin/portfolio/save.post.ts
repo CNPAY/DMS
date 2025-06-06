@@ -8,7 +8,7 @@ export default defineEventHandler(async (event) => {
       slug,
       isDefault = false,
       layoutTemplate = 'list',
-      colorTheme,
+      colorTheme = 'moonlight',
       headerInfo,
       footerInfo,
       showPrice = true,
