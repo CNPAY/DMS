@@ -78,15 +78,7 @@
           <template #default="scope">
             <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)">修改</el-button>
             <el-button link type="success" icon="Link" @click="handleAssociate(scope.row)">关联</el-button>
-            <el-button 
-              v-if="!scope.row.isDefault"
-              link 
-              type="warning" 
-              icon="Star" 
-              @click="handleSetDefault(scope.row)"
-            >
-              设为默认
-            </el-button>
+            
             <el-button link type="danger" icon="Delete" @click="handleDelete(scope.row)">删除</el-button>
           </template>
         </el-table-column>
@@ -146,8 +138,59 @@
               </el-select>
             </el-form-item>
 
+            <!-- 视觉配置 Section -->
+            <el-divider content-position="left">
+              <span style="color: #f56c6c; font-weight: 600;">🎨 视觉配置</span>
+            </el-divider>
+
+            <el-form-item label="网站Logo">
+              <div style="display: flex; flex-direction: column; gap: 12px;">
+                <el-upload
+                  class="logo-uploader"
+                  action="/api/admin/upload/image"
+                  :show-file-list="false"
+                  :on-success="handleLogoSuccess"
+                  :before-upload="beforeLogoUpload"
+                  accept="image/*"
+                >
+                  <img v-if="form.logoUrl" :src="form.logoUrl" class="logo-preview" />
+                  <el-icon v-else class="logo-uploader-icon"><Plus /></el-icon>
+                </el-upload>
+                <div style="display: flex; gap: 8px;">
+                  <el-button v-if="form.logoUrl" size="small" type="danger" @click="clearLogo">清除Logo</el-button>
+                  <div style="font-size: 12px; color: #666; flex: 1;">
+                    推荐尺寸：180x60px，支持 JPG、PNG、GIF 格式，文件大小不超过 2MB
+                  </div>
+                </div>
+              </div>
+            </el-form-item>
+
+            <el-form-item label="背景图片">
+              <div style="display: flex; flex-direction: column; gap: 12px;">
+                <el-upload
+                  class="background-uploader"
+                  action="/api/admin/upload/image"
+                  :show-file-list="false"
+                  :on-success="handleBackgroundSuccess"
+                  :before-upload="beforeBackgroundUpload"
+                  accept="image/*"
+                >
+                  <img v-if="form.backgroundUrl" :src="form.backgroundUrl" class="background-preview" />
+                  <div v-else class="background-uploader-placeholder">
+                    <el-icon class="background-uploader-icon"><Plus /></el-icon>
+                    <div class="background-uploader-text">点击上传背景图片</div>
+                  </div>
+                </el-upload>
+                <div style="display: flex; gap: 8px;">
+                  <el-button v-if="form.backgroundUrl" size="small" type="danger" @click="clearBackground">清除背景</el-button>
+                  <div style="font-size: 12px; color: #666; flex: 1;">
+                    推荐尺寸：1920x1080px，支持 JPG、PNG 格式，文件大小不超过 5MB
+                  </div>
+                </div>
+              </div>
+            </el-form-item>
+
             <el-form-item label="设置选项">
-              <el-checkbox v-model="form.isDefault">设为默认米表</el-checkbox>
               <el-checkbox v-model="form.showPrice">显示价格</el-checkbox>
               <el-checkbox v-model="form.showDescription">显示描述</el-checkbox>
               <el-checkbox v-model="form.showTags">显示标签</el-checkbox>
@@ -431,6 +474,7 @@
       
       <template #footer>
         <div class="dialog-footer">
+          <el-checkbox style="margin-right: 30px;" v-model="form.isDefault">设为默认米表</el-checkbox>
           <el-button type="primary" @click="submitForm">确 定</el-button>
           <el-button @click="cancel">取 消</el-button>
         </div>
@@ -445,7 +489,7 @@
       
       <el-form ref="associateRef" :model="associateForm" label-width="120px">
         <el-form-item label="关联分类" prop="categories">
-          <el-select v-model="associateForm.categories" multiple placeholder="选择要关联的域名分类" style="width: 100%">
+          <el-select class="category-select" v-model="associateForm.categories" multiple placeholder="选择要关联的域名分类" style="width: 100%">
             <el-option
               v-for="category in domainCategories"
               :key="category.id"
@@ -1289,6 +1333,8 @@ function reset() {
     isDefault: false,
     layoutTemplate: 'list',
     colorTheme: 'moonlight',
+    logoUrl: null,
+    backgroundUrl: null,
     headerInfo: null,
     headerPages: [],
     headerRichText: null,
@@ -1343,6 +1389,8 @@ async function handleUpdate(row) {
       isDefault: row.isDefault,
       layoutTemplate: row.layoutTemplate,
       colorTheme: row.colorTheme,
+      logoUrl: row.logoUrl,
+      backgroundUrl: row.backgroundUrl,
       headerInfo: row.headerInfo,
       headerPages: row.headerPages ? JSON.parse(row.headerPages) : [],
       headerRichText: row.headerRichText,
@@ -1364,6 +1412,8 @@ async function handleUpdate(row) {
         isDefault: selectedRow.isDefault,
         layoutTemplate: selectedRow.layoutTemplate,
         colorTheme: selectedRow.colorTheme,
+        logoUrl: selectedRow.logoUrl,
+        backgroundUrl: selectedRow.backgroundUrl,
         headerInfo: selectedRow.headerInfo,
         headerPages: selectedRow.headerPages ? JSON.parse(selectedRow.headerPages) : [],
         headerRichText: selectedRow.headerRichText,
@@ -1541,6 +1591,68 @@ async function handleDelete(row) {
   }
 }
 
+// Logo上传成功处理
+function handleLogoSuccess(res, file) {
+  if (res.code === 200) {
+    form.value.logoUrl = res.data.url
+    ElMessage.success('Logo上传成功')
+  } else {
+    ElMessage.error(res.message || 'Logo上传失败')
+  }
+}
+
+// Logo上传前校验
+function beforeLogoUpload(file) {
+  const isImage = file.type.startsWith('image/')
+  const isLt2M = file.size / 1024 / 1024 < 2
+
+  if (!isImage) {
+    ElMessage.error('上传文件只能是图片格式!')
+    return false
+  }
+  if (!isLt2M) {
+    ElMessage.error('上传图片大小不能超过 2MB!')
+    return false
+  }
+  return true
+}
+
+// 清除Logo
+function clearLogo() {
+  form.value.logoUrl = null
+}
+
+// 背景图上传成功处理
+function handleBackgroundSuccess(res, file) {
+  if (res.code === 200) {
+    form.value.backgroundUrl = res.data.url
+    ElMessage.success('背景图上传成功')
+  } else {
+    ElMessage.error(res.message || '背景图上传失败')
+  }
+}
+
+// 背景图上传前校验
+function beforeBackgroundUpload(file) {
+  const isImage = file.type.startsWith('image/')
+  const isLt5M = file.size / 1024 / 1024 < 5
+
+  if (!isImage) {
+    ElMessage.error('上传文件只能是图片格式!')
+    return false
+  }
+  if (!isLt5M) {
+    ElMessage.error('上传图片大小不能超过 5MB!')
+    return false
+  }
+  return true
+}
+
+// 清除背景图
+function clearBackground() {
+  form.value.backgroundUrl = null
+}
+
 // 导出按钮操作
 function handleExport() {
   console.log('导出功能暂未实现')
@@ -1567,5 +1679,91 @@ loadOptions()
 <style scoped lang="scss">
 .dialog-footer {
   text-align: right;
+}
+
+/* Logo上传组件样式 */
+.logo-uploader {
+  border: 2px dashed #d9d9d9;
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  width: 180px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-uploader:hover {
+  border-color: #409eff;
+  background-color: #f5f7fa;
+}
+
+.logo-uploader-icon {
+  font-size: 24px;
+  color: #8c939d;
+  text-align: center;
+}
+
+.logo-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+/* 背景图上传组件样式 */
+.background-uploader {
+  border: 2px dashed #d9d9d9;
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  width: 100%;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.background-uploader:hover {
+  border-color: #409eff;
+  background-color: #f5f7fa;
+}
+
+.background-uploader-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+}
+
+.background-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  margin-bottom: 8px;
+}
+
+.background-uploader-text {
+  color: #8c939d;
+  font-size: 14px;
+}
+
+.background-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+:deep(.category-select) {
+  .el-select__wrapper {
+    background:none;
+  }
 }
 </style> 

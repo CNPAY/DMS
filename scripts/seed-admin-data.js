@@ -386,7 +386,7 @@ async function main() {
         headerRichText: '<div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; margin: 20px 0;"><h3>🏆 专业域名投资平台</h3><p>我们致力于发现和投资具有商业价值的优质域名</p></div>',
         footerInfo: '所有域名均支持议价，欢迎咨询洽谈。专业的团队为您提供一对一服务。',
         footerPages: JSON.stringify([3, 4, 5, 6]), // 投资指南、服务条款、百度、谷歌
-        footerRichText: '<div style="text-align: center; padding: 15px; background: #f8f9fa; border-radius: 6px; margin-top: 20px;"><p style="margin: 0; color: #6c757d; font-size: 0.9em;">域名投资有风险，请谨慎决策 | 版权所有 © 2024 专业域名投资平台</p></div>',
+        footerRichText: '<div style="text-align: center; padding: 15px; border-radius: 6px; margin-top: 20px;"><p style="margin: 0; color: #6c757d; font-size: 0.9em;">域名投资有风险，请谨慎决策 | 版权所有 © 2024 专业域名投资平台</p></div>',
         showPrice: true,
         showDescription: true,
         showTags: true,

@@ -163,6 +163,10 @@ model Portfolio {
   layoutTemplate  String   @default("list") @map("layout_template") @db.VarChar(50)
   colorTheme      String?  @map("color_theme") @db.VarChar(50)
   
+  // 视觉配置
+  logoUrl         String?  @map("logo_url") @db.VarChar(500)     // logo图片URL
+  backgroundUrl   String?  @map("background_url") @db.VarChar(500) // 背景图片URL
+  
   // 头部配置
   headerInfo      String?  @map("header_info") @db.Text
   headerPages     String?  @map("header_pages") @db.Text  // JSON格式存储选中的页面ID

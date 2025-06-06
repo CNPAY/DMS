@@ -74,7 +74,7 @@
               取消
             </button>
             <button type="submit" :disabled="submitting" class="submit-btn">
-              {{ submitting ? '提交中...' : '提交线索' }}
+              {{ submitting ? '提交中...' : '提交报价' }}
             </button>
           </div>
         </form>

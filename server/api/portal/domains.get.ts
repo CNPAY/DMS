@@ -56,6 +56,7 @@ export default defineEventHandler(async (event) => {
           select: {
             tag: {
               select: {
+                id: true,
                 name: true
               }
             }
@@ -77,8 +78,10 @@ export default defineEventHandler(async (event) => {
       registrationDate: domain.creationDate,
       expirationDate: domain.expiryDate,
       registrar: domain.registrar?.name,
+      categoryId: domain.categoryId,
       category: domain.category?.name,
       tags: domain.tags.map((tagMap: any) => ({
+        id: tagMap.tag.id,
         name: tagMap.tag.name
       })),
       createdAt: domain.createdAt
