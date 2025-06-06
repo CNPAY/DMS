@@ -148,21 +148,107 @@
               <el-checkbox v-model="form.showDescription">显示描述</el-checkbox>
               <el-checkbox v-model="form.showTags">显示标签</el-checkbox>
             </el-form-item>
-            <el-form-item label="头部信息" prop="headerInfo">
+
+            <!-- 头部配置 Section -->
+            <el-divider content-position="left">
+              <span style="color: #409eff; font-weight: 600;">🔝 头部配置</span>
+            </el-divider>
+            
+            <el-form-item label="头部页面菜单" prop="headerPages">
+              <el-select 
+                v-model="form.headerPages" 
+                multiple 
+                placeholder="选择要在头部显示的页面"
+                style="width: 100%"
+                :loading="staticPagesLoading"
+              >
+                <el-option
+                  v-for="page in staticPagesList"
+                  :key="page.id"
+                  :label="page.title"
+                  :value="page.id"
+                >
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>{{ page.title }}</span>
+                    <span style="color: #999; font-size: 12px;">/{{ page.slug }}</span>
+                  </div>
+                </el-option>
+              </el-select>
+              <div style="font-size: 12px; color: #666; margin-top: 4px;">
+                选中的页面将作为头部导航菜单显示
+              </div>
+            </el-form-item>
+
+            <el-form-item label="头部简介信息" prop="headerInfo">
               <el-input 
                 v-model="form.headerInfo" 
                 type="textarea" 
-                :rows="3"
-                placeholder="请输入头部信息"
+                :rows="2"
+                placeholder="头部简介文本（纯文本）"
               />
             </el-form-item>
-            <el-form-item label="底部信息" prop="footerInfo">
+
+            <el-form-item label="头部富文本" prop="headerRichText">
+              <el-input 
+                v-model="form.headerRichText" 
+                type="textarea" 
+                :rows="6"
+                placeholder="头部富文本内容（支持HTML）"
+              />
+              <div style="font-size: 12px; color: #666; margin-top: 4px;">
+                支持HTML标签，可用于添加图片、链接等富媒体内容
+              </div>
+            </el-form-item>
+
+            <!-- 尾部配置 Section -->
+            <el-divider content-position="left">
+              <span style="color: #67c23a; font-weight: 600;">🔽 尾部配置</span>
+            </el-divider>
+
+            <el-form-item label="尾部页面链接" prop="footerPages">
+              <el-select 
+                v-model="form.footerPages" 
+                multiple 
+                placeholder="选择要在尾部显示的页面"
+                style="width: 100%"
+                :loading="staticPagesLoading"
+              >
+                <el-option
+                  v-for="page in staticPagesList"
+                  :key="page.id"
+                  :label="page.title"
+                  :value="page.id"
+                >
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>{{ page.title }}</span>
+                    <span style="color: #999; font-size: 12px;">/{{ page.slug }}</span>
+                  </div>
+                </el-option>
+              </el-select>
+              <div style="font-size: 12px; color: #666; margin-top: 4px;">
+                选中的页面将作为尾部链接显示
+              </div>
+            </el-form-item>
+
+            <el-form-item label="尾部版权信息" prop="footerInfo">
               <el-input 
                 v-model="form.footerInfo" 
                 type="textarea" 
-                :rows="3"
-                placeholder="请输入底部信息"
+                :rows="2"
+                placeholder="尾部版权信息（纯文本）"
               />
+            </el-form-item>
+
+            <el-form-item label="尾部富文本" prop="footerRichText">
+              <el-input 
+                v-model="form.footerRichText" 
+                type="textarea" 
+                :rows="6"
+                placeholder="尾部富文本内容（支持HTML）"
+              />
+              <div style="font-size: 12px; color: #666; margin-top: 4px;">
+                支持HTML标签，可用于添加联系信息、社交媒体链接等
+              </div>
             </el-form-item>
           </el-form>
         </div>
@@ -1039,6 +1125,10 @@ const multiple = ref(true)
 const total = ref(0)
 const title = ref('')
 
+// 静态页面相关数据
+const staticPagesList = ref([])
+const staticPagesLoading = ref(false)
+
 const data = reactive({
   form: {},
   queryParams: {
@@ -1164,6 +1254,28 @@ async function loadOptions() {
   }
 }
 
+// 获取静态页面列表
+async function getStaticPages() {
+  staticPagesLoading.value = true
+  try {
+    const response = await $fetch('/api/admin/static-pages/list', {
+      query: {
+        page: 1,
+        limit: 100, // 获取所有页面用于选择
+        status: 'published' // 只获取已发布的页面
+      }
+    })
+    
+    if (response.code === 200) {
+      staticPagesList.value = response.data.staticPages || []
+    }
+  } catch (error) {
+    console.error('获取静态页面列表失败:', error)
+  } finally {
+    staticPagesLoading.value = false
+  }
+}
+
 // 表单重置
 function reset() {
   form.value = {
@@ -1174,7 +1286,11 @@ function reset() {
     layoutTemplate: 'list',
     colorTheme: 'moonlight',
     headerInfo: null,
+    headerPages: [],
+    headerRichText: null,
     footerInfo: null,
+    footerPages: [],
+    footerRichText: null,
     showPrice: true,
     showDescription: false,
     showTags: false
@@ -1204,6 +1320,7 @@ function handleSelectionChange(selection) {
 // 新增按钮操作
 function handleAdd() {
   reset()
+  getStaticPages() // 获取静态页面列表
   open.value = true
   title.value = '添加米表'
 }
@@ -1211,6 +1328,7 @@ function handleAdd() {
 // 修改按钮操作
 async function handleUpdate(row) {
   reset()
+  getStaticPages() // 获取静态页面列表
   
   if (row) {
     // 直接设置表单数据
@@ -1222,7 +1340,11 @@ async function handleUpdate(row) {
       layoutTemplate: row.layoutTemplate,
       colorTheme: row.colorTheme,
       headerInfo: row.headerInfo,
+      headerPages: row.headerPages ? JSON.parse(row.headerPages) : [],
+      headerRichText: row.headerRichText,
       footerInfo: row.footerInfo,
+      footerPages: row.footerPages ? JSON.parse(row.footerPages) : [],
+      footerRichText: row.footerRichText,
       showPrice: row.showPrice,
       showDescription: row.showDescription,
       showTags: row.showTags
@@ -1238,9 +1360,12 @@ async function handleUpdate(row) {
         isDefault: selectedRow.isDefault,
         layoutTemplate: selectedRow.layoutTemplate,
         colorTheme: selectedRow.colorTheme,
-        isDefault: selectedRow.isDefault,
         headerInfo: selectedRow.headerInfo,
+        headerPages: selectedRow.headerPages ? JSON.parse(selectedRow.headerPages) : [],
+        headerRichText: selectedRow.headerRichText,
         footerInfo: selectedRow.footerInfo,
+        footerPages: selectedRow.footerPages ? JSON.parse(selectedRow.footerPages) : [],
+        footerRichText: selectedRow.footerRichText,
         showPrice: selectedRow.showPrice,
         showDescription: selectedRow.showDescription,
         showTags: selectedRow.showTags

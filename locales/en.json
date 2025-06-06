@@ -38,7 +38,8 @@
     "notificationConfig": "Notification Settings",
     "securityConfig": "Account Setting",
     "iconLibrary": "Icon Library",
-    "landingConfig": "Landing Page Config"
+    "landingConfig": "Landing Page Config",
+    "staticPages": "Page Management"
   },
   "auth": {
     "welcome": "Welcome to DMS",

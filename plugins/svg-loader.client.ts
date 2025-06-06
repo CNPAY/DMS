@@ -13,16 +13,16 @@ export default defineNuxtPlugin(async () => {
         eager: true 
       })
       
-      console.log('找到的 SVG 模块:', Object.keys(svgModules))
-      console.log('SVG 模块数量:', Object.keys(svgModules).length)
+      // console.log('找到的 SVG 模块:', Object.keys(svgModules))
+      // console.log('SVG 模块数量:', Object.keys(svgModules).length)
       
       // 处理每个 SVG 文件
       for (const [path, content] of Object.entries(svgModules)) {
-        console.log('处理文件:', path, '内容类型:', typeof content)
+        // console.log('处理文件:', path, '内容类型:', typeof content)
         
         // 从路径中提取文件名
         const fileName = path.split('/').pop()?.replace('.svg', '') || ''
-        console.log('提取的文件名:', fileName)
+        // console.log('提取的文件名:', fileName)
         
         if (fileName && typeof content === 'string') {
           try {
@@ -37,7 +37,7 @@ export default defineNuxtPlugin(async () => {
               const originalHeight = svgElement.getAttribute('height')
               const originalViewBox = svgElement.getAttribute('viewBox')
               
-              console.log(`${fileName} 原始尺寸: width=${originalWidth}, height=${originalHeight}, viewBox=${originalViewBox}`)
+              // console.log(`${fileName} 原始尺寸: width=${originalWidth}, height=${originalHeight}, viewBox=${originalViewBox}`)
               
               // 移除固定的宽高属性
               svgElement.removeAttribute('width')
@@ -50,11 +50,11 @@ export default defineNuxtPlugin(async () => {
                 const width = parseFloat(originalWidth.replace(/[^\d.]/g, '')) || 24
                 const height = parseFloat(originalHeight.replace(/[^\d.]/g, '')) || 24
                 viewBox = `0 0 ${width} ${height}`
-                console.log(`${fileName} 创建 viewBox: ${viewBox}`)
+                // console.log(`${fileName} 创建 viewBox: ${viewBox}`)
               } else if (!viewBox) {
                 // 如果都没有，使用默认的 24x24
                 viewBox = '0 0 24 24'
-                console.log(`${fileName} 使用默认 viewBox: ${viewBox}`)
+                // console.log(`${fileName} 使用默认 viewBox: ${viewBox}`)
               }
               
               svgElement.setAttribute('viewBox', viewBox)
@@ -79,15 +79,15 @@ export default defineNuxtPlugin(async () => {
               const processedSvg = svgElement.outerHTML
               svgCache.set(fileName, processedSvg)
               
-              console.log(`✅ 成功加载 SVG 图标: ${fileName}, viewBox: ${viewBox}`)
+              // console.log(`✅ 成功加载 SVG 图标: ${fileName}, viewBox: ${viewBox}`)
             } else {
-              console.error(`❌ 无法解析 SVG 文件: ${fileName}`)
+              // console.error(`❌ 无法解析 SVG 文件: ${fileName}`)
             }
           } catch (parseError) {
-            console.error(`❌ 解析 SVG 文件出错 ${fileName}:`, parseError)
+            // console.error(`❌ 解析 SVG 文件出错 ${fileName}:`, parseError)
           }
         } else {
-          console.warn(`⚠️ 跳过文件: ${path}, 文件名: ${fileName}, 内容类型: ${typeof content}`)
+          // console.warn(`⚠️ 跳过文件: ${path}, 文件名: ${fileName}, 内容类型: ${typeof content}`)
         }
       }
       

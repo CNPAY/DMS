@@ -28,6 +28,7 @@ model User {
   watchedDomains  WatchedDomain[]
   aiPrompts       AiPrompt[]
   systemSettings  SystemSetting[]
+  staticPages     StaticPage[]
 
   @@map("users")
 }
@@ -161,8 +162,17 @@ model Portfolio {
   isDefault       Boolean  @default(false) @map("is_default")
   layoutTemplate  String   @default("list") @map("layout_template") @db.VarChar(50)
   colorTheme      String?  @map("color_theme") @db.VarChar(50)
+  
+  // 头部配置
   headerInfo      String?  @map("header_info") @db.Text
+  headerPages     String?  @map("header_pages") @db.Text  // JSON格式存储选中的页面ID
+  headerRichText  String?  @map("header_rich_text") @db.LongText  // 富文本内容
+  
+  // 尾部配置  
   footerInfo      String?  @map("footer_info") @db.Text
+  footerPages     String?  @map("footer_pages") @db.Text  // JSON格式存储选中的页面ID
+  footerRichText  String?  @map("footer_rich_text") @db.LongText  // 富文本内容
+  
   showPrice       Boolean  @default(true) @map("show_price")
   showDescription Boolean  @default(false) @map("show_description")
   showTags        Boolean  @default(false) @map("show_tags")
@@ -306,4 +316,27 @@ model SystemSetting {
   user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("system_settings")
+}
+
+// 静态页面表
+model StaticPage {
+  id              Int      @id @default(autoincrement())
+  userId          Int      @map("user_id")
+  title           String   @db.VarChar(255)
+  slug            String?  @db.VarChar(255)  // 外部链接时可为空
+  content         String?  @db.LongText      // 外部链接时可为空
+  externalUrl     String?  @map("external_url") @db.VarChar(500)  // 外部链接URL
+  linkType        String   @default("internal") @map("link_type") @db.VarChar(20)  // internal/external
+  openInNewTab    Boolean  @default(false) @map("open_in_new_tab")  // 是否新窗口打开
+  metaTitle       String?  @map("meta_title") @db.VarChar(255)
+  metaDescription String?  @map("meta_description") @db.Text
+  status          String   @default("published") @db.VarChar(20)
+  sortOrder       Int      @default(0) @map("sort_order")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // 关联关系
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("static_pages")
 } 

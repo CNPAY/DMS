@@ -1,3 +1,5 @@
+import prisma from '~/server/utils/db'
+
 // 米表保存接口
 export default defineEventHandler(async (event) => {
   try {
@@ -10,7 +12,11 @@ export default defineEventHandler(async (event) => {
       layoutTemplate = 'list',
       colorTheme = 'moonlight',
       headerInfo,
+      headerPages,
+      headerRichText,
       footerInfo,
+      footerPages,
+      footerRichText,
       showPrice = true,
       showDescription = false,
       showTags = false
@@ -51,7 +57,11 @@ export default defineEventHandler(async (event) => {
           layoutTemplate,
           colorTheme,
           headerInfo,
+          headerPages: headerPages ? JSON.stringify(headerPages) : null,
+          headerRichText,
           footerInfo,
+          footerPages: footerPages ? JSON.stringify(footerPages) : null,
+          footerRichText,
           showPrice,
           showDescription,
           showTags
@@ -68,7 +78,11 @@ export default defineEventHandler(async (event) => {
           layoutTemplate,
           colorTheme,
           headerInfo,
+          headerPages: headerPages ? JSON.stringify(headerPages) : null,
+          headerRichText,
           footerInfo,
+          footerPages: footerPages ? JSON.stringify(footerPages) : null,
+          footerRichText,
           showPrice,
           showDescription,
           showTags

@@ -244,6 +244,14 @@ export const sidebarRoutes: SidebarRoute[] = [
     },
     children: [
       {
+        path: 'pages',
+        name: 'pages',
+        meta: {
+          title: 'routes.staticPages',
+          icon: 'system'
+        }
+      },
+      {
         path: 'registrar',
         name: 'RegistrarManage',
         meta: {
@@ -290,7 +298,8 @@ export const sidebarRoutes: SidebarRoute[] = [
           title: 'routes.landingConfig',
           icon: 'monitor'
         }
-      }
+      },
+      
     ]
   }
 ];

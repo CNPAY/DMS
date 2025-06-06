@@ -38,7 +38,8 @@
     "notificationConfig": "通知设置",
     "securityConfig": "个人设置",
     "iconLibrary": "图标库",
-    "landingConfig": "着陆页配置"
+    "landingConfig": "着陆页配置",
+    "staticPages": "页面管理"
   },
   "auth": {
     "welcome": "欢迎使用 DMS",
