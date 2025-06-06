@@ -131,7 +131,7 @@ export const sidebarRoutes: SidebarRoute[] = [
         path: 'list',
         name: 'PortfolioList',
         meta: {
-          title: 'routes.portfolioManagement',
+          title: 'routes.portfolioList',
           icon: 'table'
         }
       }

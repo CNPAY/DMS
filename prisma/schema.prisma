@@ -62,8 +62,9 @@ model DomainCategory {
   updatedAt   DateTime @updatedAt @map("updated_at")
 
   // 关联关系
-  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  domains Domain[]
+  user       User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  domains    Domain[]
+  portfolios PortfolioCategoryMap[]
 
   @@unique([userId, name])
   @@map("domain_categories")
@@ -169,15 +170,29 @@ model Portfolio {
   updatedAt       DateTime @updatedAt @map("updated_at")
 
   // 关联关系
-  user      User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
-  domains   PortfolioDomainMap[]
-  inquiries Inquiry[]
+  user       User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  categories PortfolioCategoryMap[]
+  domains    PortfolioDomainMap[]
+  inquiries  Inquiry[]
 
   @@unique([userId, slug])
   @@map("portfolios")
 }
 
-// 米表域名关联表
+// 米表分类关联表
+model PortfolioCategoryMap {
+  portfolioId Int @map("portfolio_id")
+  categoryId  Int @map("category_id")
+
+  // 关联关系
+  portfolio Portfolio      @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  category  DomainCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([portfolioId, categoryId])
+  @@map("portfolio_category_map")
+}
+
+// 米表域名关联表（保留用于特殊情况的直接关联）
 model PortfolioDomainMap {
   portfolioId          Int     @map("portfolio_id")
   domainId             Int     @map("domain_id")
