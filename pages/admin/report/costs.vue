@@ -60,7 +60,7 @@
     </div>
 
     <!-- 成本类型分布图表 -->
-    <el-row :gutter="20" class="mt-4">
+    <el-row :gutter="20" class="mt-4" style="margin-bottom: 15px;">
       <el-col :xs="24" :sm="12">
         <el-card shadow="never" title="成本类型分布">
           <div id="costTypeChart" class="chart-container"></div>
@@ -75,61 +75,65 @@
     </el-row>
 
     <!-- 搜索面板 -->
-    <el-form :model="searchForm" class="search-panel" ref="queryRef" :inline="true" v-show="showSearch" label-width="100px">
-      <el-form-item label="域名" prop="domainName" style="width: 280px">
-        <el-input
-          v-model="searchForm.domainName"
-          placeholder="请输入域名"
-          clearable
-          @keyup.enter="handleSearch"
-        />
-      </el-form-item>
-      
-      <el-form-item label="成本类型" prop="costType" style="width: 280px">
-        <el-select v-model="searchForm.costType" placeholder="请选择成本类型" clearable style="width: 100%">
-          <el-option
-            v-for="type in costTypeOptions"
-            :key="type.value"
-            :label="type.label"
-            :value="type.value"
+    <el-card v-show="showSearch" class="search-panel">
+      <el-form :model="searchForm" ref="queryRef" :inline="true" label-width="100px">
+        <el-form-item label="域名" prop="domainName" style="width: 280px">
+          <el-input
+            v-model="searchForm.domainName"
+            placeholder="请输入域名"
+            clearable
+            @keyup.enter="handleSearch"
           />
-        </el-select>
-      </el-form-item>
-      
-      <el-form-item label="日期范围" prop="dateRange" style="width: 320px">
-        <el-date-picker
-          v-model="searchForm.dateRange"
-          type="daterange"
-          range-separator="至"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          format="YYYY-MM-DD"
-          value-format="YYYY-MM-DD"
-          @change="handleSearch"
-        />
-      </el-form-item>
-      
-      <el-form-item label="金额范围" style="width: 320px">
-        <el-input-number
-          v-model="searchForm.minAmount"
-          placeholder="最小金额"
-          :min="0"
-          style="width: 120px; margin-right: 10px;"
-        />
-        <span style="margin: 0 5px;">-</span>
-        <el-input-number
-          v-model="searchForm.maxAmount"
-          placeholder="最大金额"
-          :min="0"
-          style="width: 120px;"
-        />
-      </el-form-item>
-      
-      <el-form-item>
-        <el-button type="primary" icon="Search" @click="handleSearch">搜索</el-button>
-        <el-button icon="Refresh" @click="resetSearch">重置</el-button>
-      </el-form-item>
-    </el-form>
+        </el-form-item>
+        
+        <el-form-item label="成本类型" prop="costType" style="width: 280px">
+          <el-select v-model="searchForm.costType" placeholder="请选择成本类型" clearable style="width: 100%">
+            <el-option
+              v-for="type in costTypeOptions"
+              :key="type.value"
+              :label="type.label"
+              :value="type.value"
+            />
+          </el-select>
+        </el-form-item>
+        
+        <el-form-item label="日期范围" prop="dateRange" style="width: 320px">
+          <el-date-picker
+            v-model="searchForm.dateRange"
+            type="daterange"
+            range-separator="至"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+            format="YYYY-MM-DD"
+            value-format="YYYY-MM-DD"
+            @change="handleSearch"
+          />
+        </el-form-item>
+        
+        <el-form-item label="金额范围" style="width: 420px">
+          <el-input-number
+            v-model="searchForm.minAmount"
+            placeholder="最小金额"
+            :min="0"
+            size="small"
+            style="width: 120px; margin-right: 10px;display: inline-block;"
+          />
+          <span style="margin: 0 5px;">-</span>
+          <el-input-number
+            v-model="searchForm.maxAmount"
+            placeholder="最大金额"
+            :min="0"
+            size="small"
+            style="width: 120px;display: inline-block;"
+          />
+        </el-form-item>
+        
+        <el-form-item>
+          <el-button type="primary" icon="Search" @click="handleSearch">搜索</el-button>
+          <el-button icon="Refresh" @click="resetSearch">重置</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
 
     <!-- 操作栏 -->
     <el-row class="mb8" style="display: flex; justify-content: space-between; align-items: center;">
@@ -148,88 +152,90 @@
     </el-row>
 
     <!-- 数据表格 -->
-    <el-table
-      v-loading="loading"
-      :data="costList"
-      @selection-change="handleSelectionChange"
-    >
-        <el-table-column type="selection" width="55" align="center" />
-        <el-table-column prop="domainName" label="域名" width="200" show-overflow-tooltip />
-        <el-table-column prop="registrarName" label="注册商" width="120" align="center">
-          <template #default="{ row }">
-            <span :class="{ 'text-gray-400': !row.registrarName }">
-              {{ row.registrarName || '-' }}
-            </span>
-          </template>
-        </el-table-column>
-        <el-table-column prop="costTypeName" label="成本类型" width="120" align="center" />
-        <el-table-column prop="amount" label="金额" width="120" align="center">
-          <template #default="{ row }">
-            <span class="text-red-500 font-medium">￥{{ row.amount?.toLocaleString() }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column prop="costDate" label="成本日期" width="120" align="center">
-          <template #default="{ row }">
-            {{ formatDate(row.costDate) }}
-          </template>
-        </el-table-column>
-        <el-table-column prop="renewalYears" label="续费年限" width="100" align="center">
-          <template #default="{ row }">
-            <span :class="{ 'text-gray-400': !row.renewalYears }">
-              {{ row.renewalYears ? `${row.renewalYears}年` : '-' }}
-            </span>
-          </template>
-        </el-table-column>
-        <el-table-column prop="notes" label="备注" min-width="200" show-overflow-tooltip>
-          <template #default="{ row }">
-            <span :class="{ 'text-gray-400': !row.notes }">
-              {{ row.notes || '-' }}
-            </span>
-          </template>
-        </el-table-column>
-        <el-table-column prop="createdAt" label="创建时间" width="160" align="center">
-          <template #default="{ row }">
-            {{ formatDateTime(row.createdAt) }}
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" width="160" align="center" fixed="right">
-          <template #default="{ row }">
-            <el-button
-              type="primary"
-              link
-              size="small"
-              icon="Edit"
-              @click="handleEdit(row)"
-            >
-              编辑
-            </el-button>
-            <el-button
-              type="danger"
-              link
-              size="small"
-              icon="Delete"
-              @click="handleDelete(row)"
-            >
-              删除
-            </el-button>
-          </template>
-        </el-table-column>
-      </el-table>
+    <el-card>
+      <el-table
+        v-loading="loading"
+        :data="costList"
+        @selection-change="handleSelectionChange"
+      >
+          <el-table-column type="selection" width="55" align="center" />
+          <el-table-column prop="domainName" label="域名" width="200" show-overflow-tooltip />
+          <el-table-column prop="registrarName" label="注册商" width="120" align="center">
+            <template #default="{ row }">
+              <span :class="{ 'text-gray-400': !row.registrarName }">
+                {{ row.registrarName || '-' }}
+              </span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="costTypeName" label="成本类型" width="120" align="center" />
+          <el-table-column prop="amount" label="金额" width="120" align="center">
+            <template #default="{ row }">
+              <span class="text-red-500 font-medium">￥{{ row.amount?.toLocaleString() }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="costDate" label="成本日期" width="120" align="center">
+            <template #default="{ row }">
+              {{ formatDate(row.costDate) }}
+            </template>
+          </el-table-column>
+          <el-table-column prop="renewalYears" label="续费年限" width="100" align="center">
+            <template #default="{ row }">
+              <span :class="{ 'text-gray-400': !row.renewalYears }">
+                {{ row.renewalYears ? `${row.renewalYears}年` : '-' }}
+              </span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="notes" label="备注" min-width="200" show-overflow-tooltip>
+            <template #default="{ row }">
+              <span :class="{ 'text-gray-400': !row.notes }">
+                {{ row.notes || '-' }}
+              </span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="createdAt" label="创建时间" width="160" align="center">
+            <template #default="{ row }">
+              {{ formatDateTime(row.createdAt) }}
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="160" align="center" fixed="right">
+            <template #default="{ row }">
+              <el-button
+                type="primary"
+                link
+                size="small"
+                icon="Edit"
+                @click="handleEdit(row)"
+              >
+                编辑
+              </el-button>
+              <el-button
+                type="danger"
+                link
+                size="small"
+                icon="Delete"
+                @click="handleDelete(row)"
+              >
+                删除
+              </el-button>
+            </template>
+          </el-table-column>
+        </el-table>
 
-    <!-- 分页 -->
-    <div class="pagination-container">
-      <el-pagination
-        v-show="total > 0"
-        :current-page="searchForm.page"
-        :page-size="searchForm.pageSize"
-        :total="total"
-        :page-sizes="[10, 20, 30, 40]"
-        layout="total, sizes, prev, pager, next, jumper"
-        background
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-      />
-    </div>
+      <!-- 分页 -->
+      <div class="pagination-container">
+        <el-pagination
+          v-show="total > 0"
+          :current-page="searchForm.page"
+          :page-size="searchForm.pageSize"
+          :total="total"
+          :page-sizes="[10, 20, 30, 40]"
+          layout="total, sizes, prev, pager, next, jumper"
+          background
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+        />
+      </div>
+    </el-card>
 
     <!-- 新增/编辑对话框 -->
     <el-dialog

@@ -203,4 +203,95 @@ aside {
     vertical-align: middle;
     margin-bottom: 10px;
   }
+}
+
+// 搜索面板样式优化
+.search-panel {
+  // 基本卡片内边距调整
+  .el-card__body {
+    padding: 16px 20px;
+  }
+  
+  // 内联表单优化
+  .el-form--inline {
+    // 当只有一行表单项时，垂直居中，但允许换行
+    display: flex;
+    align-items: flex-start; // 改为顶部对齐，更适合换行
+    flex-wrap: wrap;
+    margin: 0 -9px -12px 0; // 负边距抵消子元素的边距
+    
+    .el-form-item {
+      // 统一的边距设置
+      margin-bottom: 12px !important;
+      margin-right: 18px !important;
+    }
+    
+    // 金额范围等复合表单项的特殊处理
+    .el-form-item {
+      .el-form-item__content {
+        // 确保复合组件内部元素正确对齐
+        display: flex;
+        align-items: center;
+        
+        // 包含多个输入数字组件的表单项
+        .el-input-number {
+          &:not(:last-child) {
+            margin-right: 8px;
+          }
+        }
+        
+        // 分隔符样式
+        > span {
+          margin: 0 8px;
+          flex-shrink: 0;
+          line-height: 32px;
+        }
+      }
+    }
+    
+    // 响应式处理：在较小屏幕上调整边距
+    @media (max-width: 768px) {
+      margin: 0 -6px -8px 0;
+      
+      .el-form-item {
+        margin-right: 12px !important;
+        margin-bottom: 8px !important;
+        
+        // 移动端金额范围组件调整
+        .el-form-item__content {
+          .el-input-number {
+            width: 100px !important;
+          }
+          
+          > span {
+            margin: 0 4px;
+            font-size: 12px;
+          }
+        }
+      }
+    }
+    
+    // 当确实只有一行时（宽屏且表单项少），居中对齐
+    @media (min-width: 769px) {
+      &.single-line {
+        align-items: center;
+        margin: 0;
+        
+        .el-form-item {
+          margin-bottom: 0 !important;
+          
+          &:last-child {
+            margin-right: 0 !important;
+          }
+        }
+      }
+    }
+  }
+  
+  // 非内联表单的处理
+  .el-form:not(.el-form--inline) {
+    .el-form-item:last-child {
+      margin-bottom: 0 !important;
+    }
+  }
 } 

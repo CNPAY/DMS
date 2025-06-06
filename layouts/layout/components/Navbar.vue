@@ -18,7 +18,7 @@
         <!-- 语言切换器 -->
         <el-dropdown @command="handleLanguageChange" trigger="click">
           <div class="round-item">
-          
+            {{ locale === 'en' ? '🇺🇸' : '🇨🇳' }}
          </div>
           <template #dropdown>
             <el-dropdown-menu>
@@ -78,11 +78,7 @@ const appStore = useAppStore();
 const userStore = useUserStore();
 const settingsStore = useSettingsStore();
 const { locale, setLocale } = useI18n();
-
-// 当前语言显示文本
-const currentLanguageText = computed(() => {
-  return locale.value === 'zh' ? '中文' : 'English';
-});
+ 
 
 function toggleSideBar() {
   appStore.toggleSideBar();

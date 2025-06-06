@@ -56,7 +56,7 @@ export default defineEventHandler(async (event) => {
         dependencyMessages.push(`${costs} 条成本记录`)
       }
       if (inquiries > 0) {
-        dependencyMessages.push(`${inquiries} 条询盘记录`)
+        dependencyMessages.push(`${inquiries} 条线索记录`)
       }
       if (portfolios > 0) {
         dependencyMessages.push(`${portfolios} 个米表关联`)

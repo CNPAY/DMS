@@ -1,18 +1,20 @@
 <template>
   <div class="app-container">
     <!-- 搜索面板 -->
-    <el-form :model="queryParams" class="search-panel" ref="queryRef" :inline="true" v-show="showSearch" label-width="100px">
-      <el-form-item label="关键词" prop="search" style="width: 280px">
-        <el-input v-model="queryParams.search" placeholder="请输入潜客姓名/邮箱/域名" clearable @keyup.enter="handleQuery" />
-      </el-form-item>
-      <el-form-item label="询盘状态" prop="status">
-        <el-segmented v-model="queryParams.status" :options="segmentedStatusOptions" @change="handleQuery" />
-      </el-form-item>
-      <el-form-item>
-        <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
-        <el-button icon="Refresh" @click="resetQuery">重置</el-button>
-      </el-form-item>
-    </el-form>
+    <el-card v-show="showSearch" class="search-panel">
+      <el-form :model="queryParams" ref="queryRef" :inline="true" label-width="80px">
+        <el-form-item label="关键词" prop="search" style="width: 280px">
+          <el-input v-model="queryParams.search" placeholder="请输入潜客姓名/邮箱/域名" clearable @keyup.enter="handleQuery" />
+        </el-form-item>
+        <el-form-item label="线索状态" prop="status">
+          <el-segmented v-model="queryParams.status" :options="segmentedStatusOptions" @change="handleQuery" />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
+          <el-button icon="Refresh" @click="resetQuery">重置</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
 
     <!-- 操作栏 -->
     <el-row class="mb8" style="display: flex; justify-content: space-between; align-items: center;">
@@ -31,96 +33,98 @@
     </el-row>
 
     <!-- 数据表格 -->
-    <el-table v-loading="loading" :data="inquiryList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="潜客信息" align="center" min-width="200">
-        <template #default="{ row }">
-          <div style="text-align: left;">
-            <div style="font-weight: bold;">{{ row.visitorName || '未填写' }}</div>
-            <div style="color: #666;">{{ row.visitorEmail }}</div>
-            <div v-if="row.visitorPhone" style="color: #999; font-size: 12px;">{{ row.visitorPhone }}</div>
-          </div>
-        </template>
-      </el-table-column>
-      <el-table-column label="相关域名" align="center" prop="domain" min-width="150">
-        <template #default="{ row }">
-          <span v-if="row.domain">{{ row.domain.domainName }}</span>
-          <span v-else-if="row.portfolio">米表: {{ row.portfolio.name }}</span>
-          <span v-else>-</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="报价" align="center" prop="offerPrice" min-width="120">
-        <template #default="{ row }">
-          <span v-if="row.offerPrice" style="color: #67C23A; font-weight: bold;">
-            ${{ Number(row.offerPrice).toLocaleString() }}
-          </span>
-          <span v-else>-</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="询盘状态" align="center" prop="status" min-width="120">
-        <template #default="{ row }">
-          <el-tag 
-            :type="getStatusType(row.status)"
-            size="small"
-          >
-            {{ getStatusLabel(row.status) }}
-          </el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column label="询盘内容" align="center" prop="message" min-width="200">
-        <template #default="{ row }">
-          <el-tooltip :content="row.message" placement="top">
-            <span>{{ truncateText(row.message, 50) }}</span>
-          </el-tooltip>
-        </template>
-      </el-table-column>
-      <el-table-column label="提交时间" align="center" prop="submittedAt" width="180">
-        <template #default="{ row }">
-          <span>{{ dayjs(row.submittedAt).format('YYYY-MM-DD HH:mm:ss') }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="操作" align="center" class-name="small-padding" fixed="right" width="250">
-        <template #default="scope">
-          <el-dropdown @command="(command) => handleStatusChange(scope.row, command)">
-            <el-button link type="primary" icon="Edit">
-              更新状态<el-icon class="el-icon--right"><ArrowDown /></el-icon>
-            </el-button>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item 
-                  v-for="status in statusOptions" 
-                  :key="status.value"
-                  :command="status.value"
-                  :disabled="scope.row.status === status.value"
-                >
-                  {{ status.label }}
-                </el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
-          <el-button link type="primary" icon="View" @click="handleDetail(scope.row)">详情</el-button>
-          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)">删除</el-button>
-        </template>
-      </el-table-column>
-    </el-table>
+    <el-card>
+      <el-table v-loading="loading" :data="inquiryList" @selection-change="handleSelectionChange">
+        <el-table-column type="selection" width="55" align="center" />
+        <el-table-column label="潜客信息" align="center" min-width="200">
+          <template #default="{ row }">
+            <div style="text-align: left;">
+              <div style="font-weight: bold;">{{ row.visitorName || '未填写' }}</div>
+              <div style="color: #666;">{{ row.visitorEmail }}</div>
+              <div v-if="row.visitorPhone" style="color: #999; font-size: 12px;">{{ row.visitorPhone }}</div>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column label="相关域名" align="center" prop="domain" min-width="150">
+          <template #default="{ row }">
+            <span v-if="row.domain">{{ row.domain.domainName }}</span>
+            <span v-else-if="row.portfolio">米表: {{ row.portfolio.name }}</span>
+            <span v-else>-</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="报价" align="center" prop="offerPrice" min-width="120">
+          <template #default="{ row }">
+            <span v-if="row.offerPrice" style="color: #67C23A; font-weight: bold;">
+              ${{ Number(row.offerPrice).toLocaleString() }}
+            </span>
+            <span v-else>-</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="线索状态" align="center" prop="status" min-width="120">
+          <template #default="{ row }">
+            <el-tag 
+              :type="getStatusType(row.status)"
+              size="small"
+            >
+              {{ getStatusLabel(row.status) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="线索内容" align="center" prop="message" min-width="200">
+          <template #default="{ row }">
+            <el-tooltip :content="row.message" placement="top">
+              <span>{{ truncateText(row.message, 50) }}</span>
+            </el-tooltip>
+          </template>
+        </el-table-column>
+        <el-table-column label="提交时间" align="center" prop="submittedAt" width="180">
+          <template #default="{ row }">
+            <span>{{ dayjs(row.submittedAt).format('YYYY-MM-DD HH:mm:ss') }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" align="center" class-name="small-padding" fixed="right" width="250">
+          <template #default="scope">
+            <el-dropdown @command="(command) => handleStatusChange(scope.row, command)">
+              <el-button link type="primary" icon="Edit">
+                更新状态<el-icon class="el-icon--right"><ArrowDown /></el-icon>
+              </el-button>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item 
+                    v-for="status in statusOptions" 
+                    :key="status.value"
+                    :command="status.value"
+                    :disabled="scope.row.status === status.value"
+                  >
+                    {{ status.label }}
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+            <el-button link type="primary" icon="View" @click="handleDetail(scope.row)">详情</el-button>
+            <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)">删除</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
 
-    <!-- 分页 -->
-    <div class="pagination-container">
-      <el-pagination
-        v-show="total > 0"
-        :current-page="queryParams.pageNum"
-        :page-size="queryParams.pageSize"
-        :page-sizes="[10, 20, 30, 40]"
-        :total="total"
-        background
-        layout="total, sizes, prev, pager, next, jumper"
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-      />
-    </div>
+      <!-- 分页 -->
+      <div class="pagination-container">
+        <el-pagination
+          v-show="total > 0"
+          :current-page="queryParams.pageNum"
+          :page-size="queryParams.pageSize"
+          :page-sizes="[10, 20, 30, 40]"
+          :total="total"
+          background
+          layout="total, sizes, prev, pager, next, jumper"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+        />
+      </div>
+    </el-card>
 
-    <!-- 询盘详情对话框 -->
-    <el-dialog title="询盘详情" v-model="detailOpen" width="800px" append-to-body>
+    <!-- 线索详情对话框 -->
+    <el-dialog title="线索详情" v-model="detailOpen" width="800px" append-to-body>
       <div v-if="currentInquiry">
         <el-descriptions :column="2" border label-width="100px">
           <el-descriptions-item label="潜客姓名">
@@ -143,7 +147,7 @@
             </span>
             <span v-else>未报价</span>
           </el-descriptions-item>
-          <el-descriptions-item label="询盘状态">
+          <el-descriptions-item label="线索状态">
             <el-tag :type="getStatusType(currentInquiry.status)" size="small">
               {{ getStatusLabel(currentInquiry.status) }}
             </el-tag>
@@ -154,7 +158,7 @@
           <el-descriptions-item label="提交时间">
             {{ dayjs(currentInquiry.submittedAt).format('YYYY-MM-DD HH:mm:ss') }}
           </el-descriptions-item>
-          <el-descriptions-item label="询盘内容" :span="2">
+          <el-descriptions-item label="线索内容" :span="2">
             <div style="white-space: pre-wrap;">{{ currentInquiry.message }}</div>
           </el-descriptions-item>
           <el-descriptions-item label="用户代理" :span="2">
@@ -180,12 +184,12 @@ import dayjs from 'dayjs'
 
 definePageMeta({
   layout: 'admin',
-  title: '询盘管理',
+  title: '线索管理',
   middleware: 'auth'
 })
 
 useHead({
-  title: '询盘管理 - DMS 管理后台'
+  title: '线索管理 - DMS 管理后台'
 })
 
 // refs
@@ -209,13 +213,13 @@ const data = reactive({
     pageNum: 1,
     pageSize: 10,
     search: null,
-    status: 'new' // 默认为新询盘
+    status: 'new' // 默认为新线索
   }
 })
 
 const { queryParams } = toRefs(data)
 
-// 获取询盘列表
+// 获取线索列表
 async function getList() {
   loading.value = true
   try {
@@ -232,11 +236,11 @@ async function getList() {
       inquiryList.value = response.data.inquiries
       total.value = response.data.pagination?.total || 0
     } else {
-      ElMessage.error(response.message || '获取询盘列表失败')
+      ElMessage.error(response.message || '获取线索列表失败')
     }
   } catch (error) {
-    console.error('获取询盘列表失败:', error)
-    ElMessage.error('获取询盘列表失败')
+    console.error('获取线索列表失败:', error)
+    ElMessage.error('获取线索列表失败')
   } finally {
     loading.value = false
   }
@@ -272,7 +276,7 @@ function handleQuery() {
 // 重置搜索
 function resetQuery() {
   queryRef.value.resetFields()
-  queryParams.value.status = 'new' // 重置时回到默认的新询盘状态
+  queryParams.value.status = 'new' // 重置时回到默认的新线索状态
   handleQuery()
 }
 
@@ -326,11 +330,11 @@ async function handleDetail(row) {
       currentInquiry.value = response.data
       detailOpen.value = true
     } else {
-      ElMessage.error(response.message || '获取询盘详情失败')
+      ElMessage.error(response.message || '获取线索详情失败')
     }
   } catch (error) {
-    console.error('获取询盘详情失败:', error)
-    ElMessage.error('获取询盘详情失败')
+    console.error('获取线索详情失败:', error)
+    ElMessage.error('获取线索详情失败')
   }
 }
 
@@ -338,11 +342,11 @@ async function handleDetail(row) {
 function handleDelete(row) {
   const inquiryIds = row ? [row.id] : ids.value
   if (inquiryIds.length === 0) {
-    ElMessage.warning('请选择要删除的询盘')
+    ElMessage.warning('请选择要删除的线索')
     return
   }
   
-  ElMessageBox.confirm('是否确认删除选中的询盘数据？', '警告', {
+  ElMessageBox.confirm('是否确认删除选中的线索数据？', '警告', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
     type: 'warning'

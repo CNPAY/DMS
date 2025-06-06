@@ -1,7 +1,8 @@
 <template>
   <div class="app-container">
     <!-- 搜索面板 -->
-    <el-form :model="queryParams" class="search-panel" ref="queryRef" :inline="true" v-show="showSearch" label-width="100px">
+    <el-card v-show="showSearch" class="search-panel">
+      <el-form :model="queryParams" ref="queryRef" :inline="true" label-width="80px">
       <el-form-item label="域名" prop="domainName" style="width: 280px">
         <el-input v-model="queryParams.domainName" placeholder="请输入域名" clearable @keyup.enter="handleQuery" />
       </el-form-item>
@@ -30,6 +31,7 @@
         <el-button icon="Refresh" @click="resetQuery">重置</el-button>
       </el-form-item>
     </el-form>
+    </el-card>
 
     <!-- 操作栏 -->
     <el-row class="mb8" style="display: flex; justify-content: space-between; align-items: center;">
@@ -50,70 +52,72 @@
     </el-row>
 
     <!-- 数据表格 -->
-    <el-table v-loading="loading" :data="watchedList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="域名" align="center" prop="domainName" min-width="200">
-        <template #default="{ row }">
-          <span class="domain-name">{{ row.domainName }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="监控级别" align="center" prop="monitoringLevel" width="120">
-        <template #default="{ row }">
-          <el-tag v-if="row.monitoringLevel" :type="getMonitoringLevelType(row.monitoringLevel)">
-            {{ getMonitoringLevelLabel(row.monitoringLevel) }}
-          </el-tag>
-          <span v-else>-</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="最后检查" align="center" prop="lastWhoisCheck" width="150">
-        <template #default="{ row }">
-          <span v-if="row.lastWhoisCheck">
-            {{ dayjs(row.lastWhoisCheck).format('YYYY-MM-DD HH:mm:ss') }}
-          </span>
-          <span v-else>-</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="通知设置" align="center" prop="notifyOnChange" width="100">
-        <template #default="{ row }">
-          <el-tag :type="row.notifyOnChange ? 'success' : 'info'">
-            {{ row.notifyOnChange ? '开启' : '关闭' }}
-          </el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column label="备注" align="center" prop="notes" min-width="200">
-        <template #default="{ row }">
-          <span v-if="row.notes">{{ row.notes }}</span>
-          <span v-else>-</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="创建时间" align="center" prop="createdAt" width="180">
-        <template #default="{ row }">
-          <span>{{ dayjs(row.createdAt).format('YYYY-MM-DD HH:mm:ss') }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="操作" align="center" class-name="small-padding" fixed="right" width="200">
-        <template #default="scope">
-          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)">修改</el-button>
-          <el-button link type="success" @click="handleWhoisCheck(scope.row)">WHOIS</el-button>
-          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)">删除</el-button>
-        </template>
-      </el-table-column>
-    </el-table>
+    <el-card>
+      <el-table v-loading="loading" :data="watchedList" @selection-change="handleSelectionChange">
+        <el-table-column type="selection" width="55" align="center" />
+        <el-table-column label="域名" align="center" prop="domainName" min-width="200">
+          <template #default="{ row }">
+            <span class="domain-name">{{ row.domainName }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="监控级别" align="center" prop="monitoringLevel" width="120">
+          <template #default="{ row }">
+            <el-tag v-if="row.monitoringLevel" :type="getMonitoringLevelType(row.monitoringLevel)">
+              {{ getMonitoringLevelLabel(row.monitoringLevel) }}
+            </el-tag>
+            <span v-else>-</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="最后检查" align="center" prop="lastWhoisCheck" width="150">
+          <template #default="{ row }">
+            <span v-if="row.lastWhoisCheck">
+              {{ dayjs(row.lastWhoisCheck).format('YYYY-MM-DD HH:mm:ss') }}
+            </span>
+            <span v-else>-</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="通知设置" align="center" prop="notifyOnChange" width="100">
+          <template #default="{ row }">
+            <el-tag :type="row.notifyOnChange ? 'success' : 'info'">
+              {{ row.notifyOnChange ? '开启' : '关闭' }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="备注" align="center" prop="notes" min-width="200">
+          <template #default="{ row }">
+            <span v-if="row.notes">{{ row.notes }}</span>
+            <span v-else>-</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="创建时间" align="center" prop="createdAt" width="180">
+          <template #default="{ row }">
+            <span>{{ dayjs(row.createdAt).format('YYYY-MM-DD HH:mm:ss') }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" align="center" class-name="small-padding" fixed="right" width="200">
+          <template #default="scope">
+            <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)">修改</el-button>
+            <el-button link type="success" @click="handleWhoisCheck(scope.row)">WHOIS</el-button>
+            <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)">删除</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
 
-    <!-- 分页 -->
-    <div class="pagination-container">
-      <el-pagination
-        v-show="total > 0"
-        :current-page="queryParams.pageNum"
-        :page-size="queryParams.pageSize"
-        :page-sizes="[10, 20, 30, 40]"
-        :total="total"
-        background
-        layout="total, sizes, prev, pager, next, jumper"
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-      />
-    </div>
+      <!-- 分页 -->
+      <div class="pagination-container">
+        <el-pagination
+          v-show="total > 0"
+          :current-page="queryParams.pageNum"
+          :page-size="queryParams.pageSize"
+          :page-sizes="[10, 20, 30, 40]"
+          :total="total"
+          background
+          layout="total, sizes, prev, pager, next, jumper"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+        />
+      </div>
+    </el-card>
 
     <!-- 添加或修改关注域名对话框 -->
     <el-dialog :title="title" v-model="open" width="600px" append-to-body>

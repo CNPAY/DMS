@@ -217,7 +217,7 @@ model PortfolioDomainMap {
   @@map("portfolio_domain_map")
 }
 
-// 询盘表
+// 线索表
 model Inquiry {
   id           Int      @id @default(autoincrement())
   domainId     Int?     @map("domain_id")

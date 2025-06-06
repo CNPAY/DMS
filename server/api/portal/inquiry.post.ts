@@ -56,7 +56,7 @@ export default defineEventHandler(async (event) => {
       }
     }
 
-    // 创建询盘记录
+    // 创建线索记录
     const inquiry = await prisma.inquiry.create({
       data: {
         domainId: value.domainId,
@@ -73,14 +73,14 @@ export default defineEventHandler(async (event) => {
 
     return {
       success: true,
-      message: '询盘提交成功',
+      message: '线索提交成功',
       data: {
         inquiryId: inquiry.id,
         domainName: domain.domainName
       }
     }
   } catch (error) {
-    console.error('提交询盘失败:', error)
+    console.error('提交线索失败:', error)
     return {
       success: false,
       message: '系统错误，请稍后重试',

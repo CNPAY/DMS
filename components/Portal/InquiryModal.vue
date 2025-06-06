@@ -1,10 +1,10 @@
-# 询盘模态框组件
+# 线索模态框组件
 
 <template>
   <div v-if="modelValue" class="inquiry-modal-overlay" @click="closeModal">
     <div class="inquiry-modal" @click.stop>
       <div class="modal-header">
-        <h3>域名询盘</h3>
+        <h3>域名线索</h3>
         <button @click="closeModal" class="close-btn">&times;</button>
       </div>
       
@@ -74,7 +74,7 @@
               取消
             </button>
             <button type="submit" :disabled="submitting" class="submit-btn">
-              {{ submitting ? '提交中...' : '提交询盘' }}
+              {{ submitting ? '提交中...' : '提交线索' }}
             </button>
           </div>
         </form>
@@ -121,7 +121,7 @@ const resetForm = () => {
   })
 }
 
-// 提交询盘
+// 提交线索
 const submitInquiry = async () => {
   if (submitting.value) return
   
@@ -142,13 +142,13 @@ const submitInquiry = async () => {
     
     if (response.success) {
       // 显示成功消息
-      alert('询盘提交成功！我们会尽快与您联系。')
+      alert('线索提交成功！我们会尽快与您联系。')
       closeModal()
     } else {
       alert(response.message || '提交失败，请重试')
     }
   } catch (error) {
-    console.error('提交询盘失败:', error)
+    console.error('提交线索失败:', error)
     alert('提交失败，请重试')
   } finally {
     submitting.value = false

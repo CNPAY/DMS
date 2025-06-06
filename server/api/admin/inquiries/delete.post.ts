@@ -19,23 +19,23 @@ export default defineEventHandler(async (event) => {
 
     const { ids } = value
 
-    // 检查询盘是否存在
+    // 检查线索是否存在
     const existingInquiries = await prisma.inquiry.findMany({
       where: { id: { in: ids } }
     })
 
     if (existingInquiries.length !== ids.length) {
-      return ResponseData.error('部分询盘不存在', 404)
+      return ResponseData.error('部分线索不存在', 404)
     }
 
-    // 批量删除询盘
+    // 批量删除线索
     await prisma.inquiry.deleteMany({
       where: { id: { in: ids } }
     })
 
-    return ResponseData.success(null, `成功删除 ${ids.length} 条询盘记录`)
+    return ResponseData.success(null, `成功删除 ${ids.length} 条线索记录`)
   } catch (error: any) {
-    console.error('删除询盘失败:', error)
-    return ResponseData.error(error.message || '删除询盘失败', 500)
+    console.error('删除线索失败:', error)
+    return ResponseData.error(error.message || '删除线索失败', 500)
   }
 }) 

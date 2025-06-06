@@ -24,7 +24,7 @@ export default defineEventHandler(async (event) => {
         where: { userId }
       }),
 
-      // 待处理询盘数量
+      // 待处理线索数量
       prisma.inquiry.count({
         where: { 
           status: 'new'

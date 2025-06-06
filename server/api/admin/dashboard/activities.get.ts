@@ -29,7 +29,7 @@ export default defineEventHandler(async (event) => {
         }
       }),
 
-      // 最近的询盘
+      // 最近的线索
       prisma.inquiry.findMany({
         where: { 
           domain: { userId: user.id }
@@ -107,13 +107,13 @@ export default defineEventHandler(async (event) => {
       })
     })
 
-    // 添加询盘活动
+    // 添加线索活动
     recentInquiries.forEach(inquiry => {
       activities.push({
         id: `inquiry-${inquiry.id}`,
         type: 'inquiry_received',
-        title: '收到询盘',
-        description: `来自 ${inquiry.visitorName || '访客'} 的询盘`,
+        title: '收到线索',
+        description: `来自 ${inquiry.visitorName || '访客'} 的线索`,
         relatedItem: inquiry.visitorEmail,
         category: inquiry.status === 'new' ? '待处理' : '已处理',
         timestamp: inquiry.submittedAt,

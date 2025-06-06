@@ -85,14 +85,6 @@ export const sidebarRoutes: SidebarRoute[] = [
         }
       },
       {
-        path: 'cost',
-        name: 'DomainCost',
-        meta: {
-          title: 'routes.domainCost',
-          icon: 'money'
-        }
-      },
-      {
         path: 'register',
         name: 'DomainRegister',
         meta: {

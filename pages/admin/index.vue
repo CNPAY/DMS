@@ -46,7 +46,7 @@
             </div>
             <div class="stats-info">
               <div class="stats-number">{{ stats.pendingInquiries }}</div>
-              <div class="stats-label">待处理询盘</div>
+              <div class="stats-label">待处理线索</div>
             </div>
           </div>
         </el-card>

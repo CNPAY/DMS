@@ -1,18 +1,20 @@
 <template>
   <div class="app-container">
     <!-- 搜索面板 -->
-    <el-form :model="queryParams" class="search-panel" ref="queryRef" :inline="true" v-show="showSearch" label-width="100px">
-      <el-form-item label="米表名称" prop="name" style="width: 280px">
-        <el-input v-model="queryParams.name" placeholder="请输入米表名称" clearable @keyup.enter="handleQuery" />
-      </el-form-item>
-      <el-form-item label="URL标识符" prop="slug" style="width: 280px">
-        <el-input v-model="queryParams.slug" placeholder="请输入URL标识符" clearable @keyup.enter="handleQuery" />
-      </el-form-item>
-      <el-form-item>
-        <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
-        <el-button icon="Refresh" @click="resetQuery">重置</el-button>
-      </el-form-item>
-    </el-form>
+    <el-card v-show="showSearch" class="search-panel">
+      <el-form :model="queryParams" ref="queryRef" :inline="true" label-width="100px">
+        <el-form-item label="米表名称" prop="name" style="width: 280px">
+          <el-input v-model="queryParams.name" placeholder="请输入米表名称" clearable @keyup.enter="handleQuery" />
+        </el-form-item>
+        <el-form-item label="URL标识符" prop="slug" style="width: 280px">
+          <el-input v-model="queryParams.slug" placeholder="请输入URL标识符" clearable @keyup.enter="handleQuery" />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
+          <el-button icon="Refresh" @click="resetQuery">重置</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
 
     <!-- 操作栏 -->
     <el-row class="mb8" style="display: flex; justify-content: space-between; align-items: center;">
@@ -33,76 +35,78 @@
     </el-row>
 
     <!-- 数据表格 -->
-    <el-table v-loading="loading" :data="portfolioList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="米表信息" align="center" min-width="200">
-        <template #default="{ row }">
-          <div style="font-weight: 600; text-align: left;">
-            <div >
-              {{ row.name }}
-              <el-tag v-if="row.isDefault" type="success" size="small" style="margin-left: 8px">默认</el-tag>
-            </div>
-            <div style="font-size: 12px; color: #666;">/{{ row.slug }}</div>
+    <el-card>
+      <el-table v-loading="loading" :data="portfolioList" @selection-change="handleSelectionChange">
+        <el-table-column type="selection" width="55" align="center" />
+        <el-table-column label="米表信息" align="center" min-width="200">
+          <template #default="{ row }">
+            <div style="font-weight: 600; text-align: left;">
+              <div >
+                {{ row.name }}
+                <el-tag v-if="row.isDefault" type="success" size="small" style="margin-left: 8px">默认</el-tag>
+              </div>
+              <div style="font-size: 12px; color: #666;">/{{ row.slug }}</div>
 
-          </div>
-        </template>
-      </el-table-column>
-      <el-table-column label="数据" align="center" min-width="200">
-        <template #default="{ row }">
-        <div style="font-size: 11px; color: #999; margin-top: 2px;">
-            {{ row.domainCount || 0 }} 个域名 | {{ row.inquiryCount || 0 }} 个询盘
-          </div>
-        </template>
-      </el-table-column>
-      <el-table-column label="主题风格" align="center" min-width="140">
-        <template #default="{ row }">
-          <div style="text-align: center;">
-            <el-tag :type="getTemplateTagType(row.layoutTemplate)" style="margin-bottom: 4px;">
-              {{ getTemplateLabel(row.layoutTemplate) }}
-            </el-tag>
-            <div style="font-size: 12px; color: #666;">
-              {{ getThemeLabel(row.colorTheme) }}
             </div>
-          </div>
-        </template>
-      </el-table-column>
-      <el-table-column label="创建时间" align="center" prop="createdAt" width="180">
-        <template #default="{ row }">
-          <span>{{ formatDate(row.createdAt) }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="操作" align="center" class-name="small-padding" fixed="right" width="300">
-        <template #default="scope">
-          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)">修改</el-button>
-          <el-button link type="success" icon="Link" @click="handleAssociate(scope.row)">关联</el-button>
-          <el-button 
-            v-if="!scope.row.isDefault"
-            link 
-            type="warning" 
-            icon="Star" 
-            @click="handleSetDefault(scope.row)"
-          >
-            设为默认
-          </el-button>
-          <el-button link type="danger" icon="Delete" @click="handleDelete(scope.row)">删除</el-button>
-        </template>
-      </el-table-column>
-    </el-table>
+          </template>
+        </el-table-column>
+        <el-table-column label="数据" align="center" min-width="200">
+          <template #default="{ row }">
+          <div style="font-size: 11px; color: #999; margin-top: 2px;">
+              {{ row.domainCount || 0 }} 个域名 | {{ row.inquiryCount || 0 }} 个线索
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column label="主题风格" align="center" min-width="140">
+          <template #default="{ row }">
+            <div style="text-align: center;">
+              <el-tag :type="getTemplateTagType(row.layoutTemplate)" style="margin-bottom: 4px;">
+                {{ getTemplateLabel(row.layoutTemplate) }}
+              </el-tag>
+              <div style="font-size: 12px; color: #666;">
+                {{ getThemeLabel(row.colorTheme) }}
+              </div>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column label="创建时间" align="center" prop="createdAt" width="180">
+          <template #default="{ row }">
+            <span>{{ formatDate(row.createdAt) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" align="center" class-name="small-padding" fixed="right" width="300">
+          <template #default="scope">
+            <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)">修改</el-button>
+            <el-button link type="success" icon="Link" @click="handleAssociate(scope.row)">关联</el-button>
+            <el-button 
+              v-if="!scope.row.isDefault"
+              link 
+              type="warning" 
+              icon="Star" 
+              @click="handleSetDefault(scope.row)"
+            >
+              设为默认
+            </el-button>
+            <el-button link type="danger" icon="Delete" @click="handleDelete(scope.row)">删除</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
 
-    <!-- 分页 -->
-    <div class="pagination-container">
-      <el-pagination
-        v-show="total > 0"
-        :current-page="queryParams.pageNum"
-        :page-size="queryParams.pageSize"
-        :page-sizes="[10, 20, 30, 40]"
-        :total="total"
-        background
-        layout="total, sizes, prev, pager, next, jumper"
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-      />
-    </div>
+      <!-- 分页 -->
+      <div class="pagination-container">
+        <el-pagination
+          v-show="total > 0"
+          :current-page="queryParams.pageNum"
+          :page-size="queryParams.pageSize"
+          :page-sizes="[10, 20, 30, 40]"
+          :total="total"
+          background
+          layout="total, sizes, prev, pager, next, jumper"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+        />
+      </div>
+    </el-card>
 
     <!-- 添加或修改米表对话框 -->
     <el-dialog :title="title" v-model="open" width="1200px" append-to-body>

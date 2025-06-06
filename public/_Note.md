@@ -304,7 +304,7 @@ if (value === 'external') {
    - 创建 `components/Portal/` 目录，门户组件统一管理
    - `PortalLayout.vue` - 门户专用布局，包含导航、底部
    - `PortfolioView.vue` - 米表展示主组件，支持4种布局
-   - `InquiryModal.vue` - 询盘模态框，完整表单功能
+   - `InquiryModal.vue` - 线索模态框，完整表单功能
 
 3. **多布局展示组件**：
    - `DomainItemList.vue` - 列表式展示，信息完整
@@ -316,7 +316,7 @@ if (value === 'external') {
    - `/api/portal/default-portfolio` - 获取默认米表
    - `/api/portal/portfolio` - 根据slug获取米表
    - `/api/portal/domains` - 获取米表关联域名
-   - `/api/portal/inquiry` - 询盘提交处理
+   - `/api/portal/inquiry` - 线索提交处理
 
 **技术实现亮点：**
 - **数据库连接修复**：使用项目统一的`~/server/utils/db`工具类
@@ -332,8 +332,8 @@ if (value === 'external') {
 - **视觉层次**：清晰的信息架构和视觉引导
 - **品牌统一**：统一的色彩体系和视觉风格
 
-**询盘功能**：
-- 完整的询盘表单：姓名、邮箱、电话、报价、留言
+**线索功能**：
+- 完整的线索表单：姓名、邮箱、电话、报价、留言
 - 客户端IP和User-Agent记录
 - 数据验证和错误处理
 - 成功提交反馈
@@ -659,13 +659,13 @@ if (value === 'external') {
    - `pages/admin/portfolio/list.vue` - 米表管理主页面
    - 现代化设计，支持搜索、筛选、分页
    - 完整的CRUD操作：查看、编辑、删除、批量操作
-   - 表格展示米表基本信息、域名数量、询盘数量
+   - 表格展示米表基本信息、域名数量、线索数量
 
 3. **数据模型基础**：
    - 基于已有的Portfolio数据模型
    - 支持米表与域名的多对多关联
    - 包含布局模板、主题配色、显示选项配置
-   - 默认米表设置和询盘统计
+   - 默认米表设置和线索统计
 
 4. **丰富的配置选项**：
    - **布局模板**：列表、网格、表格、卡片四种布局
@@ -676,7 +676,7 @@ if (value === 'external') {
 
 5. **业务逻辑完善**：
    - 默认米表保护：无法删除默认米表
-   - 询盘关联检查：有询盘的米表无法删除
+   - 线索关联检查：有线索的米表无法删除
    - URL标识符唯一性验证
    - 域名关联管理和显示顺序控制
 
@@ -935,7 +935,7 @@ if (value === 'external') {
 
 ## 2024-12-29 02:15
 **用户提示:** 进入
-**改动总结:** 开始阶段二开发，完成了第一个任务"综合分析仪表盘设计与后端API"。创建了3个仪表盘API：`stats.get.ts`（快速统计数据）、`activities.get.ts`（最近活动）、`overview.get.ts`（综合概览），提供域名数量、询盘数量、总资产价值、最近活动时间线、到期提醒等核心数据。API采用统一的ResponseData返回格式，支持实时数据展示。前端界面包含统计卡片、快捷操作、最近活动流、到期提醒等模块，采用响应式设计和现代化UI风格。暂时跳过身份验证，使用固定用户ID进行测试。
+**改动总结:** 开始阶段二开发，完成了第一个任务"综合分析仪表盘设计与后端API"。创建了3个仪表盘API：`stats.get.ts`（快速统计数据）、`activities.get.ts`（最近活动）、`overview.get.ts`（综合概览），提供域名数量、线索数量、总资产价值、最近活动时间线、到期提醒等核心数据。API采用统一的ResponseData返回格式，支持实时数据展示。前端界面包含统计卡片、快捷操作、最近活动流、到期提醒等模块，采用响应式设计和现代化UI风格。暂时跳过身份验证，使用固定用户ID进行测试。
 
 ## 2024-12-29 01:55
 **用户提示:** 开发的不对啊。。。不是选key。是所有设置应该可视化
@@ -1039,7 +1039,7 @@ if (value === 'external') {
 
 4. **模板提示词建议系统**
    - 为6个核心预设场景提供专业模板提示词
-   - 域名分析、标签建议、描述生成、定价建议、询盘分析、回复建议
+   - 域名分析、标签建议、描述生成、定价建议、线索分析、回复建议
    - 仅在新建时自动填充，编辑时保护用户内容
 
 5. **动态界面标题**
@@ -1073,17 +1073,17 @@ if (value === 'external') {
 1. **搜索面板结构调整**
    - 移除 `<el-card>` 包装，改为直接使用 `class="search-panel"`
    - 调整表单属性：添加 `label-width="100px"`，添加输入框宽度限制
-   - 与询盘管理页面的搜索面板保持完全一致的结构
+   - 与线索管理页面的搜索面板保持完全一致的结构
 
 2. **工具栏布局重构**
    - 从 `<el-card>` + `<el-row>` + `<el-col>` 布局改为 `<el-row>` + `flex` 布局
    - 左侧操作按钮组：新增、删除、初始化
    - 右侧功能按钮组：搜索切换、刷新（圆形按钮）
-   - 与询盘管理页面的操作栏保持一致的样式
+   - 与线索管理页面的操作栏保持一致的样式
 
 3. **数据表格容器调整**
    - 移除表格外层的 `<el-card>` 包装
-   - 直接使用 `<el-table>` 组件，与询盘管理页面保持一致
+   - 直接使用 `<el-table>` 组件，与线索管理页面保持一致
 
 4. **响应式数据更新**
    - 添加 `showSearch`、`multiple`、`total` 等响应式变量
@@ -1095,7 +1095,7 @@ if (value === 'external') {
    - 刷新按钮直接调用 `getPromptList` 而非通用刷新
 
 **UI一致性对比：**
-- ✅ 搜索面板：现在与询盘管理页面完全一致
+- ✅ 搜索面板：现在与线索管理页面完全一致
 - ✅ 工具栏：采用相同的flex布局和按钮组织方式  
 - ✅ 数据表格：移除多余的卡片包装，保持简洁
 - ✅ 操作按钮：统一使用link类型按钮和图标
@@ -1134,7 +1134,7 @@ if (value === 'external') {
    - 用于详情查看和编辑数据回填
 
 5. 创建 `server/api/admin/ai/prompts/options.get.ts` - AI场景和模型选项API
-   - 12个预定义AI场景：域名分析、标签建议、描述生成、定价建议、询盘分析等
+   - 12个预定义AI场景：域名分析、标签建议、描述生成、定价建议、线索分析等
    - 16个AI模型选项：OpenAI、Claude、Gemini、Moonshot、智谱AI、通义千问等
    - 包含模型描述和使用建议
 
@@ -1191,32 +1191,32 @@ if (value === 'external') {
 - 用户友好的配置界面
 - 完整的帮助文档和链接
 
-## 2025-01-03 00:15 - 阶段一任务12完成：询盘管理 CRUD API & 后台界面
+## 2025-01-03 00:15 - 阶段一任务12完成：线索管理 CRUD API & 后台界面
 
 ### 用户提示词
 继续开发
 
 ### 开发总结
-**完成阶段一任务12：询盘管理 CRUD API & 后台界面**
+**完成阶段一任务12：线索管理 CRUD API & 后台界面**
 
 **API开发完成**：
-1. **`GET /api/admin/inquiries/list`** - 询盘列表查询
+1. **`GET /api/admin/inquiries/list`** - 线索列表查询
    - 支持分页、搜索（访客姓名/邮箱/域名）、状态过滤
    - 包含关联数据（域名信息、米表信息）
    - 按提交时间倒序排序
 
-2. **`POST /api/admin/inquiries/update-status`** - 询盘状态更新
-   - 支持6种状态：新询盘、已联系、协商中、已接受、已拒绝、已关闭
+2. **`POST /api/admin/inquiries/update-status`** - 线索状态更新
+   - 支持6种状态：新线索、已联系、协商中、已接受、已拒绝、已关闭
    - Joi验证状态有效性
-   - 返回更新后的完整询盘信息
+   - 返回更新后的完整线索信息
 
-3. **`POST /api/admin/inquiries/delete`** - 批量删除询盘
+3. **`POST /api/admin/inquiries/delete`** - 批量删除线索
    - 支持单个或批量删除
    - 存在性验证，防止删除不存在的记录
    - 返回删除数量统计
 
-4. **`GET /api/admin/inquiries/[id]`** - 询盘详情查询
-   - 包含完整询盘信息和关联域名/米表数据
+4. **`GET /api/admin/inquiries/[id]`** - 线索详情查询
+   - 包含完整线索信息和关联域名/米表数据
    - 用于详情查看功能
 
 5. **`GET /api/admin/inquiries/options`** - 获取状态选项
@@ -1224,7 +1224,7 @@ if (value === 'external') {
    - 用于前端状态管理和显示
 
 **前端界面完成**：
-- 询盘管理页面 `pages/admin/domain/inquiries.vue`
+- 线索管理页面 `pages/admin/domain/inquiries.vue`
 - 基于注册商管理页面样式，保持设计一致性
 - 包含搜索面板（关键词、状态过滤）
 - 工具栏（删除、导出操作）
@@ -1234,7 +1234,7 @@ if (value === 'external') {
 - 批量删除确认（防误操作）
 
 **技术亮点**：
-- 询盘状态工作流管理（6个状态流转）
+- 线索状态工作流管理（6个状态流转）
 - 复杂搜索条件（跨表搜索域名名称）
 - 访客信息聚合显示（姓名、邮箱、电话）
 - 文本截断和 Tooltip 提示
@@ -1245,7 +1245,7 @@ if (value === 'external') {
 
 **用户体验优化**：
 - 直观的状态管理（下拉菜单快速切换）
-- 详细的询盘详情查看
+- 详细的线索详情查看
 - 响应式表格设计
 - 操作反馈和确认机制
 - 加载状态管理
@@ -1280,7 +1280,7 @@ if (value === 'external') {
    - 唯一约束错误处理优化
 
 3. **`POST /api/admin/domains/delete`** - 域名删除
-   - 依赖检查（成本记录、询盘记录、米表关联）
+   - 依赖检查（成本记录、线索记录、米表关联）
    - 级联删除标签关联
    - 事务处理
 
@@ -1500,7 +1500,7 @@ if (value === 'external') {
   - registrars (注册商表)
   - portfolios (米表表)
   - portfolio_domain_map (米表域名关联表)
-  - inquiries (询盘表)
+  - inquiries (线索表)
   - watched_domains (关注域名表)
   - ai_prompts (AI提示词表)
   - system_settings (系统设置表)
@@ -2048,7 +2048,7 @@ server/api/admin/
 - 防抖搜索优化用户体验
 - 单用户系统设计（userId=1）
 
-**任务状态**：✅ 任务11已完成，进入下一任务：询盘管理 CRUD API & 后台界面 
+**任务状态**：✅ 任务11已完成，进入下一任务：线索管理 CRUD API & 后台界面 
 
 ## 2025-01-27 16:25 - 静态页面管理功能完成
 
@@ -2188,3 +2188,87 @@ server/api/admin/
 - 增强用户体验：一眼就能看出链接类型和目标地址
 
 **当前状态：** 静态页面列表显示逻辑已优化，支持内外链区分显示
+
+## 2024-12-19 23:58
+**用户反馈**: 发现花费管理功能重复 - `/admin/domain/cost` 和 `/admin/report/costs` 存在功能重叠
+
+**问题分析**: 
+- `/admin/domain/cost.vue` - 域名成本管理页面，包含完整CRUD操作和基础统计
+- `/admin/report/costs.vue` - 成本报表页面，包含数据展示、图表分析和丰富统计
+
+**重复功能**:
+- 两个页面都有成本数据的搜索和列表显示
+- 都有基础的统计信息展示
+- 都支持成本记录的查看和操作
+
+**用户选择**: 保留 `/admin/report/costs`
+
+**执行的清理操作**: ✅ 已完成
+- 删除了重复的页面文件：`pages/admin/domain/cost.vue`
+- 删除了重复的API目录：`server/api/admin/domain-costs/`
+- 保留了功能更完善的：`/admin/report/costs` 页面和相关API
+
+**当前状态**: 功能重复问题已解决，现在只有一个统一的成本管理入口
+
+## 2024-12-29 23:50 - 搜索面板统一升级工作完成总结
+**任务**: 将所有管理后台页面的搜索面板从 div 改为 el-card 组件
+**完成情况**: ✅ 全部完成
+**修改过的页面**:
+- ✅ `pages/admin/domain/tag.vue` - 标签管理页面
+- ✅ `pages/admin/domain/category.vue` - 分类管理页面
+- ✅ `pages/admin/portfolio/list.vue` - 分类列表页面
+- ✅ `pages/admin/watch/index.vue` - 关注域名页面
+- ✅ `pages/admin/report/sales.vue` - 销售报表页面
+- ✅ `pages/admin/inquiries/index.vue` - 线索管理页面
+- ✅ `pages/admin/system/pages.vue` - 静态页面管理
+- ✅ `pages/admin/system/registrar.vue` - 注册商管理页面
+**已经使用 el-card 的页面**:
+- ✅ `pages/admin/ai/prompts.vue` - AI提示词管理
+- ✅ `pages/admin/report/costs.vue` - 成本报表页面
+- ✅ `pages/admin/domain/index.vue` - 域名首页
+- ✅ `pages/admin/domain/list.vue` - 域名列表页面
+**结果**: 所有管理后台列表页面的搜索面板现在都统一使用 el-card 组件，界面风格更加一致
+
+## 2024-12-29 23:55 - Table外层统一添加el-card完成
+**用户指令**: 把所有列表页面table外层套一个el-card
+**完成内容**: 
+- ✅ 修改了 8 个页面的table外层添加 el-card 包裹：
+  - `pages/admin/domain/tag.vue` - 标签管理页面
+  - `pages/admin/domain/category.vue` - 分类管理页面  
+  - `pages/admin/portfolio/list.vue` - 分类列表页面
+  - `pages/admin/watch/index.vue` - 关注域名页面
+  - `pages/admin/inquiries/index.vue` - 线索管理页面
+  - `pages/admin/system/pages.vue` - 静态页面管理
+  - `pages/admin/system/registrar.vue` - 注册商管理页面
+  - `pages/admin/report/costs.vue` - 成本报表页面
+- ✅ 检查了已经使用 el-card 的页面：
+  - `pages/admin/ai/prompts.vue` - AI提示词管理
+  - `pages/admin/report/sales.vue` - 销售报表页面
+  - `pages/admin/domain/index.vue` - 域名首页
+  - `pages/admin/domain/list.vue` - 域名列表页面
+**改动总结**: 
+将原本裸露的 el-table 和分页组件统一包裹在 el-card 内，同时保持了表格和分页的功能不变
+**结果**: 
+所有管理后台列表页面的表格现在都有统一的卡片样式，提升了界面的整体美观度和一致性
+
+## 2024-12-30 00:15 - 金额范围复合表单项布局修复
+**用户反馈**: admin/report/costs 的搜索区域排版异常，金额范围显示怪怪的
+**问题分析**: 
+- costs页面的金额范围使用了两个 `el-input-number` 和一个分隔符 `span`
+- 在 flexbox 布局下，复合组件的内部元素排列出现问题
+- 分隔符位置不正确，输入框间距异常
+**解决方案**: 
+- ✅ 为复合表单项的 `.el-form-item__content` 设置 `display: flex` 和 `align-items: center`
+- ✅ 优化 `el-input-number` 组件的边距，使用 `:not(:last-child)` 选择器
+- ✅ 规范化分隔符 `span` 的样式：`margin: 0 8px`, `line-height: 32px`
+- ✅ 移动端响应式优化：输入框宽度 `100px`，分隔符间距 `4px`
+**技术细节**: 
+- 避免使用兼容性较差的 `:has()` 和 `:contains()` 选择器
+- 使用通用的子元素选择器确保兼容性
+- 保持了原有的 flexbox 换行特性
+**适用场景**: 
+- 金额范围（最小金额 - 最大金额）
+- 日期范围等其他复合输入组件
+- 任何包含多个输入组件的表单项
+**结果**: 
+金额范围组件现在在桌面端和移动端都能正确对齐和显示，分隔符居中，输入框间距合理

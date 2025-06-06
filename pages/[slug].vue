@@ -2,9 +2,16 @@
 
 <template>
   <div>
+    <!-- 加载状态 -->
+    <div v-if="pending" class="loading-container">
+      <div class="loading-content">
+        <div class="loading-spinner"></div>
+        <p class="loading-text">加载中...</p>
+      </div>
+    </div>
+    
     <!-- 米表显示 -->
-    <PortalPortfolioView  v-if="portfolio"  :portfolio="portfolio" 
-    />
+    <PortalPortfolioView v-else-if="portfolio && domains" :portfolio="portfolio" :domains="domains" />
     
     <!-- 404页面 -->
     <div v-else class="not-found-container">
@@ -12,10 +19,7 @@
         <div class="not-found-icon">🔍</div>
         <h1 class="not-found-title">米表未找到</h1>
         <p class="not-found-description">抱歉，您访问的米表不存在或已被删除</p>
-        <NuxtLink  
-          to="/" 
-          class="not-found-button"
-        >
+        <NuxtLink to="/" class="not-found-button">
           返回首页
         </NuxtLink>
       </div>
@@ -28,53 +32,145 @@
 const route = useRoute()
 const slug = route?.params?.slug
 
-// 存储米表数据
+// 响应式数据
 const portfolio = ref(null)
+const domains = ref([])
+const pending = ref(true)
+const error = ref(null)
 
-// 获取米表数据
-let portfolioData = await $fetch('/api/portal/portfolio', {
-  query: { slug }
-}).catch(async () => {
-  return { code: 500 }
-})
-
-if (portfolioData.code === 500) {
-   // 如果通过slug找不到米表，尝试获取默认米表（当用户访问默认米表的自定义链接时）
-   const defaultData = await $fetch('/api/portal/default-portfolio').catch(() => ({ code: 500 }))
+// 数据加载函数
+async function loadPortfolioData() {
+  try {
+    pending.value = true
     
-    // 检查默认米表的slug是否匹配当前访问的slug
-    if (defaultData.code === 200) {
-      portfolioData = defaultData
-    } 
+    let portfolioData = null
+    
+    // 1. 如果有slug，先尝试根据slug获取米表
+    if (slug) {
+      try {
+        portfolioData = await $fetch('/api/portal/portfolio', {
+          query: { slug }
+        })
+      } catch (err) {
+        console.warn('根据slug获取米表失败:', err)
+      }
+    }
+    
+    // 2. 如果没有找到指定的米表，尝试获取默认米表
+    if (!portfolioData || portfolioData.code !== 200) {
+      try {
+        const defaultData = await $fetch('/api/portal/default-portfolio')
+        
+        // 如果访问的是默认米表的slug，使用默认米表数据
+        if (defaultData.code === 200 && defaultData.data) {
+          if (!slug || defaultData.data.slug === slug) {
+            portfolioData = defaultData
+          }
+        }
+      } catch (err) {
+        console.warn('获取默认米表失败:', err)
+      }
+    }
+    
+    // 3. 处理米表数据
+    if (portfolioData?.code === 200 && portfolioData.data) {
+      portfolio.value = portfolioData.data
+      
+      // 设置页面SEO
+      const pageTitle = `${portfolio.value.name} - 域名投资组合`
+      const pageDescription = `浏览 ${portfolio.value.name} 的精选域名投资组合，发现优质域名投资机会。`
+      
+      useSeoMeta({
+        title: pageTitle,
+        description: pageDescription,
+        ogTitle: pageTitle,
+        ogDescription: pageDescription,
+        ogType: 'website'
+      })
+      
+      // 4. 获取米表关联的域名数据
+      try {
+        const domainsResponse = await $fetch('/api/portal/domains', {
+          query: { portfolioId: portfolio.value.id }
+        })
+        
+        if (domainsResponse.code === 200) {
+          domains.value = domainsResponse.data || []
+        } else {
+          console.warn('获取域名数据失败:', domainsResponse.message)
+          domains.value = []
+        }
+      } catch (err) {
+        console.error('获取域名数据失败:', err)
+        domains.value = []
+      }
+    } else {
+      // 设置404页面SEO
+      useSeoMeta({
+        title: '米表未找到',
+        description: '您访问的米表不存在',
+        ogTitle: '米表未找到',
+        ogDescription: '您访问的米表不存在',
+        ogType: 'website'
+      })
+      
+      portfolio.value = null
+      domains.value = []
+    }
+  } catch (err) {
+    console.error('加载米表数据失败:', err)
+    error.value = '加载数据失败'
+    portfolio.value = null
+    domains.value = []
+  } finally {
+    pending.value = false
+  }
 }
-if (portfolioData?.code === 200 && portfolioData.data) {
-  portfolio.value = portfolioData.data
-  console.log(portfolio.value)
 
-  // 设置米表SEO
-  const pageTitle = `${portfolio.value.name} - 域名投资组合`
-  const pageDescription = `浏览 ${portfolio.value.name} 的精选域名投资组合，发现优质域名投资机会。`
-  
-  useSeoMeta({
-    title: pageTitle,
-    description: pageDescription,
-    ogTitle: pageTitle,
-    ogDescription: pageDescription,
-    ogType: 'website'
-  })
-} else {
-  // 设置404页面SEO
-  useSeoMeta({
-    title: '米表未找到',
-    description: '您访问的米表不存在',
-    ogTitle: '米表未找到',
-    ogDescription: '您访问的米表不存在',
-    ogType: 'website'
-  })
-}
+// 页面加载时获取数据
+await loadPortfolioData()
+
+// 监听路由变化，重新加载数据
+watch(() => route.params.slug, () => {
+  loadPortfolioData()
+})
 </script>
 
 <style scoped>
+.loading-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f0f9ff 0%, #ffffff 100%);
+}
+
+.loading-content {
+  text-align: center;
+  max-width: 300px;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e2e8f0;
+  border-top: 4px solid #3182ce;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  color: #718096;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
 .not-found-container {
   min-height: 100vh;
   display: flex;

@@ -2,7 +2,7 @@
   <div class="app-container">
     <!-- 搜索面板 -->
     <el-card v-show="showSearch" class="search-panel">
-      <el-form ref="queryRef" :model="queryParams" :inline="true" class="mb8">
+      <el-form ref="queryRef" :model="queryParams" :inline="true" >
         <el-form-item label="域名" prop="search">
           <el-input
             v-model="queryParams.search"

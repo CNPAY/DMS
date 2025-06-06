@@ -27,7 +27,7 @@ export default defineEventHandler(async (event) => {
       };
     }
 
-    // 检查米表是否被询盘使用
+    // 检查米表是否被线索使用
     const portfoliosWithInquiries = await prisma.portfolio.findMany({
       where: {
         id: { in: ids.map(Number) }
@@ -43,7 +43,7 @@ export default defineEventHandler(async (event) => {
     if (hasInquiries.length > 0) {
       return {
         code: 400,
-        message: `以下米表包含询盘记录，无法删除: ${hasInquiries.map(p => p.name).join(', ')}`
+        message: `以下米表包含线索记录，无法删除: ${hasInquiries.map(p => p.name).join(', ')}`
       };
     }
 

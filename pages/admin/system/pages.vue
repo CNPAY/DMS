@@ -1,24 +1,26 @@
 <template>
   <div class="app-container">
     <!-- 搜索面板 -->
-    <el-form :model="queryParams" class="search-panel" ref="queryRef" :inline="true" v-show="showSearch" label-width="100px">
-      <el-form-item label="页面标题" prop="title" style="width: 280px">
-        <el-input v-model="queryParams.title" placeholder="请输入页面标题" clearable @keyup.enter="handleQuery" />
-      </el-form-item>
-      <el-form-item label="URL别名" prop="slug" style="width: 280px">
-        <el-input v-model="queryParams.slug" placeholder="请输入URL别名" clearable @keyup.enter="handleQuery" />
-      </el-form-item>
-      <el-form-item label="状态" prop="status" style="width: 280px">
-        <el-select v-model="queryParams.status" placeholder="请选择状态" clearable>
-          <el-option label="已发布" value="published" />
-          <el-option label="草稿" value="draft" />
-        </el-select>
-      </el-form-item>
-      <el-form-item>
-        <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
-        <el-button icon="Refresh" @click="resetQuery">重置</el-button>
-      </el-form-item>
-    </el-form>
+    <el-card v-show="showSearch" class="search-panel">
+      <el-form :model="queryParams" ref="queryRef" :inline="true" label-width="100px">
+        <el-form-item label="页面标题" prop="title" style="width: 280px">
+          <el-input v-model="queryParams.title" placeholder="请输入页面标题" clearable @keyup.enter="handleQuery" />
+        </el-form-item>
+        <el-form-item label="URL别名" prop="slug" style="width: 280px">
+          <el-input v-model="queryParams.slug" placeholder="请输入URL别名" clearable @keyup.enter="handleQuery" />
+        </el-form-item>
+        <el-form-item label="状态" prop="status" style="width: 280px">
+          <el-select v-model="queryParams.status" placeholder="请选择状态" clearable>
+            <el-option label="已发布" value="published" />
+            <el-option label="草稿" value="draft" />
+          </el-select>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
+          <el-button icon="Refresh" @click="resetQuery">重置</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
 
     <!-- 操作栏 -->
     <el-row class="mb8" style="display: flex; justify-content: space-between; align-items: center;">
@@ -38,75 +40,77 @@
     </el-row>
 
     <!-- 数据表格 -->
-    <el-table v-loading="loading" :data="staticPageList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="页面标题" align="center" prop="title" min-width="200" />
-      <el-table-column label="链接地址" align="center" min-width="200">
-        <template #default="{ row }">
-          <!-- 内部页面显示站内链接 -->
-          <template v-if="row.linkType === 'internal'">
-            <el-link :href="`/pages/${row.slug}`" target="_blank" type="primary">
-              /{{'pages/'+ row.slug }}
-            </el-link>
+    <el-card>
+      <el-table v-loading="loading" :data="staticPageList" @selection-change="handleSelectionChange">
+        <el-table-column type="selection" width="55" align="center" />
+        <el-table-column label="页面标题" align="center" prop="title" min-width="200" />
+        <el-table-column label="链接地址" align="center" min-width="200">
+          <template #default="{ row }">
+            <!-- 内部页面显示站内链接 -->
+            <template v-if="row.linkType === 'internal'">
+              <el-link :href="`/pages/${row.slug}`" target="_blank" type="primary">
+                /{{'pages/'+ row.slug }}
+              </el-link>
+            </template>
+            <!-- 外部链接显示完整URL -->
+            <template v-else-if="row.linkType === 'external'">
+              <el-link :href="row.externalUrl" :target="row.openInNewTab ? '_blank' : '_self'" type="warning">
+                {{ row.externalUrl }}
+              </el-link>
+            </template>
+            <!-- 兜底情况 -->
+            <template v-else>
+              <span class="text-gray-400">-</span>
+            </template>
           </template>
-          <!-- 外部链接显示完整URL -->
-          <template v-else-if="row.linkType === 'external'">
-            <el-link :href="row.externalUrl" :target="row.openInNewTab ? '_blank' : '_self'" type="warning">
-              {{ row.externalUrl }}
-            </el-link>
+        </el-table-column>
+        <el-table-column label="链接类型" align="center" prop="linkType" width="100">
+          <template #default="{ row }">
+            <el-tag v-if="row.linkType === 'external'" type="warning">外部链接</el-tag>
+            <el-tag v-else type="primary">内部页面</el-tag>
           </template>
-          <!-- 兜底情况 -->
-          <template v-else>
-            <span class="text-gray-400">-</span>
+        </el-table-column>
+        <el-table-column label="状态" align="center" prop="status" width="100">
+          <template #default="{ row }">
+            <el-tag v-if="row.status === 'published'" type="success">已发布</el-tag>
+            <el-tag v-else type="info">草稿</el-tag>
           </template>
-        </template>
-      </el-table-column>
-      <el-table-column label="链接类型" align="center" prop="linkType" width="100">
-        <template #default="{ row }">
-          <el-tag v-if="row.linkType === 'external'" type="warning">外部链接</el-tag>
-          <el-tag v-else type="primary">内部页面</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column label="状态" align="center" prop="status" width="100">
-        <template #default="{ row }">
-          <el-tag v-if="row.status === 'published'" type="success">已发布</el-tag>
-          <el-tag v-else type="info">草稿</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column label="排序" align="center" prop="sortOrder" width="80" />
-      <el-table-column label="SEO标题" align="center" prop="metaTitle" min-width="150">
-        <template #default="{ row }">
-          <span v-if="row.metaTitle">{{ row.metaTitle }}</span>
-          <span v-else class="text-gray-400">-</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="创建时间" align="center" prop="createdAt" width="180">
-        <template #default="{ row }">
-          <span>{{ dayjs(row.createdAt).format('YYYY-MM-DD HH:mm:ss') }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="操作" align="center" class-name="small-padding" fixed="right" width="200">
-        <template #default="scope">
-          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)">修改</el-button>
-          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)">删除</el-button>
-        </template>
-      </el-table-column>
-    </el-table>
+        </el-table-column>
+        <el-table-column label="排序" align="center" prop="sortOrder" width="80" />
+        <el-table-column label="SEO标题" align="center" prop="metaTitle" min-width="150">
+          <template #default="{ row }">
+            <span v-if="row.metaTitle">{{ row.metaTitle }}</span>
+            <span v-else class="text-gray-400">-</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="创建时间" align="center" prop="createdAt" width="180">
+          <template #default="{ row }">
+            <span>{{ dayjs(row.createdAt).format('YYYY-MM-DD HH:mm:ss') }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" align="center" class-name="small-padding" fixed="right" width="200">
+          <template #default="scope">
+            <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)">修改</el-button>
+            <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)">删除</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
 
-    <!-- 分页 -->
-    <div class="pagination-container">
-      <el-pagination
-        v-show="total > 0"
-        :current-page="queryParams.pageNum"
-        :page-size="queryParams.pageSize"
-        :page-sizes="[10, 20, 30, 40]"
-        :total="total"
-        background
-        layout="total, sizes, prev, pager, next, jumper"
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-      />
-    </div>
+      <!-- 分页 -->
+      <div class="pagination-container">
+        <el-pagination
+          v-show="total > 0"
+          :current-page="queryParams.pageNum"
+          :page-size="queryParams.pageSize"
+          :page-sizes="[10, 20, 30, 40]"
+          :total="total"
+          background
+          layout="total, sizes, prev, pager, next, jumper"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+        />
+      </div>
+    </el-card>
 
     <!-- 添加或修改静态页对话框 -->
     <el-dialog :title="title" v-model="open" width="1000px" append-to-body>

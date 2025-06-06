@@ -4,10 +4,30 @@
   <div class="portfolio-view" :class="[`theme-${portfolio.colorTheme}`, `layout-${portfolio.layoutTemplate}`]">
     <div class="portfolio-container">
       <!-- 头部信息 -->
-      <div v-if="portfolio.headerInfo" class="portfolio-header">
+      <div class="portfolio-header">
         <div class="header-content">
           <h1 class="portfolio-title">{{ portfolio.name }}</h1>
-          <div class="header-info" v-html="portfolio.headerInfo"></div>
+          
+          <!-- 头部静态页面导航 -->
+          <div v-if="headerPages && headerPages.length > 0" class="header-navigation">
+            <nav class="header-nav">
+              <NuxtLink 
+                v-for="page in headerPages" 
+                :key="page.id"
+                :to="page.linkType === 'external' ? page.externalUrl : `/pages/${page.slug}`"
+                :target="page.linkType === 'external' && page.openInNewTab ? '_blank' : '_self'"
+                class="nav-link"
+              >
+                {{ page.title }}
+              </NuxtLink>
+            </nav>
+          </div>
+          
+          <!-- 头部描述信息 -->
+          <div v-if="portfolio.headerInfo" class="header-info" v-html="portfolio.headerInfo"></div>
+          
+          <!-- 头部富文本内容 -->
+          <div v-if="portfolio.headerRichText" class="header-rich-text" v-html="portfolio.headerRichText"></div>
         </div>
       </div>
 
@@ -82,11 +102,30 @@
       </div>
 
       <!-- 底部信息 -->
-      <div v-if="portfolio.footerInfo" class="portfolio-footer">
-        <div class="footer-info" v-html="portfolio.footerInfo"></div>
+      <div class="portfolio-footer">
+        <!-- 底部静态页面导航 -->
+        <div v-if="footerPages && footerPages.length > 0" class="footer-navigation">
+          <nav class="footer-nav">
+            <NuxtLink 
+              v-for="page in footerPages" 
+              :key="page.id"
+              :to="page.linkType === 'external' ? page.externalUrl : `/pages/${page.slug}`"
+              :target="page.linkType === 'external' && page.openInNewTab ? '_blank' : '_self'"
+              class="footer-nav-link"
+            >
+              {{ page.title }}
+            </NuxtLink>
+          </nav>
+        </div>
+        
+        <!-- 底部描述信息 -->
+        <div v-if="portfolio.footerInfo" class="footer-info" v-html="portfolio.footerInfo"></div>
+        
+        <!-- 底部富文本内容 -->
+        <div v-if="portfolio.footerRichText" class="footer-rich-text" v-html="portfolio.footerRichText"></div>
       </div>
 
-      <!-- 询盘模态框 -->
+      <!-- 线索模态框 -->
       <PortalInquiryModal v-model="showInquiry" :domain="selectedDomain" />
     </div>
   </div>
@@ -102,6 +141,56 @@ const props = defineProps({
     type: Array,
     default: () => []
   }
+})
+
+// 处理头部和尾部页面数据
+const headerPages = ref([])
+const footerPages = ref([])
+
+// 获取静态页面数据
+async function loadStaticPages() {
+  try {
+    // 获取头部页面
+    if (props.portfolio.headerPages) {
+      const headerPageIds = JSON.parse(props.portfolio.headerPages)
+      if (headerPageIds && headerPageIds.length > 0) {
+        for (const pageId of headerPageIds) {
+          try {
+            const response = await $fetch(`/api/admin/static-pages/${pageId}`)
+            if (response.code === 200) {
+              headerPages.value.push(response.data)
+            }
+          } catch (err) {
+            console.warn(`获取头部页面 ${pageId} 失败:`, err)
+          }
+        }
+      }
+    }
+    
+    // 获取尾部页面
+    if (props.portfolio.footerPages) {
+      const footerPageIds = JSON.parse(props.portfolio.footerPages)
+      if (footerPageIds && footerPageIds.length > 0) {
+        for (const pageId of footerPageIds) {
+          try {
+            const response = await $fetch(`/api/admin/static-pages/${pageId}`)
+            if (response.code === 200) {
+              footerPages.value.push(response.data)
+            }
+          } catch (err) {
+            console.warn(`获取尾部页面 ${pageId} 失败:`, err)
+          }
+        }
+      }
+    }
+  } catch (err) {
+    console.error('加载静态页面数据失败:', err)
+  }
+}
+
+// 组件挂载时加载静态页面
+onMounted(() => {
+  loadStaticPages()
 })
 
 // 响应式数据
@@ -177,11 +266,47 @@ provide('showInquiry', (domain) => {
   color: #2c3e50;
 }
 
+/* 头部导航 */
+.header-navigation {
+  margin: 30px 0;
+}
+
+.header-nav {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+
+.nav-link {
+  color: #1976d2;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.nav-link:hover {
+  background-color: #1976d2;
+  color: white;
+  border-color: #1976d2;
+}
+
 .header-info {
   font-size: 1.1rem;
   color: #5a6c7d;
   max-width: 800px;
-  margin: 0 auto;
+  margin: 20px auto;
+  line-height: 1.6;
+}
+
+.header-rich-text {
+  font-size: 1rem;
+  color: #5a6c7d;
+  max-width: 800px;
+  margin: 20px auto;
   line-height: 1.6;
 }
 
@@ -274,9 +399,44 @@ provide('showInquiry', (domain) => {
   margin-top: 40px;
 }
 
+/* 底部导航 */
+.footer-navigation {
+  margin-bottom: 30px;
+}
+
+.footer-nav {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.footer-nav-link {
+  color: #5a6c7d;
+  text-decoration: none;
+  font-weight: 400;
+  padding: 6px 12px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.footer-nav-link:hover {
+  color: #1976d2;
+  background-color: #f5f5f5;
+}
+
 .footer-info {
   color: #5a6c7d;
   line-height: 1.6;
+  margin: 20px 0;
+}
+
+.footer-rich-text {
+  color: #5a6c7d;
+  line-height: 1.6;
+  font-size: 0.9rem;
+  margin: 20px 0;
 }
 
 /* 响应式设计 */

@@ -65,9 +65,9 @@ export default defineEventHandler(async (event) => {
         total,
         pages: Math.ceil(total / limit)
       }
-    }, '获取询盘列表成功')
+    }, '获取线索列表成功')
   } catch (error: any) {
-    console.error('获取询盘列表失败:', error)
-    return ResponseData.error('获取询盘列表失败', 500)
+    console.error('获取线索列表失败:', error)
+    return ResponseData.error('获取线索列表失败', 500)
   }
 })

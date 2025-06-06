@@ -20,16 +20,16 @@ export default defineEventHandler(async (event) => {
 
     const { id, status } = value
 
-    // 检查询盘是否存在
+    // 检查线索是否存在
     const existingInquiry = await prisma.inquiry.findUnique({
       where: { id }
     })
 
     if (!existingInquiry) {
-      return ResponseData.error('询盘不存在', 404)
+      return ResponseData.error('线索不存在', 404)
     }
 
-    // 更新询盘状态
+    // 更新线索状态
     const updatedInquiry = await prisma.inquiry.update({
       where: { id },
       data: { status },
@@ -50,9 +50,9 @@ export default defineEventHandler(async (event) => {
       }
     })
 
-    return ResponseData.success(updatedInquiry, '询盘状态更新成功')
+    return ResponseData.success(updatedInquiry, '线索状态更新成功')
   } catch (error: any) {
-    console.error('更新询盘状态失败:', error)
-    return ResponseData.error(error.message || '更新询盘状态失败', 500)
+    console.error('更新线索状态失败:', error)
+    return ResponseData.error(error.message || '更新线索状态失败', 500)
   }
 })

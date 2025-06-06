@@ -1,47 +1,49 @@
 <template>
   <div class="app-container">
     <!-- 搜索面板 -->
-    <el-form :model="queryParams" class="search-panel" ref="queryRef" :inline="true" v-show="showSearch" label-width="100px">
-      <el-form-item label="关键词" prop="search" style="width: 280px">
-        <el-input
-          v-model="queryParams.search"
-          placeholder="请输入场景名称或代码"
-          clearable
-          @keyup.enter="handleQuery"
-        />
-      </el-form-item>
-      
-      <el-form-item label="场景类型" prop="sceneCode" style="width: 280px">
-        <el-select
-          v-model="queryParams.sceneCode"
-          placeholder="请选择场景类型"
-          clearable
-        >
-          <el-option
-            v-for="scene in sceneOptions"
-            :key="scene.code"
-            :label="scene.name"
-            :value="scene.code"
+    <el-card v-show="showSearch" class="search-panel">
+      <el-form :model="queryParams" ref="queryRef" :inline="true" label-width="100px">
+        <el-form-item label="关键词" prop="search" style="width: 280px">
+          <el-input
+            v-model="queryParams.search"
+            placeholder="请输入场景名称或代码"
+            clearable
+            @keyup.enter="handleQuery"
           />
-        </el-select>
-      </el-form-item>
-      
-      <el-form-item label="状态" prop="hasCustomPrompt" style="width: 280px">
-        <el-select
-          v-model="queryParams.hasCustomPrompt"
-          placeholder="请选择状态"
-          clearable
-        >
-          <el-option label="已定制" :value="true" />
-          <el-option label="系统默认" :value="false" />
-        </el-select>
-      </el-form-item>
-      
-      <el-form-item>
-        <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
-        <el-button icon="Refresh" @click="resetQuery">重置</el-button>
-      </el-form-item>
-    </el-form>
+        </el-form-item>
+        
+        <el-form-item label="场景类型" prop="sceneCode" style="width: 280px">
+          <el-select
+            v-model="queryParams.sceneCode"
+            placeholder="请选择场景类型"
+            clearable
+          >
+            <el-option
+              v-for="scene in sceneOptions"
+              :key="scene.code"
+              :label="scene.name"
+              :value="scene.code"
+            />
+          </el-select>
+        </el-form-item>
+        
+        <el-form-item label="状态" prop="hasCustomPrompt" style="width: 280px">
+          <el-select
+            v-model="queryParams.hasCustomPrompt"
+            placeholder="请选择状态"
+            clearable
+          >
+            <el-option label="已定制" :value="true" />
+            <el-option label="系统默认" :value="false" />
+          </el-select>
+        </el-form-item>
+        
+        <el-form-item>
+          <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
+          <el-button icon="Refresh" @click="resetQuery">重置</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
 
     <!-- 操作栏 -->
     <el-row class="mb8" style="display: flex; justify-content: space-between; align-items: center;">
@@ -61,97 +63,99 @@
     </el-row>
 
     <!-- 数据表格 -->
-    <el-table
-      v-loading="loading"
-      :data="promptList"
-      @selection-change="handleSelectionChange"
-    >
-        <el-table-column type="selection" width="55" align="center" />
-        
-        <el-table-column label="场景信息" align="center" min-width="200">
-          <template #default="{ row }">
-            <div style="text-align: left;">
-              <div style="font-weight: bold;">{{ row.sceneName }}</div>
-              <div style="color: #666; font-size: 12px;">{{ row.sceneCode }}</div>
-            </div>
-          </template>
-        </el-table-column>
-        
-        <el-table-column label="当前提示词" align="center" min-width="300">
-          <template #default="{ row }">
-            <div class="prompt-preview" style="text-align: left;">
-              <el-tag 
-                v-if="row.isActiveCustom" 
-                type="warning" 
-                size="small" 
-                style="margin-bottom: 5px;"
-              >
-                自定义
-              </el-tag>
-              <el-tag 
-                v-else 
-                type="info" 
-                size="small" 
-                style="margin-bottom: 5px;"
-              >
-                系统默认
-              </el-tag>
-              <div class="prompt-text" style="color: #666; font-size: 13px; line-height: 1.4;">
-                {{ truncateText(row.currentPrompt, 100) }}
+    <el-card>
+      <el-table
+        v-loading="loading"
+        :data="promptList"
+        @selection-change="handleSelectionChange"
+      >
+          <el-table-column type="selection" width="55" align="center" />
+          
+          <el-table-column label="场景信息" align="center" min-width="200">
+            <template #default="{ row }">
+              <div style="text-align: left;">
+                <div style="font-weight: bold;">{{ row.sceneName }}</div>
+                <div style="color: #666; font-size: 12px;">{{ row.sceneCode }}</div>
               </div>
-            </div>
-          </template>
-        </el-table-column>
-        
-        <el-table-column label="优选模型" align="center" width="120">
-          <template #default="{ row }">
-            <el-tag v-if="row.modelPreference" size="small" type="success">
-              {{ getModelLabel(row.modelPreference) }}
-            </el-tag>
-            <span v-else class="text-gray-400">未设置</span>
-          </template>
-        </el-table-column>
-        
-        <el-table-column label="状态" align="center" width="100">
-          <template #default="{ row }">
-            <el-tag 
-              :type="row.hasCustomPrompt ? 'warning' : 'info'" 
-              size="small"
-            >
-              {{ row.hasCustomPrompt ? '已定制' : '默认' }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        
-        <el-table-column label="更新时间" align="center" prop="updatedAt" width="160">
-          <template #default="{ row }">
-            <span>{{ formatDateTime(row.updatedAt) }}</span>
-          </template>
-        </el-table-column>
-        
-        <el-table-column label="操作" align="center" class-name="small-padding" fixed="right" width="220">
-          <template #default="scope">
-            <el-button link type="primary" icon="View" @click="handleView(scope.row)">详情</el-button>
-            <el-button link type="primary" icon="Edit" @click="handleEdit(scope.row)">编辑</el-button>
-            <el-button link type="danger" icon="Delete" @click="handleDelete(scope.row)">删除</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
+            </template>
+          </el-table-column>
+          
+          <el-table-column label="当前提示词" align="center" min-width="300">
+            <template #default="{ row }">
+              <div class="prompt-preview" style="text-align: left;">
+                <el-tag 
+                  v-if="row.isActiveCustom" 
+                  type="warning" 
+                  size="small" 
+                  style="margin-bottom: 5px;"
+                >
+                  自定义
+                </el-tag>
+                <el-tag 
+                  v-else 
+                  type="info" 
+                  size="small" 
+                  style="margin-bottom: 5px;"
+                >
+                  系统默认
+                </el-tag>
+                <div class="prompt-text" style="color: #666; font-size: 13px; line-height: 1.4;">
+                  {{ truncateText(row.currentPrompt, 100) }}
+                </div>
+              </div>
+            </template>
+          </el-table-column>
+          
+          <el-table-column label="优选模型" align="center" width="120">
+            <template #default="{ row }">
+              <el-tag v-if="row.modelPreference" size="small" type="success">
+                {{ getModelLabel(row.modelPreference) }}
+              </el-tag>
+              <span v-else class="text-gray-400">未设置</span>
+            </template>
+          </el-table-column>
+          
+          <el-table-column label="状态" align="center" width="100">
+            <template #default="{ row }">
+              <el-tag 
+                :type="row.hasCustomPrompt ? 'warning' : 'info'" 
+                size="small"
+              >
+                {{ row.hasCustomPrompt ? '已定制' : '默认' }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          
+          <el-table-column label="更新时间" align="center" prop="updatedAt" width="160">
+            <template #default="{ row }">
+              <span>{{ formatDateTime(row.updatedAt) }}</span>
+            </template>
+          </el-table-column>
+          
+          <el-table-column label="操作" align="center" class-name="small-padding" fixed="right" width="220">
+            <template #default="scope">
+              <el-button link type="primary" icon="View" @click="handleView(scope.row)">详情</el-button>
+              <el-button link type="primary" icon="Edit" @click="handleEdit(scope.row)">编辑</el-button>
+              <el-button link type="danger" icon="Delete" @click="handleDelete(scope.row)">删除</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
 
-      <!-- 分页 -->
-      <div class="pagination-container">
-        <el-pagination
-          v-show="total > 0"
-          :current-page="queryParams.pageNum"
-          :page-size="queryParams.pageSize"
-          :page-sizes="[10, 20, 30, 40]"
-          :total="total"
-          background
-          layout="total, sizes, prev, pager, next, jumper"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-        />
-      </div>
+        <!-- 分页 -->
+        <div class="pagination-container">
+          <el-pagination
+            v-show="total > 0"
+            :current-page="queryParams.pageNum"
+            :page-size="queryParams.pageSize"
+            :page-sizes="[10, 20, 30, 40]"
+            :total="total"
+            background
+            layout="total, sizes, prev, pager, next, jumper"
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+          />
+        </div>
+    </el-card>
 
     <!-- 编辑对话框 -->
     <el-dialog
@@ -720,8 +724,8 @@ function providePromptSuggestion(sceneCode) {
     'tag-suggestion': '你是一个域名标签专家。请为以下域名推荐合适的标签，考虑行业、长度、类型等特征...',
     'description-generation': '你是一个域名描述撰写专家。请为以下域名撰写吸引人的描述，突出其价值和应用场景...',
     'pricing-suggestion': '你是一个域名估值专家。请根据域名的特征、市场情况和历史数据，给出合理的价格建议...',
-    'inquiry-analysis': '你是一个客户沟通专家。请分析以下询盘内容，提取关键信息并评估客户意向...',
-    'reply-suggestion': '你是一个销售沟通专家。请根据客户询盘内容，提供专业、友好的回复建议...'
+    'inquiry-analysis': '你是一个客户沟通专家。请分析以下线索内容，提取关键信息并评估客户意向...',
+    'reply-suggestion': '你是一个销售沟通专家。请根据客户线索内容，提供专业、友好的回复建议...'
   }
   
   if (promptSuggestions[sceneCode]) {

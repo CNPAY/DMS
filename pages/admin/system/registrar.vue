@@ -1,18 +1,20 @@
 <template>
   <div class="app-container">
     <!-- 搜索面板 -->
-    <el-form :model="queryParams" class="search-panel" ref="queryRef" :inline="true" v-show="showSearch" label-width="100px">
-      <el-form-item label="注册商名称" prop="name" style="width: 280px">
-        <el-input v-model="queryParams.name" placeholder="请输入注册商名称" clearable @keyup.enter="handleQuery" />
-      </el-form-item>
-      <el-form-item label="官网地址" prop="websiteUrl" style="width: 280px">
-        <el-input v-model="queryParams.websiteUrl" placeholder="请输入官网地址" clearable @keyup.enter="handleQuery" />
-      </el-form-item>
-      <el-form-item>
-        <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
-        <el-button icon="Refresh" @click="resetQuery">重置</el-button>
-      </el-form-item>
-    </el-form>
+    <el-card v-show="showSearch" class="search-panel">
+      <el-form :model="queryParams" ref="queryRef" :inline="true" label-width="100px">
+        <el-form-item label="注册商名称" prop="name" style="width: 280px">
+          <el-input v-model="queryParams.name" placeholder="请输入注册商名称" clearable @keyup.enter="handleQuery" />
+        </el-form-item>
+        <el-form-item label="官网地址" prop="websiteUrl" style="width: 280px">
+          <el-input v-model="queryParams.websiteUrl" placeholder="请输入官网地址" clearable @keyup.enter="handleQuery" />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
+          <el-button icon="Refresh" @click="resetQuery">重置</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
 
     <!-- 操作栏 -->
     <el-row  class="mb8" style="display: flex; justify-content: space-between; align-items: center;">
@@ -33,58 +35,60 @@
     </el-row>
 
     <!-- 数据表格 -->
-    <el-table v-loading="loading" :data="registrarList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="注册商名称" align="center" prop="name" min-width="150" />
-      <el-table-column label="官网地址" align="center" prop="websiteUrl" min-width="200">
-        <template #default="{ row }">
-          <el-link v-if="row.websiteUrl" :href="row.websiteUrl" target="_blank" type="primary">
-            {{ row.websiteUrl }}
-          </el-link>
-          <span v-else>-</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="登录地址" align="center" prop="loginUrl" min-width="150">
-        <template #default="{ row }">
-          <el-link v-if="row.loginUrl" :href="row.loginUrl" target="_blank" type="primary">
-            登录入口
-          </el-link>
-          <span v-else>-</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="账户ID" align="center" prop="accountId" min-width="120">
-        <template #default="{ row }">
-          <span v-if="row.accountId">{{ row.accountId }}</span>
-          <span v-else>-</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="创建时间" align="center" prop="createdAt" width="180">
-        <template #default="{ row }">
-          <span>{{ dayjs(row.createdAt).format('YYYY-MM-DD HH:mm:ss') }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="操作" align="center" class-name="small-padding" fixed="right" width="160">
-        <template #default="scope">
-          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)">修改</el-button>
-          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)">删除</el-button>
-        </template>
-      </el-table-column>
-    </el-table>
+    <el-card>
+      <el-table v-loading="loading" :data="registrarList" @selection-change="handleSelectionChange">
+        <el-table-column type="selection" width="55" align="center" />
+        <el-table-column label="注册商名称" align="center" prop="name" min-width="150" />
+        <el-table-column label="官网地址" align="center" prop="websiteUrl" min-width="200">
+          <template #default="{ row }">
+            <el-link v-if="row.websiteUrl" :href="row.websiteUrl" target="_blank" type="primary">
+              {{ row.websiteUrl }}
+            </el-link>
+            <span v-else>-</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="登录地址" align="center" prop="loginUrl" min-width="150">
+          <template #default="{ row }">
+            <el-link v-if="row.loginUrl" :href="row.loginUrl" target="_blank" type="primary">
+              登录入口
+            </el-link>
+            <span v-else>-</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="账户ID" align="center" prop="accountId" min-width="120">
+          <template #default="{ row }">
+            <span v-if="row.accountId">{{ row.accountId }}</span>
+            <span v-else>-</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="创建时间" align="center" prop="createdAt" width="180">
+          <template #default="{ row }">
+            <span>{{ dayjs(row.createdAt).format('YYYY-MM-DD HH:mm:ss') }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" align="center" class-name="small-padding" fixed="right" width="160">
+          <template #default="scope">
+            <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)">修改</el-button>
+            <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)">删除</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
 
-    <!-- 分页 -->
-    <div class="pagination-container">
-      <el-pagination
-        v-show="total > 0"
-        :current-page="queryParams.pageNum"
-        :page-size="queryParams.pageSize"
-        :page-sizes="[10, 20, 30, 40]"
-        :total="total"
-        background
-        layout="total, sizes, prev, pager, next, jumper"
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-      />
-    </div>
+      <!-- 分页 -->
+      <div class="pagination-container">
+        <el-pagination
+          v-show="total > 0"
+          :current-page="queryParams.pageNum"
+          :page-size="queryParams.pageSize"
+          :page-sizes="[10, 20, 30, 40]"
+          :total="total"
+          background
+          layout="total, sizes, prev, pager, next, jumper"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+        />
+      </div>
+    </el-card>
 
     <!-- 添加或修改注册商对话框 -->
     <el-dialog :title="title" v-model="open" width="600px" append-to-body>

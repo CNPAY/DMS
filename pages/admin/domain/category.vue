@@ -1,7 +1,8 @@
 <template>
   <div class="app-container">
     <!-- 搜索面板 -->
-    <el-form :model="queryParams" class="search-panel" ref="queryRef" :inline="true" v-show="showSearch" label-width="100px">
+    <el-card v-show="showSearch" class="search-panel">
+      <el-form :model="queryParams" ref="queryRef" :inline="true" label-width="100px">
       <el-form-item label="分类名称" prop="name" style="width: 280px">
         <el-input v-model="queryParams.name" placeholder="请输入分类名称" clearable @keyup.enter="handleQuery" />
       </el-form-item>
@@ -13,6 +14,7 @@
         <el-button icon="Refresh" @click="resetQuery">重置</el-button>
       </el-form-item>
     </el-form>
+    </el-card>
 
     <!-- 操作栏 -->
     <el-row class="mb8" style="display: flex; justify-content: space-between; align-items: center;">
@@ -32,56 +34,58 @@
     </el-row>
 
     <!-- 数据表格 -->
-    <el-table v-loading="loading" :data="categoryList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="分类名称" align="center" prop="name" min-width="150" />
-      <el-table-column label="描述" align="center" prop="description" min-width="200">
-        <template #default="{ row }">
-          <span v-if="row.description">{{ row.description }}</span>
-          <span v-else class="text-gray-400">-</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="域名数量" align="center" prop="domainCount" width="120">
-        <template #default="{ row }">
-          <el-tag v-if="row._count?.domains > 0" type="success">{{ row._count.domains }}</el-tag>
-          <el-tag v-else type="info">0</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column label="创建时间" align="center" prop="createdAt" width="180">
-        <template #default="{ row }">
-          <span>{{ dayjs(row.createdAt).format('YYYY-MM-DD HH:mm:ss') }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="操作" align="center" class-name="small-padding" fixed="right" width="160">
-        <template #default="scope">
-          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)">修改</el-button>
-          <el-button 
-            link 
-            type="primary" 
-            icon="Delete" 
-            @click="handleDelete(scope.row)"
-            :disabled="scope.row._count?.domains > 0"
-          >
-            删除
-          </el-button>
-        </template>
-      </el-table-column>
-    </el-table>
+    <el-card>
+      <el-table v-loading="loading" :data="categoryList" @selection-change="handleSelectionChange">
+        <el-table-column type="selection" width="55" align="center" />
+        <el-table-column label="分类名称" align="center" prop="name" min-width="150" />
+        <el-table-column label="描述" align="center" prop="description" min-width="200">
+          <template #default="{ row }">
+            <span v-if="row.description">{{ row.description }}</span>
+            <span v-else class="text-gray-400">-</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="域名数量" align="center" prop="domainCount" width="120">
+          <template #default="{ row }">
+            <el-tag v-if="row._count?.domains > 0" type="success">{{ row._count.domains }}</el-tag>
+            <el-tag v-else type="info">0</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="创建时间" align="center" prop="createdAt" width="180">
+          <template #default="{ row }">
+            <span>{{ dayjs(row.createdAt).format('YYYY-MM-DD HH:mm:ss') }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" align="center" class-name="small-padding" fixed="right" width="160">
+          <template #default="scope">
+            <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)">修改</el-button>
+            <el-button 
+              link 
+              type="primary" 
+              icon="Delete" 
+              @click="handleDelete(scope.row)"
+              :disabled="scope.row._count?.domains > 0"
+            >
+              删除
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
 
-    <!-- 分页 -->
-    <div class="pagination-container">
-      <el-pagination
-        v-show="total > 0"
-        :current-page="queryParams.pageNum"
-        :page-size="queryParams.pageSize"
-        :page-sizes="[10, 20, 30, 40]"
-        :total="total"
-        background
-        layout="total, sizes, prev, pager, next, jumper"
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-      />
-    </div>
+      <!-- 分页 -->
+      <div class="pagination-container">
+        <el-pagination
+          v-show="total > 0"
+          :current-page="queryParams.pageNum"
+          :page-size="queryParams.pageSize"
+          :page-sizes="[10, 20, 30, 40]"
+          :total="total"
+          background
+          layout="total, sizes, prev, pager, next, jumper"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+        />
+      </div>
+    </el-card>
 
     <!-- 添加或修改分类对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
@@ -352,17 +356,6 @@ onMounted(() => {
 <style scoped>
 .app-container {
   padding: 20px;
-}
-
-.search-panel {
-  margin-bottom: 20px;
-  padding: 20px;
-  background-color: #fff;
-  border-radius: 4px;
-}
-
-.mb8 {
-  margin-bottom: 8px;
 }
 
 .pagination-container {

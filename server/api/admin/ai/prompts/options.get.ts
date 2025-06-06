@@ -26,13 +26,13 @@ export default defineEventHandler(async (event) => {
       },
       {
         code: 'inquiry_analysis',
-        name: '询盘分析',
-        description: '分析客户询盘意图和价值'
+        name: '线索分析',
+        description: '分析客户线索意图和价值'
       },
       {
         code: 'inquiry_reply_suggest',
-        name: '询盘回复建议',
-        description: '生成个性化的询盘回复建议'
+        name: '线索回复建议',
+        description: '生成个性化的线索回复建议'
       },
       {
         code: 'market_research',

@@ -60,8 +60,8 @@
       </div>
 
       <!-- 搜索面板 -->
-      <div v-show="showSearch" class="search-panel">
-        <el-form ref="queryRef" :model="searchForm" :inline="true" class="mb8">
+      <el-card v-show="showSearch" class="search-panel">
+        <el-form ref="queryRef" :model="searchForm" :inline="true" >
           <el-form-item label="域名" prop="domainName" style="width: 220px;">
             <el-input
               v-model="searchForm.domainName"
@@ -98,7 +98,7 @@
             <el-button icon="Refresh" @click="resetSearch">重置</el-button>
           </el-form-item>
         </el-form>
-      </div>
+      </el-card>
 
       <!-- 工具栏 -->
       <el-row class="mb8" style="display: flex; justify-content: space-between; align-items: center;">

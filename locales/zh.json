@@ -5,7 +5,7 @@
   "dashboard": "仪表盘",
   "domains": "域名管理",
   "portfolios": "米表管理",
-  "inquiries": "询盘管理",
+  "inquiries": "线索管理",
   "settings": "系统设置",
   "routes": {
     "dashboard": "仪表盘",
@@ -16,7 +16,7 @@
     "domainExpiry": "到期管理",
     "domainCost": "花费管理",
     "domainRegister": "注册新域名",
-    "inquiryManagement": "询盘管理",
+    "inquiryManagement": "线索管理",
 
     "portfolioManagement": "米表管理",
     "portfolioList": "米表管理",
@@ -26,7 +26,7 @@
     "dataReports": "数据报表",
     "salesReport": "销售报表",
     "costReport": "成本报表",
-    "visitorReport": "访问与询盘分析",
+    "visitorReport": "访问与线索分析",
     "aiAssistant": "AI 助手",
     "aiConfig": "AI 服务配置",
     "aiPrompt": "提示词管理",

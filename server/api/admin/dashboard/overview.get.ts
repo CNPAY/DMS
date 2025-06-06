@@ -24,7 +24,7 @@ export default defineEventHandler(async (event) => {
         where: { userId }
       }),
 
-      // 待处理询盘数量
+      // 待处理线索数量
       prisma.inquiry.count({
         where: { 
           status: 'new'
@@ -46,7 +46,7 @@ export default defineEventHandler(async (event) => {
         }
       }),
 
-      // 最近7天询盘
+      // 最近7天线索
       prisma.inquiry.findMany({
         where: {
           domain: { userId },
@@ -81,7 +81,7 @@ export default defineEventHandler(async (event) => {
         take: 5
       }),
 
-      // 最近30天统计（新增域名、询盘数量）
+      // 最近30天统计（新增域名、线索数量）
       prisma.domain.groupBy({
         by: ['createdAt'],
         where: {
@@ -151,7 +151,7 @@ export default defineEventHandler(async (event) => {
       }
     })
 
-    // 查询最近30天询盘数据
+    // 查询最近30天线索数据
     const inquiryStats = await prisma.inquiry.groupBy({
       by: ['submittedAt'],
       where: {
@@ -165,7 +165,7 @@ export default defineEventHandler(async (event) => {
       }
     })
 
-    // 填充询盘数据
+    // 填充线索数据
     inquiryStats.forEach(item => {
       const date = new Date(item.submittedAt).toISOString().split('T')[0]
       if (dailyStats.has(date)) {
@@ -199,7 +199,7 @@ export default defineEventHandler(async (event) => {
       // 增长指标
       growth: {
         domainGrowth, // 最近7天新增域名
-        inquiryGrowth, // 最近7天新增询盘
+        inquiryGrowth, // 最近7天新增线索
         weeklyGrowthRate: totalDomains > 0 ? Math.round((domainGrowth / totalDomains) * 10000) / 100 : 0
       },
       

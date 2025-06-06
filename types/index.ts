@@ -33,9 +33,9 @@ export enum LandingPageType {
   PRICED = 'priced'      // 标价页
 }
 
-// 询盘状态枚举
+// 线索状态枚举
 export enum InquiryStatus {
-  NEW = 'new',          // 新询盘
+  NEW = 'new',          // 新线索
   READ = 'read',        // 已读
   REPLIED = 'replied',  // 已回复
   DEAL = 'deal',        // 成交
@@ -145,7 +145,7 @@ export interface Portfolio {
   domains?: Domain[]
 }
 
-// 询盘接口
+// 线索接口
 export interface Inquiry {
   id: number
   domainId?: number
