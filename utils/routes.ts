@@ -260,14 +260,6 @@ export const sidebarRoutes: SidebarRoute[] = [
         }
       },
       {
-        path: 'theme',
-        name: 'ThemeConfig',
-        meta: {
-          title: 'routes.themeConfig',
-          icon: 'theme'
-        }
-      },
-      {
         path: 'notification',
         name: 'NotificationConfig',
         meta: {
@@ -276,7 +268,7 @@ export const sidebarRoutes: SidebarRoute[] = [
         }
       },
       {
-        path: 'security',
+        path: 'profile',
         name: 'SecurityConfig',
         meta: {
           title: 'routes.securityConfig',
@@ -289,6 +281,14 @@ export const sidebarRoutes: SidebarRoute[] = [
         meta: {
           title: 'routes.iconLibrary',
           icon: 'star'
+        }
+      },
+      {
+        path: 'landing',
+        name: 'LandingConfig',
+        meta: {
+          title: 'routes.landingConfig',
+          icon: 'monitor'
         }
       }
     ]

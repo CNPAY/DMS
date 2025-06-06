@@ -17,7 +17,9 @@
     "domainCost": "Cost & Renewal",
     "domainRegister": "Register New Domain",
     "inquiryManagement": "Inquiry Management",
+
     "portfolioManagement": "Portfolio Management",
+    "landingPageConfig": "Landing Page Config",
     "domainWatch": "Domain Watch",
     "whoisQuery": "WHOIS Query",
     "dataReports": "Data Reports",
@@ -33,8 +35,9 @@
     "systemBackup": "Data Export & Backup",
     "themeConfig": "Theme Customization",
     "notificationConfig": "Notification Settings",
-    "securityConfig": "Account Security",
-    "iconLibrary": "Icon Library"
+    "securityConfig": "Account Setting",
+    "iconLibrary": "Icon Library",
+    "landingConfig": "Landing Page Config"
   },
   "auth": {
     "welcome": "Welcome to DMS",

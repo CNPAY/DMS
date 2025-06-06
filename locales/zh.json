@@ -17,7 +17,9 @@
     "domainCost": "花费管理",
     "domainRegister": "注册新域名",
     "inquiryManagement": "询盘管理",
+
     "portfolioManagement": "米表管理",
+    "landingPageConfig": "着陆页配置",
     "domainWatch": "域名关注",
     "whoisQuery": "WHOIS 查询",
     "dataReports": "数据报表",
@@ -33,8 +35,9 @@
     "systemBackup": "数据导出与备份",
     "themeConfig": "界面个性化",
     "notificationConfig": "通知设置",
-    "securityConfig": "账户安全",
-    "iconLibrary": "图标库"
+    "securityConfig": "个人设置",
+    "iconLibrary": "图标库",
+    "landingConfig": "着陆页配置"
   },
   "auth": {
     "welcome": "欢迎使用 DMS",
