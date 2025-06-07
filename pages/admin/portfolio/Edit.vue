@@ -1,7 +1,7 @@
 <template>
     <!-- 添加或修改米表对话框 -->
-    <el-dialog :title="title" v-model="open" width="1200px" append-to-body>
-      <div style="display: flex; gap: 10px; height: 500px;">
+    <el-dialog :title="title" v-model="open" width="70%" append-to-body>
+      <div style="display: flex; gap: 10px; height: 700px;">
         <!-- 左侧预览区域 -->
         <div style="width: 350px; border-right: 1px solid #e6e6e6; padding-right: 20px;">
           <div style="margin-bottom: 15px;">
@@ -630,6 +630,12 @@
 <script setup lang="js">
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Loading } from '@element-plus/icons-vue'
+import { 
+  LAYOUT_TEMPLATES, 
+  COLOR_THEMES, 
+  getTemplateLabel,
+  getThemeLabel
+} from '~/utils/constants.js'
 
 // Props
 const props = defineProps({
@@ -708,41 +714,11 @@ const rules = {
 }
 
 // 选项数据
-const layoutTemplates = ref([
-  { value: 'list', label: '列表布局' },
-  { value: 'grid', label: '网格布局' },
-  { value: 'table', label: '表格布局' },
-  { value: 'card', label: '卡片布局' }
-])
-
-const colorThemes = ref([
-  { value: 'moonlight', label: '🌙 月光白', description: '简约纯净风格' },
-  { value: 'ocean', label: '🌊 海洋蓝', description: '清新专业风格' },
-  { value: 'forest', label: '🌿 森林绿', description: '自然生机风格' },
-  { value: 'sunset', label: '🌅 暖阳橙', description: '温暖活力风格' },
-  { value: 'rose', label: '🌹 玫瑰红', description: '优雅浪漫风格' },
-  { value: 'lavender', label: '💜 薰衣草', description: '梦幻柔美风格' },
-  { value: 'midnight', label: '🌃 暗夜黑', description: '深沉神秘风格' },
-  { value: 'sakura', label: '🌸 樱花粉', description: '清雅甜美风格' },
-  { value: 'emerald', label: '💎 翡翠绿', description: '典雅高贵风格' },
-  { value: 'amber', label: '✨ 琥珀金', description: '奢华品质风格' }
-])
+const layoutTemplates = ref(LAYOUT_TEMPLATES)
+const colorThemes = ref(COLOR_THEMES)
 
 // 方法
-function getTemplateLabel(template) {
-  const templateMap = {
-    list: '列表',
-    grid: '网格', 
-    table: '表格',
-    card: '卡片'
-  }
-  return templateMap[template] || template
-}
-
-function getThemeLabel(themeValue) {
-  const theme = colorThemes.value.find(t => t.value === themeValue)
-  return theme ? theme.label : '🌙 月光白'
-}
+// getTemplateLabel 和 getThemeLabel 函数已从 utils/constants.js 导入
 
 // 初始化表单数据
 function initFormData() {

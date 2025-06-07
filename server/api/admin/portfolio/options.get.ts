@@ -1,3 +1,5 @@
+import { LAYOUT_TEMPLATES, COLOR_THEMES, SALES_STATUS_OPTIONS } from '~/utils/constants.js'
+
 // 获取米表选项数据接口
 export default defineEventHandler(async (event) => {
   try {
@@ -31,38 +33,10 @@ export default defineEventHandler(async (event) => {
         id: true,
         name: true
       },
-      orderBy: [
-        { sortOrder: 'asc' },
-        { name: 'asc' }
-      ]
+      orderBy: { name: 'asc' }
     });
 
-    // 布局模板选项
-    const layoutTemplates = [
-      { value: 'list', label: '列表布局' },
-      { value: 'grid', label: '网格布局' },
-      { value: 'table', label: '表格布局' },
-      { value: 'card', label: '卡片布局' }
-    ];
 
-    // 颜色主题选项
-    const colorThemes = [
-      { value: 'default', label: '默认主题', color: '#409eff' },
-      { value: 'dark', label: '深色主题', color: '#303133' },
-      { value: 'blue', label: '蓝色主题', color: '#409eff' },
-      { value: 'green', label: '绿色主题', color: '#67c23a' },
-      { value: 'orange', label: '橙色主题', color: '#e6a23c' },
-      { value: 'red', label: '红色主题', color: '#f56c6c' },
-      { value: 'purple', label: '紫色主题', color: '#9c27b0' }
-    ];
-
-    // 域名状态选项
-    const salesStatusOptions = [
-      { value: 1, label: '待售' },
-      { value: 2, label: '已上架' },
-      { value: 3, label: '已售出' },
-      { value: 4, label: '暂停销售' }
-    ];
 
     return {
       code: 200,
@@ -70,9 +44,9 @@ export default defineEventHandler(async (event) => {
       data: {
         domains,
         categories,
-        layoutTemplates,
-        colorThemes,
-        salesStatusOptions
+        layoutTemplates: LAYOUT_TEMPLATES,
+        colorThemes: COLOR_THEMES,
+        salesStatusOptions: SALES_STATUS_OPTIONS
       }
     };
   } catch (error) {

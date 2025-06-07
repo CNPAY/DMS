@@ -20,7 +20,6 @@
     <el-row class="mb8" style="display: flex; justify-content: space-between; align-items: center;">
       <div style="display: flex;">
         <el-button type="primary" plain icon="Plus" @click="handleAdd">新增</el-button>
-        <el-button type="success" plain icon="Edit" :disabled="single" @click="handleUpdate">修改</el-button>
         <el-button type="danger" plain icon="Delete" :disabled="multiple" @click="handleDelete">删除</el-button>
         <el-button type="warning" plain icon="Download" @click="handleExport">导出</el-button>
       </div>
@@ -110,6 +109,7 @@
     
     <!-- 米表编辑组件 -->
     <PortfolioEdit 
+      
       v-model="open" 
       :portfolio-data="currentEditData"
       @success="handleEditSuccess"
@@ -152,8 +152,12 @@
 <script setup name="Portfolio">
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Loading } from '@element-plus/icons-vue'
-import EditDialog from './Edit.vue'
 import PortfolioEdit from './Edit.vue'
+import { 
+  getTemplateLabel,
+  getTemplateTagType,
+  getThemeLabel
+} from '~/utils/constants.js'
 
 definePageMeta({
   layout: 'admin',
@@ -281,51 +285,13 @@ function handleSelectionChange(selection) {
 
 // 新增按钮操作
 function handleAdd() {
-  reset()
+  portfolioRef.value?.reset()
   getStaticPages() // 获取静态页面列表
   currentEditData.value = null
   open.value = true
   title.value = '添加米表'
 }
-
-// 表单重置
-function reset() {
-  form.value = {
-    id: null,
-    name: null,
-    slug: null,
-    isDefault: false,
-    layoutTemplate: 'list',
-    colorTheme: 'moonlight',
-    enableGrouping: false,
-    enableWaterfall: false,
-    logoUrl: null,
-    backgroundUrl: null,
-    textTheme: 'auto',
-    backgroundOverlay: false,
-    headerInfo: null,
-    headerPages: [],
-    headerRichText: null,
-    footerInfo: null,
-    footerPages: [],
-    footerRichText: null,
-    // SEO配置
-    seoTitle: null,
-    seoDescription: null,
-    seoKeywords: null,
-    ogTitle: null,
-    ogDescription: null,
-    ogImage: null,
-    twitterCard: 'summary',
-    analyticsCode: null,
-    showPrice: true,
-    showDescription: false,
-    showTags: false,
-    enableSearchArea: true
-  }
-  portfolioRef.value?.resetFields()
-}
-
+ 
 // 获取静态页面列表
 async function getStaticPages() {
   staticPagesLoading.value = true
@@ -495,48 +461,11 @@ function handleCurrentChange(val) {
   getList()
 }
 
-function getTemplateTagType(template) {
-  const typeMap = {
-    list: '',
-    grid: 'success',
-    table: 'info',
-    card: 'warning'
-  }
-  return typeMap[template] || ''
-}
-
-const colorThemes = ref([
-  { value: 'moonlight', label: '🌙 月光白', description: '简约纯净风格' },
-  { value: 'ocean', label: '🌊 海洋蓝', description: '清新专业风格' },
-  { value: 'forest', label: '🌿 森林绿', description: '自然生机风格' },
-  { value: 'sunset', label: '🌅 暖阳橙', description: '温暖活力风格' },
-  { value: 'rose', label: '🌹 玫瑰红', description: '优雅浪漫风格' },
-  { value: 'lavender', label: '💜 薰衣草', description: '梦幻柔美风格' },
-  { value: 'midnight', label: '🌃 暗夜黑', description: '深沉神秘风格' },
-  { value: 'sakura', label: '🌸 樱花粉', description: '清雅甜美风格' },
-  { value: 'emerald', label: '💎 翡翠绿', description: '典雅高贵风格' },
-  { value: 'amber', label: '✨ 琥珀金', description: '奢华品质风格' }
-])
-
-// 方法
-function getTemplateLabel(template) {
-  const templateMap = {
-    list: '列表',
-    grid: '网格', 
-    table: '表格',
-    card: '卡片'
-  }
-  return templateMap[template] || template
-}
-
-function getThemeLabel(themeValue) {
-  const theme = colorThemes.value.find(t => t.value === themeValue)
-  return theme ? theme.label : '🌙 月光白'
-}
+// getTemplateLabel, getTemplateTagType, getThemeLabel 函数已从 utils/constants.js 导入
 
 // 修改按钮操作
 async function handleUpdate(row) {
-  reset()
+  portfolioRef.value?.reset()
   getStaticPages() // 获取静态页面列表
   
   let editData = null
@@ -575,45 +504,7 @@ async function handleUpdate(row) {
       showTags: row.showTags,
       enableSearchArea: row.enableSearchArea !== undefined ? row.enableSearchArea : true
     }
-  } else {
-    // 批量修改时的处理（暂时不实现）
-    const selectedRow = portfolioList.value.find(item => ids.value.includes(item.id))
-    if (selectedRow) {
-      editData = { 
-        id: selectedRow.id,
-        name: selectedRow.name,
-        slug: selectedRow.slug,
-        isDefault: selectedRow.isDefault,
-        layoutTemplate: selectedRow.layoutTemplate,
-        enableGrouping: selectedRow.enableGrouping,
-        enableWaterfall: selectedRow.enableWaterfall,
-        colorTheme: selectedRow.colorTheme,
-        logoUrl: selectedRow.logoUrl,
-        backgroundUrl: selectedRow.backgroundUrl,
-        textTheme: selectedRow.textTheme || 'auto',
-        backgroundOverlay: selectedRow.backgroundOverlay || false,
-        headerInfo: selectedRow.headerInfo,
-        headerPages: selectedRow.headerPages ? JSON.parse(selectedRow.headerPages) : [],
-        headerRichText: selectedRow.headerRichText,
-        footerInfo: selectedRow.footerInfo,
-        footerPages: selectedRow.footerPages ? JSON.parse(selectedRow.footerPages) : [],
-        footerRichText: selectedRow.footerRichText,
-        // SEO配置
-        seoTitle: selectedRow.seoTitle,
-        seoDescription: selectedRow.seoDescription,
-        seoKeywords: selectedRow.seoKeywords,
-        ogTitle: selectedRow.ogTitle,
-        ogDescription: selectedRow.ogDescription,
-        ogImage: selectedRow.ogImage,
-        twitterCard: selectedRow.twitterCard || 'summary',
-        analyticsCode: selectedRow.analyticsCode,
-        showPrice: selectedRow.showPrice,
-        showDescription: selectedRow.showDescription,
-        showTags: selectedRow.showTags,
-        enableSearchArea: selectedRow.enableSearchArea !== undefined ? selectedRow.enableSearchArea : true
-      }
-    }
-  }
+  } 
   currentEditData.value = editData
   open.value = true
   title.value = '修改米表'
