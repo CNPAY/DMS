@@ -51,9 +51,25 @@
 
     <!-- 工具栏 -->
     <el-row class="mb8" style="display: flex; justify-content: space-between; align-items: center;">
-      <div style="display: flex;">
+      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
         <el-button type="primary" plain icon="Plus" @click="handleAdd">新增</el-button>
+        <el-button type="success" plain icon="Upload" @click="handleImport">批量导入</el-button>
         <el-button type="danger" plain icon="Delete" :disabled="multiple" @click="handleDelete">删除</el-button>
+        
+        <!-- 批量操作按钮 -->
+        <el-dropdown v-if="selectedDomains.length > 0" @command="handleBatchCommand">
+          <el-button type="warning" plain>
+            批量操作({{ selectedDomains.length }}) <el-icon><arrow-down /></el-icon>
+          </el-button>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item command="batchCategory" icon="FolderOpened">移动分类</el-dropdown-item>
+              <el-dropdown-item command="batchPrice" icon="PriceTag">设置价格</el-dropdown-item>
+              <el-dropdown-item command="batchWhois" icon="Search">Whois填充</el-dropdown-item>
+              <el-dropdown-item command="batchStatus" icon="Switch">修改销售状态</el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
       </div>
       <div style="display: flex; gap: 10px;">
         <el-button circle @click="showSearch = !showSearch">
@@ -77,6 +93,12 @@
         <el-table-column label="域名" align="center" prop="domainName" min-width="200">
           <template #default="{ row }">
             <el-link type="primary" @click="handleView(row)">{{ row.domainName }}</el-link>
+          </template>
+        </el-table-column>
+        <el-table-column label="备注" align="center" prop="notes" min-width="200">
+          <template #default="{ row }">
+            <span v-if="row.notes">{{ row.notes }}</span>
+            <span v-else class="text-gray-400">-</span>
           </template>
         </el-table-column>
         
@@ -165,7 +187,7 @@
           v-show="total > 0"
           :current-page="queryParams.pageNum"
           :page-size="queryParams.pageSize"
-          :page-sizes="[10, 20, 30, 40]"
+          :page-sizes="[20, 30, 50, 100, 200, 500, 1000]"
           :total="total"
           background
           layout="total, sizes, prev, pager, next, jumper"
@@ -329,12 +351,103 @@
         </div>
       </template>
     </el-dialog>
+
+    <!-- 批量导入域名对话框 -->
+    <DomainImport 
+      v-model="showImport" 
+      @success="handleImportSuccess" 
+    />
+
+    <!-- 批量移动分类对话框 -->
+    <el-dialog title="批量移动分类" v-model="batchCategoryDialog" width="500px">
+      <el-form :model="batchForm" label-width="100px">
+        <el-form-item label="目标分类">
+          <el-select v-model="batchForm.categoryId" placeholder="请选择分类" clearable style="width: 100%">
+            <el-option label="无分类" :value="null" />
+            <el-option
+              v-for="category in options.categories"
+              :key="category.id"
+              :label="category.name"
+              :value="category.id"
+            />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <div class="batch-info">
+        <el-alert type="info" :closable="false">
+          将移动 {{ selectedDomains.length }} 个域名到选定分类
+        </el-alert>
+      </div>
+      <template #footer>
+        <el-button @click="batchCategoryDialog = false">取消</el-button>
+        <el-button type="primary" :loading="batchLoading" @click="executeBatchCategory">确定</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 批量设置价格对话框 -->
+    <el-dialog title="批量设置价格" v-model="batchPriceDialog" width="500px">
+      <el-form :model="batchForm" label-width="100px">
+        <el-form-item label="销售价格">
+          <el-input-number
+            v-model="batchForm.price"
+            :precision="2"
+            :min="0"
+            placeholder="设置销售价格"
+            style="width: 100%"
+          />
+        </el-form-item>
+        <el-form-item label="域名成本">
+          <el-input-number
+            v-model="batchForm.costPrice"
+            :precision="2"
+            :min="0"
+            placeholder="设置域名成本"
+            style="width: 100%"
+          />
+        </el-form-item>
+      </el-form>
+      <div class="batch-info">
+        <el-alert type="info" :closable="false">
+          将为 {{ selectedDomains.length }} 个域名设置价格（空白字段将跳过）
+        </el-alert>
+      </div>
+      <template #footer>
+        <el-button @click="batchPriceDialog = false">取消</el-button>
+        <el-button type="primary" :loading="batchLoading" @click="executeBatchPrice">确定</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 批量修改销售状态对话框 -->
+    <el-dialog title="批量修改销售状态" v-model="batchStatusDialog" width="500px">
+      <el-form :model="batchForm" label-width="100px">
+        <el-form-item label="销售状态">
+          <el-select v-model="batchForm.salesStatus" placeholder="请选择销售状态" style="width: 100%">
+            <el-option
+              v-for="status in options.salesStatusOptions"
+              :key="status.value"
+              :label="status.label"
+              :value="status.value"
+            />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <div class="batch-info">
+        <el-alert type="info" :closable="false">
+          将修改 {{ selectedDomains.length }} 个域名的销售状态
+        </el-alert>
+      </div>
+      <template #footer>
+        <el-button @click="batchStatusDialog = false">取消</el-button>
+        <el-button type="primary" :loading="batchLoading" @click="executeBatchStatus">确定</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup name="Domain">
 import { ElMessage, ElMessageBox } from 'element-plus'
 import dayjs from 'dayjs'
+import DomainImport from './import.vue'
 
 definePageMeta({
   layout: 'admin',
@@ -355,11 +468,26 @@ const domainList = ref([])
 const open = ref(false)
 const loading = ref(true)
 const showSearch = ref(true)
+const showImport = ref(false)
 const ids = ref([])
 const single = ref(true)
 const multiple = ref(true)
 const total = ref(0)
 const title = ref('')
+const selectedDomains = ref([])
+
+// 批量操作相关
+const batchCategoryDialog = ref(false)
+const batchPriceDialog = ref(false)
+const batchWhoisDialog = ref(false)
+const batchStatusDialog = ref(false)
+const batchForm = ref({
+  categoryId: null,
+  price: null,
+  costPrice: null,
+  salesStatus: null
+})
+const batchLoading = ref(false)
 const options = ref({
   registrars: [],
   categories: [],
@@ -373,7 +501,7 @@ const data = reactive({
   form: {},
   queryParams: {
     pageNum: 1,
-    pageSize: 10,
+    pageSize: 20,
     search: null,
     categoryId: null,
     registrarId: null,
@@ -477,6 +605,7 @@ function resetQuery() {
 // 多选框选中数据
 function handleSelectionChange(selection) {
   ids.value = selection.map(item => item.id)
+  selectedDomains.value = selection
   single.value = selection.length !== 1
   multiple.value = !selection.length
 }
@@ -486,6 +615,18 @@ function handleAdd() {
   reset()
   open.value = true
   title.value = '添加域名'
+}
+
+// 批量导入按钮操作
+function handleImport() {
+  showImport.value = true
+}
+
+// 导入成功回调
+function handleImportSuccess() {
+  showImport.value = false
+  ElMessage.success('域名导入成功')
+  getList() // 刷新列表
 }
 
 // 修改按钮操作
@@ -650,6 +791,193 @@ function getSalesStatusLabel(status) {
   return statusMap[status] || '未知'
 }
 
+// 批量操作命令处理
+function handleBatchCommand(command) {
+  switch (command) {
+    case 'batchCategory':
+      handleBatchCategory()
+      break
+    case 'batchPrice':
+      handleBatchPrice()
+      break
+    case 'batchWhois':
+      handleBatchWhois()
+      break
+    case 'batchStatus':
+      handleBatchStatus()
+      break
+  }
+}
+
+// 批量移动分类
+function handleBatchCategory() {
+  batchForm.value.categoryId = null
+  batchCategoryDialog.value = true
+}
+
+// 批量设置价格
+function handleBatchPrice() {
+  batchForm.value.price = null
+  batchForm.value.costPrice = null
+  batchPriceDialog.value = true
+}
+
+// 批量获取Whois
+function handleBatchWhois() {
+  ElMessageBox.confirm(
+    `确认获取选中的 ${selectedDomains.value.length} 个域名的Whois信息？`,
+    '批量获取Whois',
+    {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }
+  ).then(async () => {
+    await executeBatchWhois()
+  })
+}
+
+// 批量修改销售状态
+function handleBatchStatus() {
+  batchForm.value.salesStatus = null
+  batchStatusDialog.value = true
+}
+
+// 执行批量分类移动
+async function executeBatchCategory() {
+  if (!batchForm.value.categoryId && batchForm.value.categoryId !== null) {
+    ElMessage.warning('请选择分类')
+    return
+  }
+
+  batchLoading.value = true
+  try {
+    const response = await $fetch('/api/admin/domains/batch-category', {
+      method: 'POST',
+      body: {
+        domainIds: selectedDomains.value.map(d => d.id),
+        categoryId: batchForm.value.categoryId
+      }
+    })
+
+    if (response.code === 200) {
+      ElMessage.success(`成功移动 ${response.data.successCount} 个域名`)
+      batchCategoryDialog.value = false
+      getList()
+    } else {
+      ElMessage.error(response.message || '批量移动分类失败')
+    }
+  } catch (error) {
+    console.error('批量移动分类失败:', error)
+    ElMessage.error('批量移动分类失败')
+  } finally {
+    batchLoading.value = false
+  }
+}
+
+// 执行批量设置价格
+async function executeBatchPrice() {
+  if (!batchForm.value.price && !batchForm.value.costPrice) {
+    ElMessage.warning('请至少设置一个价格')
+    return
+  }
+
+  batchLoading.value = true
+  try {
+    const response = await $fetch('/api/admin/domains/batch-price', {
+      method: 'POST',
+      body: {
+        domainIds: selectedDomains.value.map(d => d.id),
+        price: batchForm.value.price,
+        costPrice: batchForm.value.costPrice
+      }
+    })
+
+    if (response.code === 200) {
+      ElMessage.success(`成功设置 ${response.data.successCount} 个域名的价格`)
+      batchPriceDialog.value = false
+      getList()
+    } else {
+      ElMessage.error(response.message || '批量设置价格失败')
+    }
+  } catch (error) {
+    console.error('批量设置价格失败:', error)
+    ElMessage.error('批量设置价格失败')
+  } finally {
+    batchLoading.value = false
+  }
+}
+
+// 执行批量获取Whois
+async function executeBatchWhois() {
+  batchLoading.value = true
+  let successCount = 0
+  let errorCount = 0
+
+  try {
+    for (const domain of selectedDomains.value) {
+      try {
+        const response = await $fetch('/api/admin/whois/update', {
+          method: 'POST',
+          body: { domainId: domain.id }
+        })
+        
+        if (response.code === 200) {
+          successCount++
+        } else {
+          errorCount++
+        }
+      } catch (error) {
+        errorCount++
+      }
+    }
+
+    if (successCount > 0) {
+      ElMessage.success(`成功获取 ${successCount} 个域名的Whois信息${errorCount > 0 ? `，失败 ${errorCount} 个` : ''}`)
+      getList()
+    } else {
+      ElMessage.error('获取Whois信息失败')
+    }
+  } catch (error) {
+    console.error('批量获取Whois失败:', error)
+    ElMessage.error('批量获取Whois失败')
+  } finally {
+    batchLoading.value = false
+  }
+}
+
+// 执行批量修改销售状态
+async function executeBatchStatus() {
+  if (!batchForm.value.salesStatus) {
+    ElMessage.warning('请选择销售状态')
+    return
+  }
+
+  batchLoading.value = true
+  try {
+    const response = await $fetch('/api/admin/domains/batch-status', {
+      method: 'POST',
+      body: {
+        domainIds: selectedDomains.value.map(d => d.id),
+        salesStatus: batchForm.value.salesStatus
+      }
+    })
+
+    if (response.code === 200) {
+      ElMessage.success(`成功修改 ${response.data.successCount} 个域名的销售状态`)
+      batchStatusDialog.value = false
+      getList()
+    } else {
+      ElMessage.error(response.message || '批量修改销售状态失败')
+    }
+  } catch (error) {
+    console.error('批量修改销售状态失败:', error)
+    ElMessage.error('批量修改销售状态失败')
+  } finally {
+    batchLoading.value = false
+  }
+}
+
 // 页面加载时获取数据
 onMounted(async () => {
   await getOptions()
@@ -684,5 +1012,9 @@ onMounted(async () => {
 
 .dialog-footer {
   text-align: right;
+}
+
+.batch-info {
+  margin: 16px 0;
 }
 </style> 

@@ -1,3 +1,107 @@
+## 2024-12-29 14:15 - 批量操作API标准化重构
+- 用户要求：统一所有API的响应格式和数据库客户端
+- **代码规范化**：
+  - 统一响应格式：使用 `ResponseData` 工具类
+  - 统一数据库客户端：使用 `prisma` 实例，移除手动连接管理
+  - 移除重复的 `$disconnect()` 调用
+- **优化效果**：
+  - 代码更简洁：每个API减少约30行代码
+  - 响应格式统一：所有接口使用相同的JSON结构
+  - 错误处理标准化：统一的错误码和消息格式
+  - 更好的可维护性：减少重复代码，便于后续修改
+- **涉及文件**：
+  - `batch-category.post.ts` - 批量分类移动
+  - `batch-price.post.ts` - 批量价格设置
+  - `batch-status.post.ts` - 批量状态修改
+  - `whois/update.post.ts` - Whois信息查询
+
+## 2024-12-29 14:10 - 域名列表批量操作功能实现
+- 用户需求：在域名列表中添加批量操作功能
+- **前端功能**：
+  - 批量操作下拉菜单：仅在选中域名时显示，显示选中数量
+  - 四个核心批量功能：移动分类、设置价格、获取Whois、修改销售状态
+  - 友好的对话框界面，清晰显示操作范围和影响
+  - 实时进度反馈和操作结果提示
+- **后端API**：
+  - `batch-category.post.ts`：批量移动域名分类
+  - `batch-price.post.ts`：批量设置销售价格和域名成本
+  - `batch-status.post.ts`：批量修改销售状态
+  - `whois/update.post.ts`：单个域名Whois查询（支持批量调用）
+- **数据安全**：
+  - 用户权限验证：确保只能操作自己的域名
+  - 事务支持：批量价格设置使用数据库事务
+  - 参数验证：完整的输入参数和状态值验证
+- **用户体验**：
+  - 响应式设计：工具栏支持换行适配
+  - 操作确认：危险操作需要用户确认
+  - 进度反馈：实时显示操作进度和结果
+  - 错误处理：详细的错误信息和友好提示
+
+## 2024-12-29 13:55 - 域名导入增强：支持销售价格和域名成本分离
+- 用户反馈：应该区分销售价格和域名成本
+- **功能增强**：
+  - 列映射新增"域名成本"字段选项
+  - 智能识别支持两个价格字段：销售价格 + 域名成本
+  - 数据验证同时支持两种价格格式验证
+- **数据存储优化**：
+  - 销售价格保存到 `landingPagePrice` 字段
+  - 域名成本创建 `DomainCost` 记录，类型为 'purchase'
+  - 描述信息保存到 `notes` 字段
+- **用户体验提升**：
+  - 更新示例格式：`域名 销售价格 成本 描述`
+  - 导入摘要分别显示销售价格和域名成本字段
+  - 格式说明更加清晰明确
+- **业务价值**：
+  - 支持完整的域名财务管理
+  - 可以计算域名投资回报率
+  - 便于成本分析和盈利统计
+
+## 2024-12-29 13:45 - 域名导入功能完整实现
+- 完成了域名导入功能的完整调用实现
+- **前端集成**：
+  - 在域名列表页面添加"批量导入"按钮
+  - 集成DomainImport组件，支持弹窗调用
+  - 实现导入成功后自动刷新列表功能
+- **后端API**：
+  - 创建 `/api/admin/domains/import` 接口
+  - 支持批量域名数据处理和验证
+  - 完整的重复处理策略：跳过/更新/报错
+  - 数据验证：域名格式、价格格式验证
+  - 详细的错误报告和统计信息
+- **功能特性**：
+  - 智能识别域名、价格、描述字段
+  - 支持CSV/XLSX/TXT文件 + 文本输入
+  - 完整的5步导入流程
+  - 实时错误提示和进度反馈
+  - 响应式设计，移动端友好
+- **技术细节**：
+  - 正确处理Prisma模型关系
+  - 用户ID关联（目前临时硬编码）
+  - 完整的错误处理和类型安全
+
+## 2024-12-29 13:35 - 专业域名导入功能实现
+- 用户需求：实现专业的域名导入弹窗，支持CSV/TXT/XLSX格式批量导入
+- 创建了全新的域名导入组件 `pages/admin/domain/import.vue`
+- 功能特性：
+  - 5步导入流程：数据源选择 → 数据预览 → 列映射 → 导入设置 → 结果展示
+  - 多格式支持：CSV、XLSX、TXT文件上传 + 直接文本输入
+  - 智能列识别：自动识别域名、价格、描述等字段
+  - 数据验证：域名格式、价格格式验证，重复数据处理
+  - 完整的错误处理和进度反馈
+- 技术实现：
+  - 使用XLSX库处理Excel文件
+  - Vue3 Composition API + Element Plus UI
+  - 响应式设计，移动端适配
+  - 完整的TypeScript类型支持
+- 待完成：创建对应的API接口 `/api/admin/domains/import`
+
+## 2024-12-29 13:26 - 取消过度抽离
+- 用户反馈：PORTFOLIO_FORM_RULES 和 PORTFOLIO_FORM_DEFAULTS 还不需要抽离
+- 从 utils/constants.js 中移除表单验证规则和默认数据
+- 在 Edit.vue 和 list.vue 中恢复原来的本地定义
+- 保留必要的静态选项数据：LAYOUT_TEMPLATES、COLOR_THEMES 等
+- 避免过度抽离，保持合理的代码组织结构
+
 ## 2025-01-27 19:10 - 门户分页和搜索区域交互优化
 
 **用户需求：**
@@ -2544,4 +2648,160 @@ server/api/admin/
 
 ---
 
-// ... existing code ...
+## 2025-01-27 21:35 - 静态选项数据抽离到公共文件重构完成
+
+**用户需求：** 将 colorThemes、layoutTemplates 等静态选项数据抽离到公共文件，避免代码重复
+
+**问题分析：**
+这些静态数据在多个文件中重复定义：
+1. `server/api/admin/portfolio/options.get.ts` - 服务端API
+2. `pages/admin/portfolio/Edit.vue` - 编辑组件
+3. `pages/admin/portfolio/list.vue` - 列表组件
+
+**解决方案：**
+
+### 1. **创建公共常量文件**
+
+**文件：`utils/constants.js`**
+```javascript
+// 布局模板选项
+export const LAYOUT_TEMPLATES = [
+  { value: 'list', label: '列表布局' },
+  { value: 'grid', label: '网格布局' },
+  { value: 'table', label: '表格布局' },
+  { value: 'card', label: '卡片布局' }
+]
+
+// 颜色主题选项（10种主题）
+export const COLOR_THEMES = [
+  { value: 'moonlight', label: '🌙 月光白', description: '简约纯净风格' },
+  { value: 'ocean', label: '🌊 海洋蓝', description: '清新专业风格' },
+  // ... 其他主题
+]
+
+// 工具函数
+export function getTemplateLabel(template) { /* ... */ }
+export function getTemplateTagType(template) { /* ... */ }
+export function getThemeLabel(themeValue) { /* ... */ }
+
+// 表单相关常量
+export const PORTFOLIO_FORM_RULES = { /* 验证规则 */ }
+export const PORTFOLIO_FORM_DEFAULTS = { /* 默认表单数据 */ }
+```
+
+### 2. **服务端API重构**
+
+**文件：`server/api/admin/portfolio/options.get.ts`**
+```javascript
+import { LAYOUT_TEMPLATES, COLOR_THEMES, SALES_STATUS_OPTIONS } from '~/utils/constants.js'
+
+export default defineEventHandler(async (event) => {
+  try {
+    // 数据库查询...
+    return {
+      code: 200,
+      data: {
+        domains,
+        categories,
+        layoutTemplates: LAYOUT_TEMPLATES,    // 使用公共常量
+        colorThemes: COLOR_THEMES,            // 使用公共常量
+        salesStatusOptions: SALES_STATUS_OPTIONS  // 使用公共常量
+      }
+    }
+  } catch (error) {
+    // 错误处理...
+  }
+})
+```
+
+### 3. **Edit.vue组件重构**
+
+**主要改动：**
+```javascript
+import { 
+  LAYOUT_TEMPLATES, 
+  COLOR_THEMES, 
+  PORTFOLIO_FORM_RULES, 
+  PORTFOLIO_FORM_DEFAULTS,
+  getTemplateLabel,
+  getThemeLabel
+} from '~/utils/constants.js'
+
+// 使用公共常量
+const form = ref({ ...PORTFOLIO_FORM_DEFAULTS })
+const rules = PORTFOLIO_FORM_RULES
+const layoutTemplates = ref(LAYOUT_TEMPLATES)
+const colorThemes = ref(COLOR_THEMES)
+
+// 移除重复的函数定义，直接使用导入的函数
+```
+
+### 4. **list.vue组件重构**
+
+**主要改动：**
+```javascript
+import { 
+  COLOR_THEMES, 
+  PORTFOLIO_FORM_DEFAULTS,
+  getTemplateLabel,
+  getTemplateTagType,
+  getThemeLabel
+} from '~/utils/constants.js'
+
+// 表单重置使用公共默认值
+function reset() {
+  Object.assign(form.value, { ...PORTFOLIO_FORM_DEFAULTS })
+  portfolioRef.value?.resetFields()
+}
+
+// 移除重复的函数和常量定义
+```
+
+### 5. **数据库字段修复**
+
+**修复了Prisma查询错误：**
+```javascript
+// 修复前：
+orderBy: [
+  { sortOrder: 'asc' },  // ❌ sortOrder字段不存在
+  { name: 'asc' }
+]
+
+// 修复后：
+orderBy: { name: 'asc' }  // ✅ 简化排序
+```
+
+### 6. **代码优化效果**
+
+**重构前：**
+- 3个文件中重复定义相同的静态数据
+- 工具函数在多处重复实现
+- 表单默认值硬编码在各个组件中
+- 代码总量：~200行重复代码
+
+**重构后：**
+- 所有静态数据集中在`utils/constants.js`
+- 工具函数复用，避免重复实现
+- 表单默认值统一管理
+- 减少重复代码：~200行 → ~50行（净减少75%）
+
+**维护优势：**
+- 🎯 **单点维护** - 修改常量只需更新一个文件
+- 🔄 **数据一致性** - 避免不同文件中数据不同步
+- 📝 **类型安全** - 统一的数据结构和验证规则
+- 🚀 **代码复用** - 工具函数可在任何地方使用
+
+**新增常量：**
+- `LAYOUT_TEMPLATES` - 布局模板选项
+- `COLOR_THEMES` - 颜色主题选项（10种主题）
+- `SALES_STATUS_OPTIONS` - 域名状态选项
+- `TEXT_THEME_OPTIONS` - 文字主题选项
+- `TWITTER_CARD_OPTIONS` - Twitter卡片选项
+- `PORTFOLIO_FORM_RULES` - 表单验证规则
+- `PORTFOLIO_FORM_DEFAULTS` - 表单默认数据
+
+**✅ 重构完成：静态选项数据成功抽离到公共文件，代码结构更加清晰，维护性显著提升**
+
+---
+
+## 2025-01-27 21:25 - 米表编辑组件拆分和引用调试完成
