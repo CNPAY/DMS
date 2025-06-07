@@ -44,6 +44,11 @@
             <span v-else class="text-gray-400">-</span>
           </template>
         </el-table-column>
+        <el-table-column label="排序" align="center" prop="sortOrder" width="100">
+          <template #default="{ row }">
+            <el-tag type="info">{{ row.sortOrder || 0 }}</el-tag>
+          </template>
+        </el-table-column>
         <el-table-column label="域名数量" align="center" prop="domainCount" width="120">
           <template #default="{ row }">
             <el-tag v-if="row._count?.domains > 0" type="success">{{ row._count.domains }}</el-tag>
@@ -99,6 +104,15 @@
             type="textarea" 
             :rows="3"
             placeholder="请输入分类描述"
+          />
+        </el-form-item>
+        <el-form-item label="排序" prop="sortOrder">
+          <el-input-number 
+            v-model="form.sortOrder" 
+            :min="0"
+            :max="9999"
+            placeholder="请输入排序值（数字越小越靠前）"
+            style="width: 100%"
           />
         </el-form-item>
       </el-form>
@@ -195,7 +209,8 @@ function reset() {
   form.value = {
     id: null,
     name: null,
-    description: null
+    description: null,
+    sortOrder: 0
   }
   if (categoryRef.value) {
     categoryRef.value.resetFields()
@@ -239,7 +254,8 @@ async function handleUpdate(row) {
   form.value = { 
     id: row.id,
     name: row.name, 
-    description: row.description 
+    description: row.description,
+    sortOrder: row.sortOrder || 0
   }
   open.value = true
   title.value = '修改域名分类'
@@ -258,7 +274,8 @@ function submitForm() {
           body: {
             id: form.value.id,
             name: form.value.name,
-            description: form.value.description
+            description: form.value.description,
+            sortOrder: form.value.sortOrder || 0
           }
         })
         

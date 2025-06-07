@@ -78,7 +78,15 @@
           <template #default="scope">
             <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)">修改</el-button>
             <el-button link type="success" icon="Link" @click="handleAssociate(scope.row)">关联</el-button>
-            
+            <el-button 
+             v-if="!scope.row.isDefault"
+              link 
+              type="warning" 
+              icon="Star" 
+              @click="handleSetDefault(scope.row)"
+            >
+              设为默认
+            </el-button>
             <el-button link type="danger" icon="Delete" @click="handleDelete(scope.row)">删除</el-button>
           </template>
         </el-table-column>
@@ -102,206 +110,9 @@
 
     <!-- 添加或修改米表对话框 -->
     <el-dialog :title="title" v-model="open" width="1200px" append-to-body>
-      <div style="display: flex; gap: 20px; height: 500px;">
-        <!-- 左侧表单区域 -->
-        <div style="flex: 1; overflow-y: auto;">
-          <el-form ref="portfolioRef" :model="form" :rules="rules" label-width="120px">
-            <el-form-item label="米表名称" prop="name">
-              <el-input v-model="form.name" placeholder="请输入米表名称" />
-            </el-form-item>
-            <el-form-item label="URL标识符" prop="slug">
-              <el-input v-model="form.slug" placeholder="请输入URL标识符" />
-            </el-form-item>
-            <el-form-item label="布局模板" prop="layoutTemplate">
-              <el-select v-model="form.layoutTemplate" style="width: 100%">
-                <el-option
-                  v-for="template in layoutTemplates"
-                  :key="template.value"
-                  :label="template.label"
-                  :value="template.value"
-                />
-              </el-select>
-            </el-form-item>
-            <el-form-item label="米表主题" prop="colorTheme">
-              <el-select v-model="form.colorTheme" placeholder="选择米表主题风格" style="width: 100%">
-                <el-option
-                  v-for="theme in colorThemes"
-                  :key="theme.value"
-                  :label="theme.label"
-                  :value="theme.value"
-                >
-                  <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span>{{ theme.label }}</span>
-                    <span style="color: #999; font-size: 12px;">{{ theme.description }}</span>
-                  </div>
-                </el-option>
-              </el-select>
-            </el-form-item>
-
-            <!-- 视觉配置 Section -->
-            <el-divider content-position="left">
-              <span style="color: #f56c6c; font-weight: 600;">🎨 视觉配置</span>
-            </el-divider>
-
-            <el-form-item label="网站Logo">
-              <div style="display: flex; flex-direction: column; gap: 12px;">
-                <el-upload
-                  class="logo-uploader"
-                  action="/api/admin/upload/image"
-                  :show-file-list="false"
-                  :on-success="handleLogoSuccess"
-                  :before-upload="beforeLogoUpload"
-                  accept="image/*"
-                >
-                  <img v-if="form.logoUrl" :src="form.logoUrl" class="logo-preview" />
-                  <el-icon v-else class="logo-uploader-icon"><Plus /></el-icon>
-                </el-upload>
-                <div style="display: flex; gap: 8px;">
-                  <el-button v-if="form.logoUrl" size="small" type="danger" @click="clearLogo">清除Logo</el-button>
-                  <div style="font-size: 12px; color: #666; flex: 1;">
-                    推荐尺寸：180x60px，支持 JPG、PNG、GIF 格式，文件大小不超过 2MB
-                  </div>
-                </div>
-              </div>
-            </el-form-item>
-
-            <el-form-item label="背景图片">
-              <div style="display: flex; flex-direction: column; gap: 12px;">
-                <el-upload
-                  class="background-uploader"
-                  action="/api/admin/upload/image"
-                  :show-file-list="false"
-                  :on-success="handleBackgroundSuccess"
-                  :before-upload="beforeBackgroundUpload"
-                  accept="image/*"
-                >
-                  <img v-if="form.backgroundUrl" :src="form.backgroundUrl" class="background-preview" />
-                  <div v-else class="background-uploader-placeholder">
-                    <el-icon class="background-uploader-icon"><Plus /></el-icon>
-                    <div class="background-uploader-text">点击上传背景图片</div>
-                  </div>
-                </el-upload>
-                <div style="display: flex; gap: 8px;">
-                  <el-button v-if="form.backgroundUrl" size="small" type="danger" @click="clearBackground">清除背景</el-button>
-                  <div style="font-size: 12px; color: #666; flex: 1;">
-                    推荐尺寸：1920x1080px，支持 JPG、PNG 格式，文件大小不超过 5MB
-                  </div>
-                </div>
-              </div>
-            </el-form-item>
-
-            <el-form-item label="设置选项">
-              <el-checkbox v-model="form.showPrice">显示价格</el-checkbox>
-              <el-checkbox v-model="form.showDescription">显示描述</el-checkbox>
-              <el-checkbox v-model="form.showTags">显示标签</el-checkbox>
-            </el-form-item>
-
-            <!-- 头部配置 Section -->
-            <el-divider content-position="left">
-              <span style="color: #409eff; font-weight: 600;">🔝 头部配置</span>
-            </el-divider>
-            
-            <el-form-item label="头部页面菜单" prop="headerPages">
-              <el-select 
-                v-model="form.headerPages" 
-                multiple 
-                placeholder="选择要在头部显示的页面"
-                style="width: 100%"
-                :loading="staticPagesLoading"
-              >
-                <el-option
-                  v-for="page in staticPagesList"
-                  :key="page.id"
-                  :label="page.title"
-                  :value="page.id"
-                >
-                  <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span>{{ page.title }}</span>
-                    <span style="color: #999; font-size: 12px;">/{{ page.slug }}</span>
-                  </div>
-                </el-option>
-              </el-select>
-              <div style="font-size: 12px; color: #666; margin-top: 4px;">
-                选中的页面将作为头部导航菜单显示
-              </div>
-            </el-form-item>
-
-            <el-form-item label="头部简介信息" prop="headerInfo">
-              <el-input 
-                v-model="form.headerInfo" 
-                type="textarea" 
-                :rows="2"
-                placeholder="头部简介文本（纯文本）"
-              />
-            </el-form-item>
-
-            <el-form-item label="头部富文本" prop="headerRichText">
-              <el-input 
-                v-model="form.headerRichText" 
-                type="textarea" 
-                :rows="6"
-                placeholder="头部富文本内容（支持HTML）"
-              />
-              <div style="font-size: 12px; color: #666; margin-top: 4px;">
-                支持HTML标签，可用于添加图片、链接等富媒体内容
-              </div>
-            </el-form-item>
-
-            <!-- 尾部配置 Section -->
-            <el-divider content-position="left">
-              <span style="color: #67c23a; font-weight: 600;">🔽 尾部配置</span>
-            </el-divider>
-
-            <el-form-item label="尾部页面链接" prop="footerPages">
-              <el-select 
-                v-model="form.footerPages" 
-                multiple 
-                placeholder="选择要在尾部显示的页面"
-                style="width: 100%"
-                :loading="staticPagesLoading"
-              >
-                <el-option
-                  v-for="page in staticPagesList"
-                  :key="page.id"
-                  :label="page.title"
-                  :value="page.id"
-                >
-                  <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span>{{ page.title }}</span>
-                    <span style="color: #999; font-size: 12px;">/{{ page.slug }}</span>
-                  </div>
-                </el-option>
-              </el-select>
-              <div style="font-size: 12px; color: #666; margin-top: 4px;">
-                选中的页面将作为尾部链接显示
-              </div>
-            </el-form-item>
-
-            <el-form-item label="尾部版权信息" prop="footerInfo">
-              <el-input 
-                v-model="form.footerInfo" 
-                type="textarea" 
-                :rows="2"
-                placeholder="尾部版权信息（纯文本）"
-              />
-            </el-form-item>
-
-            <el-form-item label="尾部富文本" prop="footerRichText">
-              <el-input 
-                v-model="form.footerRichText" 
-                type="textarea" 
-                :rows="6"
-                placeholder="尾部富文本内容（支持HTML）"
-              />
-              <div style="font-size: 12px; color: #666; margin-top: 4px;">
-                支持HTML标签，可用于添加联系信息、社交媒体链接等
-              </div>
-            </el-form-item>
-          </el-form>
-        </div>
-        
-        <!-- 右侧预览区域 -->
-        <div style="width: 350px; border-left: 1px solid #e6e6e6; padding-left: 20px;">
+      <div style="display: flex; gap: 10px; height: 500px;">
+        <!-- 左侧预览区域 -->
+        <div style="width: 350px; border-right: 1px solid #e6e6e6; padding-right: 20px;">
           <div style="margin-bottom: 15px;">
             <h4 style="margin: 0 0 8px 0; color: #333; font-size: 16px;">🎨 主题预览</h4>
             <p style="margin: 0; color: #666; font-size: 12px;">实时预览选中主题的视觉效果</p>
@@ -328,9 +139,60 @@
               <!-- 布局标识 -->
               <div class="layout-indicator">
                 <span class="layout-badge">{{ getTemplateLabel(form.layoutTemplate) }}布局</span>
+                <span v-if="form.enableGrouping" class="feature-badge grouping-badge">分组模式</span>
+                <span v-if="form.enableWaterfall" class="feature-badge waterfall-badge">瀑布流</span>
               </div>
               
-              <!-- 列表布局 -->
+              <!-- 分组模式预览 -->
+              <template v-if="form.enableGrouping">
+                <!-- 第一个分组 -->
+                <div class="preview-group">
+                  <div class="group-header">
+                    <h4 class="group-title">🏢 商务类</h4>
+                    <span class="group-count">2个</span>
+                  </div>
+                  <div :class="`preview-domain-list ${form.layoutTemplate}-layout`">
+                    <div class="preview-domain-item">
+                      <div class="domain-name">shop.com</div>
+                      <div class="domain-price" v-if="form.showPrice">¥8,888</div>
+                      <div class="domain-desc" v-if="form.showDescription">商务首选</div>
+                      <div class="domain-tags" v-if="form.showTags">
+                        <span class="tag">商务</span>
+                      </div>
+                    </div>
+                    <div class="preview-domain-item">
+                      <div class="domain-name">business.net</div>
+                      <div class="domain-price" v-if="form.showPrice">¥6,666</div>
+                      <div class="domain-desc" v-if="form.showDescription">企业专用</div>
+                      <div class="domain-tags" v-if="form.showTags">
+                        <span class="tag">企业</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- 第二个分组 -->
+                <div class="preview-group">
+                  <div class="group-header">
+                    <h4 class="group-title">💻 科技类</h4>
+                    <span class="group-count">1个</span>
+                  </div>
+                  <div :class="`preview-domain-list ${form.layoutTemplate}-layout`">
+                    <div class="preview-domain-item">
+                      <div class="domain-name">tech.org</div>
+                      <div class="domain-price" v-if="form.showPrice">¥3,999</div>
+                      <div class="domain-desc" v-if="form.showDescription">科技创新</div>
+                      <div class="domain-tags" v-if="form.showTags">
+                        <span class="tag">科技</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </template>
+              
+              <!-- 普通模式预览 -->
+              <template v-else>
+                <!-- 列表布局 -->
               <div v-if="form.layoutTemplate === 'list'" class="preview-domain-list list-layout">
                 <div class="preview-domain-item">
                   <div class="domain-name">example.com</div>
@@ -462,13 +324,392 @@
                     </div>
                   </div>
                 </div>
-              </div>
-              
-              <div class="preview-footer-info" v-if="form.footerInfo">
-                {{ form.footerInfo }}
-              </div>
+                             </div>
+               </template>
+               
+               <!-- 瀑布流预览效果 -->
+               <div v-if="form.enableWaterfall" class="waterfall-preview">
+                 <div class="waterfall-loading-demo">
+                   <div class="loading-indicator">
+                     <el-icon class="is-loading"><Loading /></el-icon>
+                     <span>正在加载更多...</span>
+                   </div>
+                 </div>
+               </div>
+               
+               <!-- 传统分页预览 -->
+               <div v-else class="pagination-preview">
+                 <div class="pagination-demo">
+                   <span class="page-btn">1</span>
+                   <span class="page-btn active">2</span>
+                   <span class="page-btn">3</span>
+                 </div>
+               </div>
+               
+               <div class="preview-footer-info" v-if="form.footerInfo">
+                 {{ form.footerInfo }}
+               </div>
+             </div>
+           </div>
+         </div>
+        
+        <!-- 右侧表单区域 -->
+        <div style="flex: 1; overflow-y: auto;padding-right: 10px;">
+          <el-form ref="portfolioRef" :model="form" :rules="rules" label-width="110px">
+            <el-form-item label="米表名称" prop="name">
+              <el-input v-model="form.name" placeholder="请输入米表名称" />
+            </el-form-item>
+            <el-form-item label="URL标识符" prop="slug">
+              <el-input v-model="form.slug" placeholder="请输入URL标识符" />
+            </el-form-item>
+            <el-form-item label="布局模板" prop="layoutTemplate">
+              <el-select v-model="form.layoutTemplate" style="width: 100%">
+                <el-option
+                  v-for="template in layoutTemplates"
+                  :key="template.value"
+                  :label="template.label"
+                  :value="template.value"
+                />
+              </el-select>
+            </el-form-item>
+            <el-form-item label="分组设置" prop="enableGrouping">
+              <el-radio-group v-model="form.enableGrouping">
+                <el-radio :label="false">关闭分组</el-radio>
+                <el-radio :label="true">开启分组</el-radio>
+              </el-radio-group>
+            </el-form-item>
+            <div style="font-size: 12px; color: #666; margin-top: -16px; margin-bottom: 18px; margin-left: 120px;">
+              开启后将按域名分类进行分组展示
             </div>
-          </div>
+            <el-form-item label="瀑布流设置" prop="enableWaterfall">
+              <el-radio-group v-model="form.enableWaterfall">
+                <el-radio :label="false">关闭瀑布流</el-radio>
+                <el-radio :label="true">开启瀑布流</el-radio>
+              </el-radio-group>
+            </el-form-item>
+            <div style="font-size: 12px; color: #666; margin-top: -16px; margin-bottom: 18px; margin-left: 120px;">
+              开启后将自动加载更多内容，不显示分页按钮
+            </div>
+            <el-form-item label="米表主题" prop="colorTheme">
+              <el-select v-model="form.colorTheme" placeholder="选择米表主题风格" style="width: 100%">
+                <el-option
+                  v-for="theme in colorThemes"
+                  :key="theme.value"
+                  :label="theme.label"
+                  :value="theme.value"
+                >
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>{{ theme.label }}</span>
+                    <span style="color: #999; font-size: 12px;">{{ theme.description }}</span>
+                  </div>
+                </el-option>
+              </el-select>
+            </el-form-item>
+
+            <!-- 视觉配置 Section -->
+            <el-divider content-position="left">
+              <span style="color: #f56c6c; font-weight: 600;">🎨 视觉配置</span>
+            </el-divider>
+
+            <el-form-item label="网站Logo">
+              <div style="display: flex; flex-direction: column; gap: 12px;">
+                <el-upload
+                  class="logo-uploader"
+                  action="/api/admin/upload/image"
+                  :show-file-list="false"
+                  :on-success="handleLogoSuccess"
+                  :before-upload="beforeLogoUpload"
+                  accept="image/*"
+                >
+                  <img v-if="form.logoUrl" :src="form.logoUrl" class="logo-preview" />
+                  <el-icon v-else class="logo-uploader-icon"><Plus /></el-icon>
+                </el-upload>
+                <div style="display: flex; gap: 8px;">
+                  <el-button v-if="form.logoUrl" size="small" type="danger" @click="clearLogo">清除Logo</el-button>
+                  <div style="font-size: 12px; color: #666; flex: 1;">
+                    推荐尺寸：180x60px，支持 JPG、PNG、GIF 格式，文件大小不超过 2MB
+                  </div>
+                </div>
+              </div>
+            </el-form-item>
+
+            <el-form-item label="背景图片">
+              <div style="display: flex; flex-direction: column; gap: 12px;">
+                <el-upload
+                  class="background-uploader"
+                  action="/api/admin/upload/image"
+                  :show-file-list="false"
+                  :on-success="handleBackgroundSuccess"
+                  :before-upload="beforeBackgroundUpload"
+                  accept="image/*"
+                >
+                  <img v-if="form.backgroundUrl" :src="form.backgroundUrl" class="background-preview" />
+                  <div v-else class="background-uploader-placeholder">
+                    <el-icon class="background-uploader-icon"><Plus /></el-icon>
+                    <div class="background-uploader-text">点击上传背景图片</div>
+                  </div>
+                </el-upload>
+                <div style="display: flex; gap: 8px;">
+                  <el-button v-if="form.backgroundUrl" size="small" type="danger" @click="clearBackground">清除背景</el-button>
+                  <div style="font-size: 12px; color: #666; flex: 1;">
+                    推荐尺寸：1920x1080px，支持 JPG、PNG 格式，文件大小不超过 5MB
+                  </div>
+                </div>
+              </div>
+            </el-form-item>
+
+            <el-form-item label="文字颜色" prop="textTheme">
+              <el-radio-group v-model="form.textTheme">
+                <el-radio label="auto">自动适应</el-radio>
+                <el-radio label="light">浅色文字</el-radio>
+                <el-radio label="dark">深色文字</el-radio>
+              </el-radio-group>
+              <div style="font-size: 12px; color: #666; margin-top: 4px;">
+                选择文字颜色以确保在不同背景下的可读性。自动适应会根据背景添加适当的对比效果。
+              </div>
+            </el-form-item>
+
+            <el-form-item label="背景遮罩" prop="backgroundOverlay">
+              <el-switch v-model="form.backgroundOverlay" />
+              <div style="font-size: 12px; color: #666; margin-top: 4px;margin-left: 80px;">
+                为背景图添加半透明遮罩，提升文字可读性
+              </div>
+            </el-form-item>
+
+            <el-form-item label="设置选项">
+              <el-checkbox v-model="form.showPrice">显示价格</el-checkbox>
+              <el-checkbox v-model="form.showDescription">显示描述</el-checkbox>
+              <el-checkbox v-model="form.showTags">显示标签</el-checkbox>
+            </el-form-item>
+
+            <!-- 头部配置 Section -->
+            <el-divider content-position="left">
+              <span style="color: #409eff; font-weight: 600;">🔝 头部配置</span>
+            </el-divider>
+            
+            <el-form-item label="头部页面菜单" prop="headerPages">
+              <el-select 
+                v-model="form.headerPages" 
+                multiple 
+                placeholder="选择要在头部显示的页面"
+                style="width: 100%"
+                :loading="staticPagesLoading"
+              >
+                <el-option
+                  v-for="page in staticPagesList"
+                  :key="page.id"
+                  :label="page.title"
+                  :value="page.id"
+                >
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>{{ page.title }}</span>
+                    <span style="color: #999; font-size: 12px;">/{{ page.slug }}</span>
+                  </div>
+                </el-option>
+              </el-select>
+              <div style="font-size: 12px; color: #666; margin-top: 4px;">
+                选中的页面将作为头部导航菜单显示
+              </div>
+            </el-form-item>
+
+            <el-form-item label="头部简介信息" prop="headerInfo">
+              <el-input 
+                v-model="form.headerInfo" 
+                type="textarea" 
+                :rows="2"
+                placeholder="头部简介文本（纯文本）"
+              />
+            </el-form-item>
+
+            <el-form-item label="头部富文本" prop="headerRichText">
+              <el-input 
+                v-model="form.headerRichText" 
+                type="textarea" 
+                :rows="6"
+                placeholder="头部富文本内容（支持HTML）"
+              />
+              <div style="font-size: 12px; color: #666; margin-top: 4px;">
+                支持HTML标签，可用于添加图片、链接等富媒体内容
+              </div>
+            </el-form-item>
+
+            <!-- 尾部配置 Section -->
+            <el-divider content-position="left">
+              <span style="color: #67c23a; font-weight: 600;">🔽 尾部配置</span>
+            </el-divider>
+
+            <el-form-item label="尾部页面链接" prop="footerPages">
+              <el-select 
+                v-model="form.footerPages" 
+                multiple 
+                placeholder="选择要在尾部显示的页面"
+                style="width: 100%"
+                :loading="staticPagesLoading"
+              >
+                <el-option
+                  v-for="page in staticPagesList"
+                  :key="page.id"
+                  :label="page.title"
+                  :value="page.id"
+                >
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>{{ page.title }}</span>
+                    <span style="color: #999; font-size: 12px;">/{{ page.slug }}</span>
+                  </div>
+                </el-option>
+              </el-select>
+              <div style="font-size: 12px; color: #666; margin-top: 4px;">
+                选中的页面将作为尾部链接显示
+              </div>
+            </el-form-item>
+
+            <el-form-item label="尾部版权信息" prop="footerInfo">
+              <el-input 
+                v-model="form.footerInfo" 
+                type="textarea" 
+                :rows="2"
+                placeholder="尾部版权信息（纯文本）"
+              />
+            </el-form-item>
+
+            <el-form-item label="尾部富文本" prop="footerRichText">
+              <el-input 
+                v-model="form.footerRichText" 
+                type="textarea" 
+                :rows="6"
+                placeholder="尾部富文本内容（支持HTML）"
+              />
+              <div style="font-size: 12px; color: #666; margin-top: 4px;">
+                支持HTML标签，可用于添加联系信息、社交媒体链接等
+              </div>
+            </el-form-item>
+
+            <!-- SEO配置 Section -->
+            <el-divider content-position="left">
+              <span style="color: #e6a23c; font-weight: 600;">🔍 SEO配置</span>
+            </el-divider>
+
+            <el-form-item label="SEO标题" prop="seoTitle">
+              <el-input 
+                v-model="form.seoTitle" 
+                placeholder="页面标题，用于搜索引擎显示（建议50-60字符）"
+                maxlength="255"
+                show-word-limit
+              />
+              <div style="font-size: 12px; color: #666; margin-top: 4px;">
+                如果不填写，将使用"米表名称 - 优质域名出售"作为默认标题
+              </div>
+            </el-form-item>
+
+            <el-form-item label="SEO描述" prop="seoDescription">
+              <el-input 
+                v-model="form.seoDescription" 
+                type="textarea" 
+                :rows="3"
+                placeholder="页面描述，用于搜索引擎摘要显示（建议120-160字符）"
+                maxlength="500"
+                show-word-limit
+              />
+              <div style="font-size: 12px; color: #666; margin-top: 4px;">
+                简洁描述米表内容，吸引用户点击
+              </div>
+            </el-form-item>
+
+            <el-form-item label="SEO关键词" prop="seoKeywords">
+              <el-input 
+                v-model="form.seoKeywords" 
+                placeholder="关键词，用英文逗号分隔，如：域名出售,优质域名,domain,出售"
+                maxlength="500"
+                show-word-limit
+              />
+              <div style="font-size: 12px; color: #666; margin-top: 4px;">
+                使用英文逗号分隔，建议5-10个相关关键词
+              </div>
+            </el-form-item>
+
+            <!-- 社交媒体配置 -->
+            <el-divider content-position="left">
+              <span style="color: #909399; font-weight: 600;">📱 社交媒体</span>
+            </el-divider>
+
+            <el-form-item label="分享标题" prop="ogTitle">
+              <el-input 
+                v-model="form.ogTitle" 
+                placeholder="社交媒体分享时显示的标题"
+                maxlength="255"
+                show-word-limit
+              />
+              <div style="font-size: 12px; color: #666; margin-top: 4px;">
+                用于微信、微博、Facebook等平台分享，如不填写将使用SEO标题
+              </div>
+            </el-form-item>
+
+            <el-form-item label="分享描述" prop="ogDescription">
+              <el-input 
+                v-model="form.ogDescription" 
+                type="textarea" 
+                :rows="2"
+                placeholder="社交媒体分享时显示的描述"
+                maxlength="300"
+                show-word-limit
+              />
+              <div style="font-size: 12px; color: #666; margin-top: 4px;">
+                如不填写将使用SEO描述
+              </div>
+            </el-form-item>
+
+            <el-form-item label="分享图片" prop="ogImage">
+              <div style="display: flex; flex-direction: column; gap: 12px;">
+                <el-upload
+                  class="og-image-uploader"
+                  action="/api/admin/upload/image"
+                  :show-file-list="false"
+                  :on-success="handleOgImageSuccess"
+                  :before-upload="beforeOgImageUpload"
+                  accept="image/*"
+                >
+                  <img v-if="form.ogImage" :src="form.ogImage" class="og-image-preview" />
+                  <div v-else class="og-image-uploader-placeholder">
+                    <el-icon class="og-image-uploader-icon"><Plus /></el-icon>
+                    <div class="og-image-uploader-text">点击上传分享图片</div>
+                  </div>
+                </el-upload>
+                <div style="display: flex; gap: 8px;">
+                  <el-button v-if="form.ogImage" size="small" type="danger" @click="clearOgImage">清除图片</el-button>
+                  <div style="font-size: 12px; color: #666; flex: 1;">
+                    推荐尺寸：1200x630px，用于社交媒体分享预览
+                  </div>
+                </div>
+              </div>
+            </el-form-item>
+
+            <el-form-item label="Twitter卡片" prop="twitterCard">
+              <el-select v-model="form.twitterCard" style="width: 100%">
+                <el-option label="摘要" value="summary" />
+                <el-option label="大图摘要" value="summary_large_image" />
+              </el-select>
+              <div style="font-size: 12px; color: #666; margin-top: 4px;">
+                选择在Twitter分享时的卡片样式
+              </div>
+            </el-form-item>
+
+            <!-- 统计代码配置 -->
+            <el-divider content-position="left">
+              <span style="color: #67c23a; font-weight: 600;">📊 网站统计</span>
+            </el-divider>
+
+            <el-form-item label="统计代码" prop="analyticsCode">
+              <el-input 
+                v-model="form.analyticsCode" 
+                type="textarea" 
+                :rows="6"
+                placeholder="请输入Google Analytics、百度统计或其他统计工具的代码"
+              />
+              <div style="font-size: 12px; color: #666; margin-top: 4px;">
+                支持Google Analytics (gtag.js)、百度统计、友盟等统计代码。代码将插入到页面头部。
+              </div>
+            </el-form-item>
+          </el-form>
         </div>
       </div>
       
@@ -619,6 +860,10 @@
 .layout-indicator {
   margin-bottom: 12px;
   text-align: center;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
 }
 
 .layout-badge {
@@ -628,6 +873,99 @@
   border-radius: 12px;
   font-size: 10px;
   font-weight: bold;
+}
+
+.feature-badge {
+  padding: 4px 8px;
+  border-radius: 10px;
+  font-size: 9px;
+  font-weight: bold;
+}
+
+.grouping-badge {
+  background: #e8f4fd;
+  color: #1976d2;
+}
+
+.waterfall-badge {
+  background: #f0f9ff;
+  color: #0891b2;
+}
+
+/* 分组预览样式 */
+.preview-group {
+  margin-bottom: 20px;
+}
+
+.preview-group .group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #e6e6e6;
+  margin-bottom: 10px;
+}
+
+.preview-group .group-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.preview-group .group-count {
+  font-size: 10px;
+  color: #666;
+  background: #f5f5f5;
+  padding: 2px 6px;
+  border-radius: 8px;
+}
+
+/* 瀑布流和分页预览样式 */
+.waterfall-preview, .pagination-preview {
+  text-align: center;
+  padding: 12px 0;
+  margin-top: 15px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.waterfall-loading-demo .loading-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: #1976d2;
+  font-size: 11px;
+}
+
+.waterfall-loading-demo .el-icon {
+  font-size: 14px;
+}
+
+.pagination-demo {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+}
+
+.pagination-demo .page-btn {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e1e8ed;
+  background: white;
+  color: #666;
+  border-radius: 3px;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.pagination-demo .page-btn.active {
+  background: #1976d2;
+  color: white;
+  border-color: #1976d2;
 }
 
 /* 列表布局样式 */
@@ -1147,6 +1485,7 @@
 
 <script setup name="Portfolio">
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { Loading } from '@element-plus/icons-vue'
 
 definePageMeta({
   layout: 'admin',
@@ -1333,14 +1672,27 @@ function reset() {
     isDefault: false,
     layoutTemplate: 'list',
     colorTheme: 'moonlight',
+    enableGrouping: false,
+    enableWaterfall: false,
     logoUrl: null,
     backgroundUrl: null,
+    textTheme: 'auto',
+    backgroundOverlay: false,
     headerInfo: null,
     headerPages: [],
     headerRichText: null,
     footerInfo: null,
     footerPages: [],
     footerRichText: null,
+    // SEO配置
+    seoTitle: null,
+    seoDescription: null,
+    seoKeywords: null,
+    ogTitle: null,
+    ogDescription: null,
+    ogImage: null,
+    twitterCard: 'summary',
+    analyticsCode: null,
     showPrice: true,
     showDescription: false,
     showTags: false
@@ -1388,15 +1740,28 @@ async function handleUpdate(row) {
       slug: row.slug,
       isDefault: row.isDefault,
       layoutTemplate: row.layoutTemplate,
+      enableGrouping: row.enableGrouping,
+      enableWaterfall: row.enableWaterfall,
       colorTheme: row.colorTheme,
       logoUrl: row.logoUrl,
       backgroundUrl: row.backgroundUrl,
+      textTheme: row.textTheme || 'auto',
+      backgroundOverlay: row.backgroundOverlay || false,
       headerInfo: row.headerInfo,
       headerPages: row.headerPages ? JSON.parse(row.headerPages) : [],
       headerRichText: row.headerRichText,
       footerInfo: row.footerInfo,
       footerPages: row.footerPages ? JSON.parse(row.footerPages) : [],
       footerRichText: row.footerRichText,
+      // SEO配置
+      seoTitle: row.seoTitle,
+      seoDescription: row.seoDescription,
+      seoKeywords: row.seoKeywords,
+      ogTitle: row.ogTitle,
+      ogDescription: row.ogDescription,
+      ogImage: row.ogImage,
+      twitterCard: row.twitterCard || 'summary',
+      analyticsCode: row.analyticsCode,
       showPrice: row.showPrice,
       showDescription: row.showDescription,
       showTags: row.showTags
@@ -1411,15 +1776,28 @@ async function handleUpdate(row) {
         slug: selectedRow.slug,
         isDefault: selectedRow.isDefault,
         layoutTemplate: selectedRow.layoutTemplate,
+        enableGrouping: selectedRow.enableGrouping,
+        enableWaterfall: selectedRow.enableWaterfall,
         colorTheme: selectedRow.colorTheme,
         logoUrl: selectedRow.logoUrl,
         backgroundUrl: selectedRow.backgroundUrl,
+        textTheme: selectedRow.textTheme || 'auto',
+        backgroundOverlay: selectedRow.backgroundOverlay || false,
         headerInfo: selectedRow.headerInfo,
         headerPages: selectedRow.headerPages ? JSON.parse(selectedRow.headerPages) : [],
         headerRichText: selectedRow.headerRichText,
         footerInfo: selectedRow.footerInfo,
         footerPages: selectedRow.footerPages ? JSON.parse(selectedRow.footerPages) : [],
         footerRichText: selectedRow.footerRichText,
+        // SEO配置
+        seoTitle: selectedRow.seoTitle,
+        seoDescription: selectedRow.seoDescription,
+        seoKeywords: selectedRow.seoKeywords,
+        ogTitle: selectedRow.ogTitle,
+        ogDescription: selectedRow.ogDescription,
+        ogImage: selectedRow.ogImage,
+        twitterCard: selectedRow.twitterCard || 'summary',
+        analyticsCode: selectedRow.analyticsCode,
         showPrice: selectedRow.showPrice,
         showDescription: selectedRow.showDescription,
         showTags: selectedRow.showTags
@@ -1653,6 +2031,37 @@ function clearBackground() {
   form.value.backgroundUrl = null
 }
 
+// 分享图片上传成功处理
+function handleOgImageSuccess(res, file) {
+  if (res.code === 200) {
+    form.value.ogImage = res.data.url
+    ElMessage.success('分享图片上传成功')
+  } else {
+    ElMessage.error(res.message || '分享图片上传失败')
+  }
+}
+
+// 分享图片上传前校验
+function beforeOgImageUpload(file) {
+  const isImage = file.type.startsWith('image/')
+  const isLt3M = file.size / 1024 / 1024 < 3
+
+  if (!isImage) {
+    ElMessage.error('上传文件只能是图片格式!')
+    return false
+  }
+  if (!isLt3M) {
+    ElMessage.error('上传图片大小不能超过 3MB!')
+    return false
+  }
+  return true
+}
+
+// 清除分享图片
+function clearOgImage() {
+  form.value.ogImage = null
+}
+
 // 导出按钮操作
 function handleExport() {
   console.log('导出功能暂未实现')
@@ -1758,6 +2167,53 @@ loadOptions()
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: 4px;
+}
+
+/* 分享图片上传组件样式 - 与Logo保持一致 */
+.og-image-uploader {
+  border: 2px dashed #d9d9d9;
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  width: 300px;
+  height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.og-image-uploader:hover {
+  border-color: #409eff;
+  background-color: #f5f7fa;
+}
+
+.og-image-uploader-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+}
+
+.og-image-uploader-icon {
+  font-size: 24px;
+  color: #8c939d;
+  margin-bottom: 8px;
+}
+
+.og-image-uploader-text {
+  color: #8c939d;
+  font-size: 14px;
+}
+
+.og-image-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
   border-radius: 4px;
 }
 

@@ -38,13 +38,12 @@
         <el-dropdown @command="handleCommand" class="right-menu-item hover-effect" trigger="click">
           <div class="avatar-wrapper">
             <!-- <img :src="userStore.avatar" class="user-avatar" /> -->
-            <span class="user-type">{{ getRoles() }}</span>
-            <span class="user-avatar round-item">{{ userStore.name.substring(0, 1).toUpperCase() }}</span>
+            <span class="user-avatar round-item">{{ "A" }}</span>
             <span class="user-name">{{ userStore.name }}</span>
           </div>
           <template #dropdown>
             <el-dropdown-menu>
-              <router-link to="/user/profile">
+              <router-link to="/admin/user/profile">
                 <el-dropdown-item>个人中心</el-dropdown-item>
               </router-link>
               <el-dropdown-item command="setLayout" v-if="settingsStore.showSettings">
@@ -141,7 +140,7 @@ function logout() {
   })
     .then(() => {
       userStore.logOut().then(() => {
-        location.href = '/index';
+        location.href = '/admin/';
       });
     })
     .catch(() => {});

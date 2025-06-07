@@ -76,17 +76,53 @@ async function loadPortfolioData() {
     if (portfolioData?.code === 200 && portfolioData.data) {
       portfolio.value = portfolioData.data
       
-      // 设置页面SEO
-      const pageTitle = `${portfolio.value.name} - 域名投资组合`
-      const pageDescription = `浏览 ${portfolio.value.name} 的精选域名投资组合，发现优质域名投资机会。`
+      // 设置页面SEO - 使用米表配置的SEO信息
+      const portfolioConfig = portfolio.value
       
-      useSeoMeta({
+      // 页面标题：优先使用SEO标题，否则使用米表名称
+      const pageTitle = `${portfolioConfig.seoTitle} | ${portfolioConfig.name}`
+      
+      // 页面描述：优先使用SEO描述，否则使用默认描述
+      const pageDescription = portfolioConfig.seoDescription || 
+        `浏览 ${portfolioConfig.name} 的精选域名投资组合，发现优质域名投资机会。`
+      
+      // OG标题：优先使用OG标题，否则使用SEO标题
+      const ogTitle = portfolioConfig.ogTitle || pageTitle
+      
+      // OG描述：优先使用OG描述，否则使用SEO描述
+      const ogDescription = portfolioConfig.ogDescription || pageDescription
+      
+      // SEO元数据配置
+      const seoConfig = {
         title: pageTitle,
         description: pageDescription,
-        ogTitle: pageTitle,
-        ogDescription: pageDescription,
-        ogType: 'website'
-      })
+        keywords: portfolioConfig.seoKeywords,
+        ogTitle: ogTitle,
+        ogDescription: ogDescription,
+        ogType: 'website',
+        twitterCard: portfolioConfig.twitterCard || 'summary'
+      }
+      
+      // 如果有OG图片，添加到配置中
+      if (portfolioConfig.ogImage) {
+        seoConfig.ogImage = portfolioConfig.ogImage
+        seoConfig.twitterImage = portfolioConfig.ogImage
+      }
+      
+      // 应用SEO配置
+      useSeoMeta(seoConfig)
+      
+      // 如果有统计代码，插入到页面头部
+      if (portfolioConfig.analyticsCode) {
+        useHead({
+          script: [
+            {
+              innerHTML: portfolioConfig.analyticsCode,
+              type: 'text/javascript'
+            }
+          ]
+        })
+      }
       
       // 4. 获取米表关联的域名数据
       try {

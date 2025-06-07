@@ -30,7 +30,10 @@ export default defineEventHandler(async (event) => {
       where,
       skip: (page - 1) * limit,
       take: limit,
-      orderBy: { createdAt: 'desc' },
+      orderBy: [
+        { sortOrder: 'asc' },  // 首先按排序字段升序排序
+        { createdAt: 'desc' }  // 然后按创建时间降序排序
+      ],
       include: {
         _count: {
           select: { domains: true }

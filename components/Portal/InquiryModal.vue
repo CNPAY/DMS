@@ -4,7 +4,7 @@
   <div v-if="modelValue" class="inquiry-modal-overlay" @click="closeModal">
     <div class="inquiry-modal" @click.stop>
       <div class="modal-header">
-        <h3>域名线索</h3>
+        <h3>域名报价</h3>
         <button @click="closeModal" class="close-btn">&times;</button>
       </div>
       

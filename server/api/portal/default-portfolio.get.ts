@@ -12,18 +12,35 @@ export default defineEventHandler(async (event) => {
         id: true,
         name: true,
         slug: true,
+        isDefault: true,
         layoutTemplate: true,
         colorTheme: true,
+        enableGrouping: true,
+        enableWaterfall: true,
+        logoUrl: true,
+        backgroundUrl: true,
+        textTheme: true,
+        backgroundOverlay: true,
         headerInfo: true,
         headerPages: true,
         headerRichText: true,
         footerInfo: true,
         footerPages: true,
         footerRichText: true,
+        // SEO配置
+        seoTitle: true,
+        seoDescription: true,
+        seoKeywords: true,
+        ogTitle: true,
+        ogDescription: true,
+        ogImage: true,
+        twitterCard: true,
+        analyticsCode: true,
         showPrice: true,
         showDescription: true,
         showTags: true,
-        createdAt: true
+        createdAt: true,
+        updatedAt: true
       }
     })
 

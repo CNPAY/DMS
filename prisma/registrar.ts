@@ -1,13 +1,6 @@
 import { PrismaClient } from '@prisma/client'
-import { dbConfig } from '~/config'
 
-const prisma = new PrismaClient({
-    datasources: {
-        db: {
-            url: dbConfig.mysql.url
-        }
-    }
-})
+const prisma = new PrismaClient()
 
 async function main() {
   console.log('开始插入测试数据...')

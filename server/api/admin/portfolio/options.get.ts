@@ -31,7 +31,10 @@ export default defineEventHandler(async (event) => {
         id: true,
         name: true
       },
-      orderBy: { name: 'asc' }
+      orderBy: [
+        { sortOrder: 'asc' },
+        { name: 'asc' }
+      ]
     });
 
     // 布局模板选项

@@ -1,10 +1,16 @@
 <template>
-  <div class="portfolio-view" :class="[`theme-${portfolio.colorTheme}`, `layout-${portfolio.layoutTemplate}`]">
+  <div class="portfolio-view" :class="[`theme-${portfolio.colorTheme}`, `layout-${portfolio.layoutTemplate}`, portfolioTextThemeClass]" :style="portfolioBackgroundStyle">
+    <!-- 背景遮罩层 -->
+    <div v-if="portfolio.backgroundUrl && portfolio.backgroundOverlay" class="background-overlay"></div>
     <div class="portfolio-container">
       <!-- 头部信息 -->
       <div class="portfolio-header">
         <div class="header-content">
           <div class="header-main">
+            <!-- Logo在左侧 -->
+            <div v-if="portfolio.logoUrl" class="portfolio-logo">
+              <img :src="portfolio.logoUrl" :alt="portfolio.name" class="logo-image" />
+            </div>
             <div class="header-info-section">
               <div class="portfolio-title">{{ portfolio.name }}</div>
               <div v-if="portfolio.headerInfo" class="header-info" v-html="portfolio.headerInfo"></div>
@@ -44,7 +50,8 @@
               class="search-input"
             />
           </div>
-          <div class="sort-box">
+          <div class="filter-row filter-right">
+            <div class="sort-box">
             <select v-model="sortBy" class="sort-select">
               <option value="name_asc">按名称 A-Z</option>
               <option value="name_desc">按名称 Z-A</option>
@@ -53,6 +60,23 @@
               <option value="length_asc">按长度 短-长</option>
               <option value="length_desc">按长度 长-短</option>
             </select>
+          </div>
+          <!-- 布局切换按钮组 -->
+          <div class="layout-switcher">
+            <div class="layout-label">布局</div>
+            <div class="layout-buttons">
+              <button
+                v-for="option in layoutOptions"
+                :key="option.value"
+                :class="{ active: currentLayout === option.value }"
+                @click="switchLayout(option.value)"
+                class="layout-btn"
+                :title="option.label"
+              >
+                <span class="layout-icon">{{ option.icon }}</span>
+              </button>
+            </div>
+          </div>
           </div>
         </div>
 
@@ -136,53 +160,117 @@
 
       <!-- 域名展示区域 -->
       <div class="domains-section">
-        <!-- 列表布局 -->
-        <div v-if="portfolio.layoutTemplate === 'list'" class="domains-list">
-          <PortalDomainItemList 
-            v-for="domain in filteredDomains" 
-            :key="domain.id" 
-            :domain="domain" 
-            :portfolio="portfolio"
-          />
-        </div>
+        <!-- 分组模式显示 -->
+        <template v-if="portfolio.enableGrouping">
+          <div v-for="group in groupedDomains" :key="group.categoryId" :id="`group-${group.categoryId}`" class="domain-group">
+            <div class="group-header">
+              <h3 class="group-title">{{ group.categoryName }}</h3>
+              <span class="group-count">{{ group.domains.length }} 个域名</span>
+            </div>
+            
+            <!-- 列表布局 -->
+            <div v-if="currentLayout === 'list'" class="domains-list">
+              <PortalDomainItemList 
+                v-for="domain in group.domains" 
+                :key="domain.id" 
+                :domain="domain" 
+                :portfolio="portfolio"
+              />
+            </div>
 
-        <!-- 网格布局 -->
-        <div v-else-if="portfolio.layoutTemplate === 'grid'" class="domains-grid">
-          <PortalDomainItemGrid 
-            v-for="domain in filteredDomains" 
-            :key="domain.id" 
-            :domain="domain" 
-            :portfolio="portfolio"
-          />
-        </div>
+            <!-- 网格布局 -->
+            <div v-else-if="currentLayout === 'grid'" class="domains-grid">
+              <PortalDomainItemGrid 
+                v-for="domain in group.domains" 
+                :key="domain.id" 
+                :domain="domain" 
+                :portfolio="portfolio"
+              />
+            </div>
 
-        <!-- 表格布局 -->
-        <div v-else-if="portfolio.layoutTemplate === 'table'" class="domains-table">
-          <PortalDomainTableView :domains="filteredDomains" :portfolio="portfolio" />
-        </div>
+            <!-- 表格布局 -->
+            <div v-else-if="currentLayout === 'table'" class="domains-table">
+              <PortalDomainTableView :domains="group.domains" :portfolio="portfolio" />
+            </div>
 
-        <!-- 卡片布局 -->
-        <div v-else-if="portfolio.layoutTemplate === 'card'" class="domains-cards">
-          <PortalDomainItemCard 
-            v-for="domain in filteredDomains" 
-            :key="domain.id" 
-            :domain="domain" 
-            :portfolio="portfolio"
-          />
-        </div>
+            <!-- 卡片布局 -->
+            <div v-else-if="currentLayout === 'card'" class="domains-cards">
+              <PortalDomainItemCard 
+                v-for="domain in group.domains" 
+                :key="domain.id" 
+                :domain="domain" 
+                :portfolio="portfolio"
+              />
+            </div>
+          </div>
+        </template>
+
+        <!-- 非分组模式显示 -->
+        <template v-else>
+          <!-- 列表布局 -->
+          <div v-if="currentLayout === 'list'" class="domains-list">
+            <PortalDomainItemList 
+              v-for="domain in filteredDomains" 
+              :key="domain.id" 
+              :domain="domain" 
+              :portfolio="portfolio"
+            />
+          </div>
+
+          <!-- 网格布局 -->
+          <div v-else-if="currentLayout === 'grid'" class="domains-grid">
+            <PortalDomainItemGrid 
+              v-for="domain in filteredDomains" 
+              :key="domain.id" 
+              :domain="domain" 
+              :portfolio="portfolio"
+            />
+          </div>
+
+          <!-- 表格布局 -->
+          <div v-else-if="currentLayout === 'table'" class="domains-table">
+            <PortalDomainTableView :domains="filteredDomains" :portfolio="portfolio" />
+          </div>
+
+          <!-- 卡片布局 -->
+          <div v-else-if="currentLayout === 'card'" class="domains-cards">
+            <PortalDomainItemCard 
+              v-for="domain in filteredDomains" 
+              :key="domain.id" 
+              :domain="domain" 
+              :portfolio="portfolio"
+            />
+          </div>
+        </template>
       </div>
 
-      <!-- 分页 -->
-      <div v-if="totalPages > 1" class="pagination">
+      <!-- 分页（非瀑布流且非分组模式） -->
+      <div v-if="!portfolio.enableWaterfall && !portfolio.enableGrouping && totalPages > 1" class="pagination">
         <button 
           v-for="page in totalPages" 
           :key="page"
           :class="{ active: page === currentPage }"
-          @click="currentPage = page"
+          @click="handlePageChange(page)"
           class="page-btn"
         >
           {{ page }}
         </button>
+      </div>
+
+      <!-- 瀑布流加载提示 -->
+      <div v-if="portfolio.enableWaterfall" class="waterfall-loading">
+        <div v-if="isLoadingMore" class="loading-indicator">
+          <div class="loading-spinner"></div>
+          <span class="loading-text">加载中...</span>
+        </div>
+        <div v-else-if="hasMore" class="load-more-tip">
+          <span class="tip-icon"></span>
+          <span class="tip-text">滚动加载更多</span>
+        </div>
+        <div v-else class="no-more-tip">
+          <span class="complete-icon"></span>
+          <span class="complete-text">已加载全部</span>
+        </div>
       </div>
 
       <!-- 底部信息 -->
@@ -213,6 +301,9 @@
 </template>
 
 <script setup>
+import { Loading } from '@element-plus/icons-vue'
+import { nextTick } from 'vue'
+
 const props = defineProps({
   portfolio: {
     type: Object,
@@ -282,6 +373,44 @@ const pageSize = 20
 const showInquiry = ref(false)
 const selectedDomain = ref(null)
 
+// 计算背景样式
+const portfolioBackgroundStyle = computed(() => {
+  const styles = {}
+  
+  if (props.portfolio.backgroundUrl) {
+    styles.backgroundImage = `url('${props.portfolio.backgroundUrl}')`
+    styles.backgroundSize = 'cover'
+    styles.backgroundPosition = 'center'
+    styles.backgroundRepeat = 'no-repeat'
+    styles.backgroundAttachment = 'fixed'
+  }
+  
+  return styles
+})
+
+// 计算文字颜色主题类
+const portfolioTextThemeClass = computed(() => {
+  const theme = props.portfolio.textTheme || 'auto'
+  const hasBackground = !!props.portfolio.backgroundUrl
+  const hasOverlay = props.portfolio.backgroundOverlay
+  
+  return {
+    'text-theme-auto': theme === 'auto',
+    'text-theme-light': theme === 'light',
+    'text-theme-dark': theme === 'dark',
+    'has-background': hasBackground,
+    'has-overlay': hasOverlay
+  }
+})
+
+// 瀑布流相关状态
+const isLoadingMore = ref(false)
+const hasMore = ref(true)
+const waterfallPage = ref(1)
+
+// 添加布局模式状态
+const currentLayout = ref(props.portfolio.layoutTemplate || 'grid')
+
 // 筛选选项数据
 const categories = ref([])
 const tags = ref([])
@@ -341,6 +470,44 @@ const handleCategoryClick = (categoryId) => {
   selectedCategory.value = categoryId
   currentPage.value = 1
   console.log('设置后的selectedCategory:', selectedCategory.value, '类型:', typeof selectedCategory.value)
+  
+  // 在分组模式下，滚动到对应的位置
+  if (props.portfolio.enableGrouping) {
+    // 使用 nextTick 确保DOM更新完成后再滚动
+    nextTick(() => {
+      if (categoryId) {
+        // 滚动到指定分组
+        const targetElement = document.getElementById(`group-${categoryId}`)
+        if (targetElement) {
+          // 获取筛选区域的高度，用于计算偏移
+          const filtersElement = document.querySelector('.portfolio-filters')
+          const offset = filtersElement ? filtersElement.offsetHeight + 20 : 100
+          
+          // 计算目标位置
+          const targetPosition = targetElement.offsetTop - offset
+          
+          // 平滑滚动到目标位置
+          window.scrollTo({
+            top: targetPosition,
+            behavior: 'smooth'
+          })
+        }
+      } else {
+        // 点击"全部分类"时，滚动到域名区域开始位置
+        const domainsSection = document.querySelector('.domains-section')
+        if (domainsSection) {
+          const filtersElement = document.querySelector('.portfolio-filters')
+          const offset = filtersElement ? filtersElement.offsetHeight + 20 : 100
+          const targetPosition = domainsSection.offsetTop - offset
+          
+          window.scrollTo({
+            top: targetPosition,
+            behavior: 'smooth'
+          })
+        }
+      }
+    })
+  }
 }
 
 // 重置筛选条件
@@ -353,12 +520,87 @@ const resetFilters = () => {
   selectedPriceRange.value = ''
   sortBy.value = 'name_asc'
   currentPage.value = 1
+  resetWaterfallState()
+}
+
+// 布局模式选项
+const layoutOptions = [
+  { value: 'list', label: '列表', icon: '☰' },
+  { value: 'grid', label: '网格', icon: '⊞' },
+  { value: 'table', label: '表格', icon: '≣' },
+  { value: 'card', label: '卡片', icon: '⊡' }
+]
+
+// 切换布局模式
+const switchLayout = (layout) => {
+  currentLayout.value = layout
+  currentPage.value = 1 // 切换布局时重置到第一页
+}
+
+// 瀑布流滚动监听器
+const handleScroll = throttle(() => {
+  if (!props.portfolio.enableWaterfall || isLoadingMore.value || !hasMore.value) {
+    return
+  }
+
+  const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+  const windowHeight = window.innerHeight
+  const documentHeight = document.documentElement.scrollHeight
+
+  // 当滚动到距离底部200px时加载更多
+  if (scrollTop + windowHeight >= documentHeight - 200) {
+    loadMoreDomains()
+  }
+}, 200) // 节流200ms
+
+// 加载更多域名
+const loadMoreDomains = async () => {
+  if (isLoadingMore.value || !hasMore.value) {
+    return
+  }
+
+  isLoadingMore.value = true
+  
+  // 模拟网络延迟
+  await new Promise(resolve => setTimeout(resolve, 500))
+  
+  waterfallPage.value += 1
+  isLoadingMore.value = false
+}
+
+// 简单的节流函数
+function throttle(func, wait) {
+  let timeout
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout)
+      func(...args)
+    }
+    clearTimeout(timeout)
+    timeout = setTimeout(later, wait)
+  }
+}
+
+// 重置筛选条件时重置瀑布流状态
+const resetWaterfallState = () => {
+  waterfallPage.value = 1
+  hasMore.value = true
 }
 
 // 组件挂载时加载静态页面
 onMounted(() => {
   loadStaticPages()
   loadFilterOptions()
+  
+  // 添加滚动监听器（仅在瀑布流模式下）
+  if (props.portfolio.enableWaterfall) {
+    window.addEventListener('scroll', handleScroll)
+  }
+})
+
+// 组件卸载时移除滚动监听器
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll)
 })
 
 // 监听域名数据变化，重新提取后缀和标签
@@ -368,8 +610,22 @@ watch(() => props.domains, () => {
   extractTags()
 }, { immediate: true })
 
-// 计算属性
-const filteredDomains = computed(() => {
+// 监听 portfolio 变化，更新布局模式
+watch(() => props.portfolio.layoutTemplate, (newLayout) => {
+  if (newLayout) {
+    currentLayout.value = newLayout
+  }
+}, { immediate: true })
+
+// 监听筛选条件变化，重置瀑布流状态
+watch([searchTerm, selectedCategory, selectedTag, selectedLength, selectedSuffix, selectedPriceRange, sortBy], () => {
+  if (props.portfolio.enableWaterfall) {
+    resetWaterfallState()
+  }
+})
+
+// 获取过滤和排序后的所有域名
+const getFilteredAndSortedDomains = () => {
   let filtered = props.domains
 
   // 关键词搜索
@@ -460,106 +716,38 @@ const filteredDomains = computed(() => {
     }
   })
 
-  // 分页
-  const start = (currentPage.value - 1) * pageSize
-  const end = start + pageSize
-  return filtered.slice(start, end)
+  return filtered
+}
+
+// 计算属性
+const filteredDomains = computed(() => {
+  const filtered = getFilteredAndSortedDomains()
+  
+  if (props.portfolio.enableWaterfall) {
+    // 瀑布流模式：显示从第1页到当前瀑布流页的所有数据
+    const end = waterfallPage.value * pageSize
+    const result = filtered.slice(0, end)
+    
+    // 更新是否还有更多数据
+    hasMore.value = filtered.length > end
+    
+    return result
+  } else {
+    // 普通分页模式
+    const start = (currentPage.value - 1) * pageSize
+    const end = start + pageSize
+    return filtered.slice(start, end)
+  }
 })
 
 const totalPages = computed(() => {
-  let filtered = props.domains
-
-  // 应用所有筛选条件（不包括分页）
-  if (searchTerm.value) {
-    filtered = filtered.filter(domain => 
-      domain.name.toLowerCase().includes(searchTerm.value.toLowerCase())
-    )
-  }
-  if (selectedCategory.value) {
-    filtered = filtered.filter(domain => domain.categoryId === selectedCategory.value)
-  }
-  if (selectedTag.value) {
-    filtered = filtered.filter(domain => 
-      domain.tags && domain.tags.some(tag => tag.id === selectedTag.value)
-    )
-  }
-  if (selectedLength.value) {
-    filtered = filtered.filter(domain => {
-      const length = domain.name.split('.')[0].length
-      switch (selectedLength.value) {
-        case '1-3': return length >= 1 && length <= 3
-        case '4-6': return length >= 4 && length <= 6
-        case '7-10': return length >= 7 && length <= 10
-        case '11+': return length >= 11
-        default: return true
-      }
-    })
-  }
-  if (selectedSuffix.value) {
-    filtered = filtered.filter(domain => domain.name.endsWith('.' + selectedSuffix.value))
-  }
-  if (selectedPriceRange.value) {
-    filtered = filtered.filter(domain => {
-      const price = domain.salePrice || 0
-      switch (selectedPriceRange.value) {
-        case '0-1000': return price >= 0 && price <= 1000
-        case '1000-5000': return price > 1000 && price <= 5000
-        case '5000-10000': return price > 5000 && price <= 10000
-        case '10000+': return price > 10000
-        default: return true
-      }
-    })
-  }
-
+  const filtered = getFilteredAndSortedDomains()
   return Math.ceil(filtered.length / pageSize)
 })
 
 // 筛选结果计数
 const filteredDomainsCount = computed(() => {
-  let filtered = props.domains
-
-  // 应用所有筛选条件
-  if (searchTerm.value) {
-    filtered = filtered.filter(domain => 
-      domain.name.toLowerCase().includes(searchTerm.value.toLowerCase())
-    )
-  }
-  if (selectedCategory.value) {
-    filtered = filtered.filter(domain => domain.categoryId === selectedCategory.value)
-  }
-  if (selectedTag.value) {
-    filtered = filtered.filter(domain => 
-      domain.tags && domain.tags.some(tag => tag.id === selectedTag.value)
-    )
-  }
-  if (selectedLength.value) {
-    filtered = filtered.filter(domain => {
-      const length = domain.name.split('.')[0].length
-      switch (selectedLength.value) {
-        case '1-3': return length >= 1 && length <= 3
-        case '4-6': return length >= 4 && length <= 6
-        case '7-10': return length >= 7 && length <= 10
-        case '11+': return length >= 11
-        default: return true
-      }
-    })
-  }
-  if (selectedSuffix.value) {
-    filtered = filtered.filter(domain => domain.name.endsWith('.' + selectedSuffix.value))
-  }
-  if (selectedPriceRange.value) {
-    filtered = filtered.filter(domain => {
-      const price = domain.salePrice || 0
-      switch (selectedPriceRange.value) {
-        case '0-1000': return price >= 0 && price <= 1000
-        case '1000-5000': return price > 1000 && price <= 5000
-        case '5000-10000': return price > 5000 && price <= 10000
-        case '10000+': return price > 10000
-        default: return true
-      }
-    })
-  }
-
+  const filtered = getFilteredAndSortedDomains()
   return filtered.length
 })
 
@@ -588,6 +776,133 @@ const activeFiltersText = computed(() => {
   return filters.join(' | ')
 })
 
+// 分组域名数据
+const groupedDomains = computed(() => {
+  if (!props.portfolio.enableGrouping) {
+    return []
+  }
+  
+  // 获取筛选后的域名，但排除分类筛选（因为要分组显示）
+  let filtered = props.domains
+  
+  // 关键词搜索
+  if (searchTerm.value) {
+    filtered = filtered.filter(domain => 
+      domain.name.toLowerCase().includes(searchTerm.value.toLowerCase())
+    )
+  }
+
+  // 标签筛选
+  if (selectedTag.value) {
+    filtered = filtered.filter(domain => 
+      domain.tags && domain.tags.some(tag => tag.id === selectedTag.value)
+    )
+  }
+
+  // 长度筛选
+  if (selectedLength.value) {
+    filtered = filtered.filter(domain => {
+      const length = domain.name.split('.')[0].length
+      switch (selectedLength.value) {
+        case '1-3': return length >= 1 && length <= 3
+        case '4-6': return length >= 4 && length <= 6
+        case '7-10': return length >= 7 && length <= 10
+        case '11+': return length >= 11
+        default: return true
+      }
+    })
+  }
+
+  // 后缀筛选
+  if (selectedSuffix.value) {
+    filtered = filtered.filter(domain => domain.name.endsWith('.' + selectedSuffix.value))
+  }
+
+  // 价格区间筛选
+  if (selectedPriceRange.value) {
+    filtered = filtered.filter(domain => {
+      const price = domain.salePrice || 0
+      switch (selectedPriceRange.value) {
+        case '0-1000': return price >= 0 && price <= 1000
+        case '1000-5000': return price > 1000 && price <= 5000
+        case '5000-10000': return price > 5000 && price <= 10000
+        case '10000+': return price > 10000
+        default: return true
+      }
+    })
+  }
+
+  // 按分类分组
+  const groups = new Map()
+  
+  filtered.forEach(domain => {
+    const categoryId = domain.categoryId || 0 // 未分类的域名
+    if (!groups.has(categoryId)) {
+      // 找到分类名称
+      let categoryName = '未分类'
+      if (categoryId > 0) {
+        const category = categories.value.find(c => c.id === categoryId)
+        categoryName = category ? category.name : `分类 ${categoryId}`
+      }
+      
+      groups.set(categoryId, {
+        categoryId,
+        categoryName,
+        domains: []
+      })
+    }
+    groups.get(categoryId).domains.push(domain)
+  })
+
+  // 排序分组内的域名
+  groups.forEach(group => {
+    group.domains.sort((a, b) => {
+      switch (sortBy.value) {
+        case 'name_desc':
+          return b.name.localeCompare(a.name)
+        case 'price_desc':
+          return (b.salePrice || 0) - (a.salePrice || 0)
+        case 'price_asc':
+          return (a.salePrice || 0) - (b.salePrice || 0)
+        case 'length_asc':
+          return a.name.length - b.name.length
+        case 'length_desc':
+          return b.name.length - a.name.length
+        case 'name_asc':
+        default:
+          return a.name.localeCompare(b.name)
+      }
+    })
+  })
+
+  // 转换为数组并按分类名称排序
+  const groupsArray = Array.from(groups.values())
+  groupsArray.sort((a, b) => {
+    // 未分类的放在最后
+    if (a.categoryId === 0) return 1
+    if (b.categoryId === 0) return -1
+    return a.categoryName.localeCompare(b.categoryName)
+  })
+
+  return groupsArray
+})
+
+// 处理分页变更
+const handlePageChange = (page) => {
+  currentPage.value = page
+  
+  // 滚动到域名展示区域顶部
+  nextTick(() => {
+    const domainsSection = document.querySelector('.domains-section')
+    if (domainsSection) {
+      domainsSection.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      })
+    }
+  })
+}
+
 // 提供事件给子组件
 provide('showInquiry', (domain) => {
   selectedDomain.value = domain
@@ -606,6 +921,131 @@ provide('showInquiry', (domain) => {
   padding: 0 20px;
 }
 
+/* 背景遮罩层 */
+.background-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    to bottom, 
+    rgba(0, 0, 0, 0.4) 0%, 
+    rgba(0, 0, 0, 0.3) 50%, 
+    rgba(0, 0, 0, 0.5) 100%
+  );
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* 确保内容在遮罩层之上 */
+.portfolio-view.has-overlay .portfolio-container {
+  position: relative;
+  z-index: 2;
+}
+
+/* 文字颜色主题样式 */
+.portfolio-view.text-theme-light {
+  color: #ffffff;
+}
+
+.portfolio-view.text-theme-light .portfolio-title {
+  color: #ffffff;
+}
+
+.portfolio-view.text-theme-light .header-info {
+  background: linear-gradient(135deg, #ffffff 0%, #e0e7ff 50%, #c7d2fe 100%);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.portfolio-view.text-theme-light .nav-link {
+  color: #e0e0e0;
+}
+
+.portfolio-view.text-theme-light .nav-link:hover {
+  color: #ffffff;
+}
+
+.portfolio-view.text-theme-dark {
+  color: #333333;
+}
+
+.portfolio-view.text-theme-dark .portfolio-title {
+  color: #1a1a1a;
+}
+
+.portfolio-view.text-theme-dark .header-info {
+  background: linear-gradient(135deg, #1f2937 0%, #374151 50%, #4b5563 100%);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.portfolio-view.text-theme-dark .nav-link {
+  color: #555555;
+}
+
+.portfolio-view.text-theme-dark .nav-link:hover {
+  color: #333333;
+}
+
+/* 自动适应主题 - 有背景图时添加文字阴影增强可读性 */
+.portfolio-view.text-theme-auto.has-background .portfolio-title {
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  color: #ffffff;
+}
+
+.portfolio-view.text-theme-auto.has-background .header-info {
+  background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 50%, #e2e8f0 100%);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.8));
+}
+
+.portfolio-view.text-theme-auto.has-background .nav-link {
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+  color: #e0e0e0;
+}
+
+.portfolio-view.text-theme-auto.has-background .nav-link:hover {
+  color: #ffffff;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.9);
+}
+
+/* 有遮罩时调整文字对比度 */
+.portfolio-view.has-overlay .portfolio-filters {
+  background: rgba(248, 249, 250, 0.95);
+  backdrop-filter: blur(10px);
+}
+
+.portfolio-view.text-theme-light .portfolio-filters {
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(10px);
+  color: #ffffff;
+}
+
+.portfolio-view.text-theme-light .filter-label {
+  color: #e0e0e0;
+}
+
+.portfolio-view.text-theme-light .search-input,
+.portfolio-view.text-theme-light .sort-select,
+.portfolio-view.text-theme-light .filter-select {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+}
+
+.portfolio-view.text-theme-light .search-input::placeholder {
+  color: #cccccc;
+}
+
 /* 头部样式 */
 .portfolio-header {
   /* margin-bottom: 16px; */
@@ -614,10 +1054,17 @@ provide('showInquiry', (domain) => {
 .header-info-section{
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  div{
-    text-align: left;
-  }
+  gap: 2px;
+  flex: 1;
+  overflow: hidden;
+}
+
+.header-info-section .portfolio-title {
+  text-align: left;
+}
+
+.header-info-section .header-info {
+  text-align: left;
 }
 .header-content {
   display: flex;
@@ -626,17 +1073,90 @@ provide('showInquiry', (domain) => {
 }
 
 .portfolio-title {
-  font-size: 2.2rem;
+  font-size: 2rem;
   font-weight: bold;
-  margin: 0;
+  margin: 0 0 2px 0;
   color: #2c3e50;
-  text-align: center;
+  line-height: 1.2;
+}
+
+.header-info {
+  font-size: 0.8rem;
+  line-height: 1.5;
+  margin: 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-family: 'Georgia', 'Times New Roman', '宋体', serif;
+  font-weight: 400;
+  font-style: italic;
+  letter-spacing: 0.5px;
+  position: relative;
+  overflow: hidden;
+}
+
+.header-info::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes gradientShift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  50%, 100% {
+    left: 100%;
+  }
 }
 .header-main{
   display: flex;
   flex-direction: row;
-  gap: 8px;
-  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  justify-content: flex-start;
+  overflow: hidden;
+}
+
+/* Logo样式 */
+.portfolio-logo {
+  flex-shrink: 0;
+}
+
+.logo-image {
+  max-height: 80px;
+  max-width: 200px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
 }
 /* 头部导航紧跟标题 */
 .header-navigation {
@@ -651,25 +1171,59 @@ provide('showInquiry', (domain) => {
 }
 
 .nav-link {
-  color: #1976d2;
+  color: #64748b;
   text-decoration: none;
   font-weight: 500;
-  padding: 4px 10px;
-  border-radius: 4px;
-  transition: all 0.3s ease;
-  border: 1px solid transparent;
+  padding: 4px 0;
+  margin: 0 12px;
   font-size: 0.9rem;
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-bottom: 2px solid transparent;
+}
+
+.nav-link::before {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+  transition: width 0.3s ease;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -8px;
+  width: 4px;
+  height: 4px;
+  background: #3b82f6;
+  border-radius: 50%;
+  transform: translateY(-50%) scale(0);
+  transition: transform 0.3s ease;
+  opacity: 0;
 }
 
 .nav-link:hover {
-  background-color: #1976d2;
-  color: white;
-  border-color: #1976d2;
+  color: #3b82f6;
+  text-shadow: 0 0 8px rgba(59, 130, 246, 0.3);
+}
+
+.nav-link:hover::before {
+  width: 100%;
+}
+
+.nav-link:hover::after {
+  transform: translateY(-50%) scale(1);
+  opacity: 1;
 }
 
 /* 筛选样式 - 专业版 */
 .portfolio-filters {
-  background: #f8f9fa;
+  background: white;
   border-radius: 8px;
   border: 1px solid #e9ecef;
   padding: 16px;
@@ -687,8 +1241,14 @@ provide('showInquiry', (domain) => {
   margin-bottom: 12px;
   padding-bottom: 12px;
   border-bottom: 1px solid #e9ecef;
+  justify-content: space-between;
 }
-
+.filter-right{
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  justify-content: space-between;
+}
 .filter-row-advanced {
   gap: 12px;
 }
@@ -726,6 +1286,61 @@ provide('showInquiry', (domain) => {
   font-size: 14px;
   background: white;
   cursor: pointer;
+}
+
+/* 布局切换器样式 */
+.layout-switcher {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 140px;
+}
+
+.layout-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #5a6c7d;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.layout-buttons {
+  display: flex;
+  gap: 2px;
+  border: 1px solid #e1e8ed;
+  border-radius: 4px;
+  background: white;
+  padding: 2px;
+}
+
+.layout-btn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  color: #5a6c7d;
+}
+
+.layout-btn:hover {
+  background: #f5f5f5;
+  color: #1976d2;
+}
+
+.layout-btn.active {
+  background: #1976d2;
+  color: white;
+}
+
+.layout-icon {
+  font-size: 20px;
+  line-height: 1;
 }
 
 .filter-group {
@@ -840,6 +1455,148 @@ provide('showInquiry', (domain) => {
   gap: 20px;
 }
 
+/* 分组样式 */
+.domain-group {
+  margin-bottom: 40px;
+}
+
+.group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+  font-weight: 600;
+}
+
+.group-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.group-count {
+  font-size: 0.9rem;
+  color: #666;
+  background: #f8f9fa;
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 1px solid #e1e8ed;
+}
+
+/* 瀑布流加载样式 - 小巧版 */
+.waterfall-loading {
+  display: flex;
+  justify-content: center;
+}
+
+.loading-indicator,
+.load-more-tip,
+.no-more-tip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(8px);
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.loading-indicator:hover,
+.load-more-tip:hover,
+.no-more-tip:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+/* 加载动画 */
+.loading-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #e5e7eb;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* 文本样式 */
+.loading-text {
+  color: #3b82f6;
+  font-weight: 500;
+}
+
+.tip-text {
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.complete-text {
+  color: #059669;
+  font-weight: 500;
+}
+
+/* 图标样式 */
+.tip-icon,
+.complete-icon {
+  font-size: 16px;
+  animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+/* 不同状态的主题色 */
+.loading-indicator {
+  background: rgba(59, 130, 246, 0.05);
+  border-color: rgba(59, 130, 246, 0.1);
+}
+
+.load-more-tip {
+  background: rgba(107, 114, 128, 0.05);
+  border-color: rgba(107, 114, 128, 0.1);
+}
+
+.no-more-tip {
+  background: rgba(5, 150, 105, 0.05);
+  border-color: rgba(5, 150, 105, 0.1);
+}
+
+/* 响应式优化 */
+@media (max-width: 768px) {
+  .waterfall-loading {
+    padding: 12px 0;
+    margin: 12px 0;
+  }
+  
+  .loading-indicator,
+  .load-more-tip,
+  .no-more-tip {
+    padding: 6px 12px;
+    font-size: 13px;
+    gap: 6px;
+  }
+  
+  .loading-spinner {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .tip-icon,
+  .complete-icon {
+    font-size: 14px;
+  }
+}
+
 /* 分页样式 */
 .pagination {
   display: flex;
@@ -892,25 +1649,82 @@ provide('showInquiry', (domain) => {
 }
 
 .footer-nav-link {
-  color: #5a6c7d;
+  color: #64748b;
   text-decoration: none;
-  font-weight: 400;
-  padding: 3px 8px;
-  border-radius: 3px;
-  transition: all 0.3s ease;
-  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 2px 0;
+  margin: 0 8px;
+  font-size: 0.9rem;
   white-space: nowrap;
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-bottom: 1px solid transparent;
+}
+
+.footer-nav-link::before {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 50%;
+  width: 0;
+  height: 1px;
+  background: linear-gradient(90deg, #8b5cf6, #06b6d4);
+  transition: all 0.3s ease;
+  transform: translateX(-50%);
+}
+
+.footer-nav-link::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: -6px;
+  width: 3px;
+  height: 3px;
+  background: #8b5cf6;
+  border-radius: 50%;
+  transform: translateY(-50%) scale(0);
+  transition: transform 0.3s ease;
+  opacity: 0;
 }
 
 .footer-nav-link:hover {
-  color: #1976d2;
-  background-color: #f5f5f5;
+  color: #8b5cf6;
+  text-shadow: 0 0 6px rgba(139, 92, 246, 0.3);
+}
+
+.footer-nav-link:hover::before {
+  width: 100%;
+}
+
+.footer-nav-link:hover::after {
+  transform: translateY(-50%) scale(1);
+  opacity: 1;
 }
 
 /* 响应式设计 */
 @media (max-width: 768px) {
   .portfolio-title {
     font-size: 1.8rem;
+  }
+  
+  .header-info {
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+  
+  .header-main {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .portfolio-logo {
+    align-self: center;
+  }
+  
+  .logo-image {
+    max-height: 60px;
+    max-width: 150px;
   }
   
   .portfolio-filters {
@@ -926,8 +1740,8 @@ provide('showInquiry', (domain) => {
     align-items: stretch;
     margin-bottom: 10px;
     padding-bottom: 10px;
+    justify-content: flex-start;
   }
-  
   .filter-row-advanced {
     flex-direction: column;
     align-items: stretch;
@@ -940,6 +1754,13 @@ provide('showInquiry', (domain) => {
   
   .sort-box {
     min-width: auto;
+  }
+
+  /* 移动端布局切换器 */
+  .layout-switcher {
+    min-width: auto;
+    justify-content: center;
+    margin-top: 8px;
   }
   
   .filter-group {
@@ -979,6 +1800,7 @@ provide('showInquiry', (domain) => {
     margin-bottom: 0;
   }
   
+  
   .filter-row-advanced {
     justify-content: space-between;
   }
@@ -996,7 +1818,11 @@ provide('showInquiry', (domain) => {
   }
   
   .portfolio-title {
-    margin-bottom: 0;
+    font-size: 2.6rem;
+  }
+  
+  .header-info {
+    font-size: 1rem;
   }
   
   .portfolio-filters {

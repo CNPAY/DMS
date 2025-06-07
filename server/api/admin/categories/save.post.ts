@@ -12,6 +12,11 @@ const categorySchema = Joi.object({
   }),
   description: Joi.string().max(1000).allow('').optional().messages({
     'string.max': '分类描述不能超过1000个字符'
+  }),
+  sortOrder: Joi.number().integer().min(0).max(9999).default(0).messages({
+    'number.base': '排序值必须是数字',
+    'number.min': '排序值不能小于0',
+    'number.max': '排序值不能大于9999'
   })
 })
 
@@ -62,7 +67,8 @@ export default defineEventHandler(async (event) => {
         where: { id },
         data: {
           name: value.name,
-          description: value.description || null
+          description: value.description || null,
+          sortOrder: value.sortOrder
         }
       })
 
@@ -87,7 +93,8 @@ export default defineEventHandler(async (event) => {
         data: {
           userId,
           name: value.name,
-          description: value.description || null
+          description: value.description || null,
+          sortOrder: value.sortOrder
         }
       })
 

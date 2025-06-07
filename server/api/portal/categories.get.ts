@@ -20,14 +20,24 @@ export default defineEventHandler(async (event) => {
           select: {
             id: true,
             name: true,
-            description: true
+            description: true,
+            sortOrder: true
           }
         }
       }
     })
 
-    // 提取分类信息
-    const categories = portfolioCategoryMaps.map(map => map.category)
+    // 提取分类信息并按排序字段排序
+    const categories = portfolioCategoryMaps
+      .map(map => map.category)
+      .sort((a, b) => {
+        // 首先按sortOrder升序排序
+        if (a.sortOrder !== b.sortOrder) {
+          return a.sortOrder - b.sortOrder
+        }
+        // 如果sortOrder相同，按名称排序
+        return a.name.localeCompare(b.name)
+      })
 
     return ResponseData.success(categories, '获取米表分类成功')
   } catch (error) {

@@ -353,8 +353,14 @@ const handleInquiry = (domain) => {
 
 @media (max-width: 640px) {
   .table-container {
-    margin: -16px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0;
     border-radius: 0;
+  }
+  
+  .domains-table {
+    min-width: 700px; /* 确保有滚动空间 */
   }
   
   .domains-table th,
@@ -363,8 +369,21 @@ const handleInquiry = (domain) => {
     font-size: 0.8rem;
   }
   
-  .domain-column {
+  /* 固定域名列 */
+  .domain-column,
+  .domain-cell {
+    position: sticky;
+    left: 0;
+    background: white;
+    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+    z-index: 5;
     min-width: 150px;
+    max-width: 150px;
+  }
+  
+  .domain-column {
+    background: #f8f9fa;
+    z-index: 6;
   }
   
   .category-column,

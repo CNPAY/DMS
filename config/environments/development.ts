@@ -14,7 +14,7 @@ const developmentConfig: Config = {
   
   database: {
     mysql: {
-      url: 'mysql://dms:EKnkBaG7G48fs4FK@43.154.106.167:3306/dms'
+      url: ''
     },
   },
   

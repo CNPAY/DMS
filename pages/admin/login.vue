@@ -124,7 +124,7 @@ const handleLogin = async () => {
       ElMessage.success(response.message || t('auth.loginSuccess'))
       
       // 跳转到管理后台
-      await navigateTo('/admin/dashboard')
+      await navigateTo('/admin/')
     }
   } catch (error: any) {
     console.error('Login error:', error)

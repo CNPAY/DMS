@@ -10,6 +10,6 @@ export default defineNuxtRouteMiddleware((to) => {
   
   // 如果已登录且访问登录页面，则重定向到管理后台
   if (token && to.path === '/admin/login') {
-    return navigateTo('/admin/dashboard')
+    return navigateTo('/admin/')
   }
 }) 

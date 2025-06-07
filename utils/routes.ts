@@ -112,6 +112,40 @@ export const sidebarRoutes: SidebarRoute[] = [
     ]
   },
   {
+    path: '/admin/report',
+    redirect: '/admin/report/sales',
+    meta: {
+      title: 'routes.dataReports',
+      icon: 'chart'
+    },
+    children: [
+      {
+        path: 'sales',
+        name: 'SalesReport',
+        meta: {
+          title: 'routes.salesReport',
+          icon: 'shopping'
+        }
+      },
+      {
+        path: 'costs',
+        name: 'CostReport',
+        meta: {
+          title: 'routes.costReport',
+          icon: 'money'
+        }
+      },
+      {
+        path: 'visitor',
+        name: 'VisitorReport',
+        meta: {
+          title: 'routes.visitorReport',
+          icon: 'monitor'
+        }
+      }
+    ]
+  },
+  {
     path: '/admin/portfolio',
     redirect: '/admin/portfolio/list',
     meta: {
@@ -159,40 +193,7 @@ export const sidebarRoutes: SidebarRoute[] = [
       }
     }]
   },
-  {
-    path: '/admin/report',
-    redirect: '/admin/report/sales',
-    meta: {
-      title: 'routes.dataReports',
-      icon: 'chart'
-    },
-    children: [
-      {
-        path: 'sales',
-        name: 'SalesReport',
-        meta: {
-          title: 'routes.salesReport',
-          icon: 'shopping'
-        }
-      },
-      {
-        path: 'costs',
-        name: 'CostReport',
-        meta: {
-          title: 'routes.costReport',
-          icon: 'money'
-        }
-      },
-      {
-        path: 'visitor',
-        name: 'VisitorReport',
-        meta: {
-          title: 'routes.visitorReport',
-          icon: 'monitor'
-        }
-      }
-    ]
-  },
+  
   {
     path: '/admin/ai',
     redirect: '/admin/ai/config',
@@ -275,6 +276,14 @@ export const sidebarRoutes: SidebarRoute[] = [
           icon: 'lock'
         }
       },
+        {
+        path: 'landing',
+        name: 'LandingConfig',
+        meta: {
+          title: 'routes.landingConfig',
+          icon: 'monitor'
+        }
+      },
       {
         path: 'icons',
         name: 'IconLibrary',
@@ -283,14 +292,7 @@ export const sidebarRoutes: SidebarRoute[] = [
           icon: 'star'
         }
       },
-      {
-        path: 'landing',
-        name: 'LandingConfig',
-        meta: {
-          title: 'routes.landingConfig',
-          icon: 'monitor'
-        }
-      },
+    
       
     ]
   }
