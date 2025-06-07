@@ -1,17 +1,19 @@
 <template>
-  <ElConfigProvider :locale="elementLocale">
-    <div v-if="device === 'mobile' && sidebar.opened" class="drawer-bg" @click="handleClickOutside" />
-    <sidebar v-if="!sidebar.hide" class="sidebar-container" />
-    <div :class="{ hasTagsView: needTagsView, sidebarHide: sidebar.hide }" class="main-container">
-      <div :class="{ 'fixed-header': fixedHeader }">
-        <navbar @setLayout="setLayout" />
-        <tags-view v-if="needTagsView" />
+  <ElConfigProvider :locale="elementLocale" >
+    <div :class="classObj" class="app-wrapper" :style="{ '--current-color': theme }">
+      <div v-if="device === 'mobile' && sidebar.opened" class="drawer-bg" @click="handleClickOutside" />
+      <sidebar v-if="!sidebar.hide" class="sidebar-container" />
+      <div :class="{ hasTagsView: needTagsView, sidebarHide: sidebar.hide }" class="main-container">
+        <div :class="{ 'fixed-header': fixedHeader }">
+          <navbar @setLayout="setLayout" />
+          <tags-view v-if="needTagsView" />
+        </div>
+        <section class="app-main">
+          <slot />
+          <!-- <iframe-toggle /> -->
+        </section>
+        <settings ref="settingRef" />
       </div>
-      <section class="app-main">
-        <slot />
-        <!-- <iframe-toggle /> -->
-      </section>
-      <settings ref="settingRef" />
     </div>
   </ElConfigProvider>
 </template>
