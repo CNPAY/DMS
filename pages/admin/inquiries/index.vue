@@ -19,7 +19,7 @@
     <!-- 操作栏 -->
     <el-row class="mb8" style="display: flex; justify-content: space-between; align-items: center;">
       <div style="display: flex;">
-        <el-button type="danger" plain icon="Delete" :disabled="multiple" @click="handleDelete">删除</el-button>
+        <el-button type="danger" plain icon="Delete" :disabled="multiple" @click="handleDelete()">删除</el-button>
         <el-button type="warning" plain icon="Download" @click="handleExport">导出</el-button>
       </div>
       <div style="display: flex; gap: 10px;">

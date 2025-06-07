@@ -105,7 +105,17 @@ model Domain {
   categoryId          Int?     @map("category_id")
   landingPageType     String?  @map("landing_page_type") @db.VarChar(20)
   landingPageContent  String?  @map("landing_page_content") @db.Text
-  landingPagePrice    Decimal? @map("landing_page_price") @db.Decimal(10, 2)
+  salesPrice    Decimal? @map("sales_price") @db.Decimal(10, 2) //销售价格
+  
+  // 新增字段 - 价格和营销相关
+  discount            Decimal? @db.Decimal(10, 2)  // 折扣价格
+  discountExpiry      DateTime? @map("discount_expiry")  // 折扣有效期
+  priceExpiry         DateTime? @map("price_expiry")     // 价格有效期
+  
+  // 新增字段 - 域名描述
+  domainMeaning       String?  @map("domain_meaning") @db.VarChar(100)   // 域名含义
+  domainDescription   String?  @map("domain_description") @db.Text       // 域名描述
+  
   createdAt           DateTime @default(now()) @map("created_at")
   updatedAt           DateTime @updatedAt @map("updated_at")
 

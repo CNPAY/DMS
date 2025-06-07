@@ -31,7 +31,7 @@ export default defineEventHandler(async (event) => {
       priceRanges.map(async (range) => {
         const count = await prisma.domain.count({
           where: {
-            landingPagePrice: {
+            salesPrice: {
               gte: range.min,
               lt: range.max
             }

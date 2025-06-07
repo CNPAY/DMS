@@ -18,7 +18,7 @@ export default defineEventHandler(async (event) => {
             id: true,
             domainName: true,
             purchasePrice: true,
-            landingPagePrice: true
+            salesPrice: true
           }
         },
         portfolio: {

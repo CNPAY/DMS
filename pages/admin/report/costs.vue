@@ -139,7 +139,7 @@
     <el-row class="mb8" style="display: flex; justify-content: space-between; align-items: center;">
       <div style="display: flex;">
         <el-button type="primary" plain icon="Plus" @click="handleAdd">新增</el-button>
-        <el-button type="danger" plain icon="Delete" :disabled="multiple" @click="handleDelete">删除</el-button>
+        <el-button type="danger" plain icon="Delete" :disabled="multiple" @click="handleDelete()">删除</el-button>
       </div>
       <div style="display: flex; gap: 10px;">
         <el-button circle @click="showSearch = !showSearch">
@@ -237,89 +237,14 @@
       </div>
     </el-card>
 
-    <!-- 新增/编辑对话框 -->
-    <el-dialog
+    <!-- 成本编辑弹窗组件 -->
+    <CostsEdit
       v-model="dialogVisible"
-      :title="dialogTitle"
-      width="600px"
-      @close="resetForm"
-    >
-      <el-form
-        ref="formRef"
-        :model="form"
-        :rules="formRules"
-        label-width="100px"
-      >
-        <el-form-item label="域名" prop="domainId">
-          <el-select v-model="form.domainId" placeholder="请选择域名" style="width: 100%">
-            <el-option
-              v-for="domain in domainOptions"
-              :key="domain.value"
-              :label="domain.label"
-              :value="domain.value"
-            />
-          </el-select>
-        </el-form-item>
-        
-        <el-form-item label="成本类型" prop="costType">
-          <el-select v-model="form.costType" placeholder="请选择成本类型" style="width: 100%">
-            <el-option
-              v-for="type in costTypeOptions"
-              :key="type.value"
-              :label="type.label"
-              :value="type.value"
-            />
-          </el-select>
-        </el-form-item>
-        
-        <el-form-item label="金额" prop="amount">
-          <el-input-number
-            v-model="form.amount"
-            placeholder="请输入金额"
-            :min="0"
-            :precision="2"
-            style="width: 100%"
-          />
-        </el-form-item>
-        
-        <el-form-item label="成本日期" prop="costDate">
-          <el-date-picker
-            v-model="form.costDate"
-            type="date"
-            placeholder="请选择日期"
-            format="YYYY-MM-DD"
-            value-format="YYYY-MM-DD"
-            style="width: 100%"
-          />
-        </el-form-item>
-        
-        <el-form-item label="续费年限" prop="renewalYears">
-          <el-input-number
-            v-model="form.renewalYears"
-            placeholder="续费年限（仅续费类型）"
-            :min="1"
-            :max="10"
-            style="width: 100%"
-          />
-        </el-form-item>
-        
-        <el-form-item label="备注" prop="notes">
-          <el-input
-            v-model="form.notes"
-            type="textarea"
-            placeholder="请输入备注"
-            :rows="3"
-          />
-        </el-form-item>
-      </el-form>
-      
-      <template #footer>
-        <div class="dialog-footer">
-          <el-button @click="dialogVisible = false">取消</el-button>
-          <el-button type="primary" @click="submitForm">确定</el-button>
-        </div>
-      </template>
-    </el-dialog>
+      :edit-data="editData"
+      :domain-options="domainOptions"
+      :cost-type-options="costTypeOptions"
+      @success="handleEditSuccess"
+    />
   </div>
 </template>
 
@@ -338,6 +263,7 @@ import {
   Edit
 } from '@element-plus/icons-vue'
 import * as echarts from 'echarts'
+import CostsEdit from './_costs_edit.vue'
 
 definePageMeta({
   layout: 'admin'
@@ -346,10 +272,9 @@ definePageMeta({
 // 响应式数据
 const loading = ref(false)
 const showSearch = ref(true)
-const multiple = ref(false)
+const multiple = ref(true)  // 初始状态应该禁用批量删除按钮
 const ids = ref<number[]>([])
 const queryRef = ref()
-const formRef = ref()
 
 // 成本统计数据
 const costStats = ref<any>({})
@@ -370,40 +295,12 @@ const costList = ref([])
 const total = ref(0)
 
 // 选项数据
-const domainOptions = ref([])
-const costTypeOptions = ref([])
+const domainOptions = ref<Array<{value: number, label: string}>>([])
+const costTypeOptions = ref<Array<{value: string, label: string}>>([])
 
 // 对话框相关
 const dialogVisible = ref(false)
-const dialogTitle = computed(() => form.id ? '编辑成本记录' : '新增成本记录')
-
-// 表单数据
-const form = reactive({
-  id: undefined as number | undefined,
-  domainId: undefined as number | undefined,
-  costType: '',
-  amount: undefined as number | undefined,
-  costDate: '',
-  renewalYears: undefined as number | undefined,
-  notes: ''
-})
-
-// 表单验证规则
-const formRules = {
-  domainId: [
-    { required: true, message: '请选择域名', trigger: 'change' }
-  ],
-  costType: [
-    { required: true, message: '请选择成本类型', trigger: 'change' }
-  ],
-  amount: [
-    { required: true, message: '请输入金额', trigger: 'blur' },
-    { type: 'number', min: 0.01, message: '金额必须大于0', trigger: 'blur' }
-  ],
-  costDate: [
-    { required: true, message: '请选择日期', trigger: 'change' }
-  ]
-}
+const editData = ref<any>(null)
 
 // 格式化日期
 const formatDate = (date: string) => {
@@ -555,20 +452,20 @@ const resetSearch = () => {
 
 // 新增
 const handleAdd = () => {
-  resetForm()
+  editData.value = null
   dialogVisible.value = true
 }
 
 // 编辑
 const handleEdit = (row: any) => {
-  form.id = row.id
-  form.domainId = row.domainId
-  form.costType = row.costType
-  form.amount = row.amount
-  form.costDate = row.costDate
-  form.renewalYears = row.renewalYears
-  form.notes = row.notes
+  editData.value = { ...row }
   dialogVisible.value = true
+}
+
+// 编辑成功回调
+const handleEditSuccess = () => {
+  fetchCostList()
+  fetchCostStats()
 }
 
 // 删除
@@ -593,18 +490,22 @@ const handleDelete = async (row?: any) => {
     const action = deleteIds.length === 1 ? 'delete' : 'batchDelete'
     const data = deleteIds.length === 1 ? deleteIds[0] : deleteIds
 
-    await $fetch('/api/admin/report/costs/save', {
+    const response = await $fetch('/api/admin/report/costs/save', {
       method: 'POST',
       body: { action, data }
     })
 
-    ElMessage.success('删除成功')
-    await fetchCostList()
-    await fetchCostStats()
-  } catch (error) {
+    if (response.code === 200) {
+      ElMessage.success('删除成功')
+      await fetchCostList()
+      await fetchCostStats()
+    } else {
+      ElMessage.error(response.message || '删除失败')
+    }
+  } catch (error: any) {
     if (error !== 'cancel') {
       console.error('删除失败:', error)
-      ElMessage.error('删除失败')
+      ElMessage.error(error?.data?.message || error?.message || '删除失败')
     }
   }
 }
@@ -612,7 +513,7 @@ const handleDelete = async (row?: any) => {
 // 表格选择变化
 const handleSelectionChange = (selection: any[]) => {
   ids.value = selection.map(item => item.id)
-  multiple.value = !selection.length
+  multiple.value = selection.length === 0  // 没有选择时禁用按钮
 }
 
 // 分页大小变化
@@ -634,37 +535,7 @@ const handleRefresh = () => {
   fetchCostStats()
 }
 
-// 重置表单
-const resetForm = () => {
-  form.id = undefined
-  form.domainId = undefined
-  form.costType = ''
-  form.amount = undefined
-  form.costDate = ''
-  form.renewalYears = undefined
-  form.notes = ''
-  formRef.value?.clearValidate()
-}
 
-// 提交表单
-const submitForm = async () => {
-  try {
-    await formRef.value?.validate()
-    
-    const action = form.id ? 'update' : 'create'
-    await $fetch('/api/admin/report/costs/save', {
-      method: 'POST',
-      body: { action, data: form }
-    })
-
-    ElMessage.success(form.id ? '更新成功' : '创建成功')
-    dialogVisible.value = false
-    await fetchCostList()
-    await fetchCostStats()
-  } catch (error) {
-    console.error('保存失败:', error)
-  }
-}
 
 // 页面初始化
 onMounted(async () => {

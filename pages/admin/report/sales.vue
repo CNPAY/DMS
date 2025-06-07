@@ -104,7 +104,7 @@
       <el-row class="mb8" style="display: flex; justify-content: space-between; align-items: center;">
         <div style="display: flex;">
           <el-button type="primary" plain icon="Plus" @click="showAddDialog">新增</el-button>
-          <el-button type="danger" plain icon="Delete" :disabled="multiple" @click="handleDelete">删除</el-button>
+          <el-button type="danger" plain icon="Delete" :disabled="multiple" @click="handleDelete()">删除</el-button>
         </div>
         <div style="display: flex; gap: 10px;">
           <el-button circle @click="showSearch = !showSearch">

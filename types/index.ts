@@ -68,7 +68,7 @@ export interface Domain {
   categoryId?: number
   landingPageType?: LandingPageType
   landingPageContent?: string
-  landingPagePrice?: number
+  salesPrice?: number
   createdAt: Date
   updatedAt: Date
   

@@ -135,9 +135,9 @@ export default defineEventHandler(async (event) => {
                 notes: item.description || null
               }
               
-              // 销售价格保存到landingPagePrice字段
+              // 销售价格保存到salesPrice字段
               if (price !== null) {
-                updateData.landingPagePrice = price
+                updateData.salesPrice = price
               }
 
               await prisma.domain.update({
@@ -179,9 +179,9 @@ export default defineEventHandler(async (event) => {
           notes: item.description || `通过批量导入创建 - ${new Date().toLocaleString()}`
         }
         
-        // 销售价格保存到landingPagePrice字段
+        // 销售价格保存到salesPrice字段
         if (price !== null) {
-          domainData.landingPagePrice = price
+          domainData.salesPrice = price
         }
 
         const newDomain = await prisma.domain.create({

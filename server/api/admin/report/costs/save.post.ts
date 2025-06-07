@@ -17,7 +17,7 @@ export default defineEventHandler(async (event) => {
     const userId = 1
     
     const body = await readBody(event)
-    const { action, data } = body as { action: 'create' | 'update' | 'delete' | 'batchDelete', data: any }
+    const { action, data } = body as { action: 'create' | 'update' | 'delete' | 'batchDelete' | 'batchCreate', data: any }
 
     switch (action) {
       case 'create':
@@ -150,6 +150,65 @@ export default defineEventHandler(async (event) => {
         })
 
         return ResponseData.success(null, '成本记录删除成功')
+      }
+
+      case 'batchCreate': {
+        const { domainIds, costType, amount, costDate, renewalYears, notes } = data
+        
+        if (!Array.isArray(domainIds) || domainIds.length === 0) {
+          return ResponseData.error('请选择要操作的域名')
+        }
+
+        // 验证必填字段
+        if (!costDate || !amount || !costType) {
+          return ResponseData.error('日期、金额和成本类型不能为空')
+        }
+
+        // 验证成本类型
+        const validCostTypes = ['purchase', 'renewal', 'transfer', 'privacy', 'dns', 'ssl', 'other']
+        if (!validCostTypes.includes(costType)) {
+          return ResponseData.error('无效的成本类型')
+        }
+
+        // 验证金额
+        if (amount <= 0) {
+          return ResponseData.error('金额必须大于0')
+        }
+
+        const parsedCostDate = new Date(costDate)
+        if (isNaN(parsedCostDate.getTime())) {
+          return ResponseData.error('无效的日期格式')
+        }
+
+        // 验证所有域名是否属于当前用户
+        const existingDomains = await prisma.domain.findMany({
+          where: {
+            id: { in: domainIds },
+            userId
+          }
+        })
+
+        if (existingDomains.length !== domainIds.length) {
+          return ResponseData.error('部分域名不存在或无权限操作')
+        }
+
+        // 构建批量创建数据
+        const createData = domainIds.map((domainId: number) => ({
+          domainId,
+          costType,
+          amount: parseFloat(amount),
+          costDate: parsedCostDate,
+          renewalYears: renewalYears || null,
+          notes: notes || null
+        }))
+
+        const createResult = await prisma.domainCost.createMany({
+          data: createData
+        })
+
+        return ResponseData.success({
+          successCount: createResult.count
+        }, `成功为 ${createResult.count} 个域名添加成本记录`)
       }
 
       case 'batchDelete': {

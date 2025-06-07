@@ -11,7 +11,7 @@
   "routes": {
     "dashboard": "仪表盘",
     "domainManagement": "域名管理",
-    "domainList": "域名信息管理",
+    "domainList": "域名管理",
     "domainCategory": "分类管理",
     "domainTag": "标签管理",
     "domainExpiry": "到期管理",

@@ -13,31 +13,44 @@ const domainSchema = Joi.object({
   registrarId: Joi.number().integer().allow(null).optional(),
   creationDate: Joi.date().allow(null).optional(),
   expiryDate: Joi.date().allow(null).optional(),
-  nameServers: Joi.string().max(2000).allow('').optional().messages({
+  nameServers: Joi.string().max(2000).allow('', null).optional().messages({
     'string.max': '域名服务器不能超过2000个字符'
   }),
   purchasePrice: Joi.number().precision(2).min(0).allow(null).optional().messages({
     'number.min': '购买价格不能小于0'
   }),
-  holderInfo: Joi.string().max(2000).allow('').optional().messages({
+  salesPrice: Joi.number().precision(2).min(0).allow(null).optional().messages({
+    'number.min': '销售价格不能小于0'
+  }),
+  discount: Joi.number().precision(2).min(0).allow(null).optional().messages({
+    'number.min': '折扣价格不能小于0'
+  }),
+  discountExpiry: Joi.date().allow(null).optional(),
+  priceExpiry: Joi.date().allow(null).optional(),
+  domainMeaning: Joi.string().max(100).allow('', null).optional().messages({
+    'string.max': '域名含义不能超过100个字符'
+  }),
+  domainDescription: Joi.string().max(500).allow('', null).optional().messages({
+    'string.max': '域名描述不能超过500个字符'
+  }),
+  holderInfo: Joi.string().max(2000).allow('', null).optional().messages({
     'string.max': '持有人信息不能超过2000个字符'
   }),
-  notes: Joi.string().max(2000).allow('').optional().messages({
+  notes: Joi.string().max(2000).allow('', null).optional().messages({
     'string.max': '备注不能超过2000个字符'
   }),
-  domainStatus: Joi.number().integer().valid(1, 2, 3, 4).optional().messages({
-    'any.only': '域名状态值无效'
+  domainStatus: Joi.number().integer().valid(1, 2, 3, 4).required().messages({
+    'any.only': '域名状态值无效',
+    'any.required': '域名状态为必填项'
   }),
-  salesStatus: Joi.number().integer().valid(1, 2, 3, 4, 5).optional().messages({
-    'any.only': '销售状态值无效'
+  salesStatus: Joi.number().integer().valid(1, 2, 3, 4, 5).required().messages({
+    'any.only': '销售状态值无效',
+    'any.required': '销售状态为必填项'
   }),
   categoryId: Joi.number().integer().allow(null).optional(),
   landingPageType: Joi.string().valid('redirect', 'template', 'custom').allow(null).optional(),
-  landingPageContent: Joi.string().max(5000).allow('').optional().messages({
+  landingPageContent: Joi.string().max(5000).allow('', null).optional().messages({
     'string.max': '着陆页内容不能超过5000个字符'
-  }),
-  landingPagePrice: Joi.number().precision(2).min(0).allow(null).optional().messages({
-    'number.min': '着陆页价格不能小于0'
   }),
   tagIds: Joi.array().items(Joi.number().integer()).optional()
 })
@@ -121,7 +134,12 @@ export default defineEventHandler(async (event) => {
             categoryId: domainData.categoryId,
             landingPageType: domainData.landingPageType,
             landingPageContent: domainData.landingPageContent || null,
-            landingPagePrice: domainData.landingPagePrice
+            salesPrice: domainData.salesPrice,
+            discount: domainData.discount,
+            discountExpiry: domainData.discountExpiry,
+            priceExpiry: domainData.priceExpiry,
+            domainMeaning: domainData.domainMeaning || null,
+            domainDescription: domainData.domainDescription || null
           }
         })
 
@@ -212,7 +230,12 @@ export default defineEventHandler(async (event) => {
             categoryId: domainData.categoryId,
             landingPageType: domainData.landingPageType,
             landingPageContent: domainData.landingPageContent || null,
-            landingPagePrice: domainData.landingPagePrice
+            salesPrice: domainData.salesPrice,
+            discount: domainData.discount,
+            discountExpiry: domainData.discountExpiry,
+            priceExpiry: domainData.priceExpiry,
+            domainMeaning: domainData.domainMeaning || null,
+            domainDescription: domainData.domainDescription || null
           }
         })
 
