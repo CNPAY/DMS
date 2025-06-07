@@ -39,6 +39,7 @@ export default defineEventHandler(async (event) => {
         showPrice: true,
         showDescription: true,
         showTags: true,
+        enableSearchArea: true,
         createdAt: true,
         updatedAt: true
       }

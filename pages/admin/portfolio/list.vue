@@ -141,6 +141,7 @@
                 <span class="layout-badge">{{ getTemplateLabel(form.layoutTemplate) }}布局</span>
                 <span v-if="form.enableGrouping" class="feature-badge grouping-badge">分组模式</span>
                 <span v-if="form.enableWaterfall" class="feature-badge waterfall-badge">瀑布流</span>
+                <span v-if="!form.enableSearchArea" class="feature-badge search-badge">搜索折叠</span>
               </div>
               
               <!-- 分组模式预览 -->
@@ -470,16 +471,28 @@
             </el-form-item>
 
             <el-form-item label="背景遮罩" prop="backgroundOverlay">
-              <el-switch v-model="form.backgroundOverlay" />
-              <div style="font-size: 12px; color: #666; margin-top: 4px;margin-left: 80px;">
-                为背景图添加半透明遮罩，提升文字可读性
+              <div style="display: flex; flex-direction: column; gap: 8px;">
+                <el-switch v-model="form.backgroundOverlay" />
+                <div style="font-size: 12px; color: #666; line-height: 1.5;">
+                  为背景图添加半透明遮罩，提升文字可读性
+                </div>
               </div>
             </el-form-item>
 
             <el-form-item label="设置选项">
-              <el-checkbox v-model="form.showPrice">显示价格</el-checkbox>
-              <el-checkbox v-model="form.showDescription">显示描述</el-checkbox>
-              <el-checkbox v-model="form.showTags">显示标签</el-checkbox>
+              <div style="display: flex; flex-direction: row; gap: 8px;">
+                <el-checkbox v-model="form.showPrice">显示价格</el-checkbox>
+                <el-checkbox v-model="form.showDescription">显示描述</el-checkbox>
+                <el-checkbox v-model="form.showTags">显示标签</el-checkbox>
+              </div>
+            </el-form-item>
+            <el-form-item label="搜索区域" prop="enableSearchArea">
+              <div style="display: flex; flex-direction: column; gap: 8px;">
+                <el-switch v-model="form.enableSearchArea" />
+                <div style="font-size: 12px; color: #666; line-height: 1.5;">
+                  关闭后，搜索区域将折叠为小图标，用户点击后展开
+                </div>
+              </div>
             </el-form-item>
 
             <!-- 头部配置 Section -->
@@ -890,6 +903,11 @@
 .waterfall-badge {
   background: #f0f9ff;
   color: #0891b2;
+}
+
+.search-badge {
+  background: #fef3e2;
+  color: #ea580c;
 }
 
 /* 分组预览样式 */
@@ -1695,7 +1713,8 @@ function reset() {
     analyticsCode: null,
     showPrice: true,
     showDescription: false,
-    showTags: false
+    showTags: false,
+    enableSearchArea: true
   }
   portfolioRef.value?.resetFields()
 }
@@ -1764,7 +1783,8 @@ async function handleUpdate(row) {
       analyticsCode: row.analyticsCode,
       showPrice: row.showPrice,
       showDescription: row.showDescription,
-      showTags: row.showTags
+      showTags: row.showTags,
+      enableSearchArea: row.enableSearchArea !== undefined ? row.enableSearchArea : true
     }
   } else {
     // 批量修改时的处理（暂时不实现）
@@ -1800,7 +1820,8 @@ async function handleUpdate(row) {
         analyticsCode: selectedRow.analyticsCode,
         showPrice: selectedRow.showPrice,
         showDescription: selectedRow.showDescription,
-        showTags: selectedRow.showTags
+        showTags: selectedRow.showTags,
+        enableSearchArea: selectedRow.enableSearchArea !== undefined ? selectedRow.enableSearchArea : true
       }
     }
   }

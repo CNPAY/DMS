@@ -34,7 +34,8 @@ export default defineEventHandler(async (event) => {
       analyticsCode,
       showPrice = true,
       showDescription = false,
-      showTags = false
+      showTags = false,
+      enableSearchArea = true
     } = body;
 
     // 验证必填字段
@@ -94,7 +95,8 @@ export default defineEventHandler(async (event) => {
           analyticsCode,
           showPrice,
           showDescription,
-          showTags
+          showTags,
+          enableSearchArea
         }
       });
     } else {
@@ -130,7 +132,8 @@ export default defineEventHandler(async (event) => {
           analyticsCode,
           showPrice,
           showDescription,
-          showTags
+          showTags,
+          enableSearchArea
         }
       });
     }

@@ -39,7 +39,16 @@
       </div>
 
       <!-- 搜索和筛选 -->
-      <div class="portfolio-filters">
+      <div class="portfolio-filters" :class="{ collapsed: !searchAreaExpanded }">
+        <!-- 折叠状态的搜索按钮 -->
+        <div v-if="!searchAreaExpanded" class="search-toggle-collapsed" @click="toggleSearchArea">
+          <div class="search-icon">⚙</div>
+          <span class="search-text">筛选</span>
+        </div>
+        
+        <!-- 展开状态的搜索区域 -->
+        <div v-else class="search-area-expanded">
+          
         <!-- 第一行：关键词搜索和排序 -->
         <div class="filter-row filter-row-main">
           <div class="search-box">
@@ -146,9 +155,17 @@
             </select>
           </div>
 
-          <button @click="resetFilters" class="reset-btn">
-            重置筛选
-          </button>
+          <div class="filter-buttons">
+            <button @click="resetFilters" class="reset-btn">
+              重置筛选
+            </button>
+            
+            <!-- 收起筛选按钮 -->
+            <button @click="toggleSearchArea" class="collapse-btn">
+              <span class="collapse-icon">▲</span>
+            </button>
+          </div>
+        </div>
         </div>
       </div>
 
@@ -246,14 +263,39 @@
 
       <!-- 分页（非瀑布流且非分组模式） -->
       <div v-if="!portfolio.enableWaterfall && !portfolio.enableGrouping && totalPages > 1" class="pagination">
+        <!-- 上一页按钮 -->
         <button 
-          v-for="page in totalPages" 
-          :key="page"
-          :class="{ active: page === currentPage }"
-          @click="handlePageChange(page)"
-          class="page-btn"
+          :disabled="currentPage === 1"
+          @click="handlePageChange(currentPage - 1)"
+          class="page-btn prev-btn"
+          :class="{ disabled: currentPage === 1 }"
         >
-          {{ page }}
+          <span class="pagination-icon">‹</span>
+          <span class="pagination-text">上一页</span>
+        </button>
+        
+        <!-- 页码按钮 -->
+        <template v-for="page in visiblePages" :key="page">
+          <span v-if="page === '...'" class="page-ellipsis">...</span>
+          <button 
+            v-else
+            :class="{ active: page === currentPage }"
+            @click="handlePageChange(page)"
+            class="page-btn"
+          >
+            {{ page }}
+          </button>
+        </template>
+        
+        <!-- 下一页按钮 -->
+        <button 
+          :disabled="currentPage === totalPages"
+          @click="handlePageChange(currentPage + 1)"
+          class="page-btn next-btn"
+          :class="{ disabled: currentPage === totalPages }"
+        >
+          <span class="pagination-text">下一页</span>
+          <span class="pagination-icon">›</span>
         </button>
       </div>
 
@@ -373,6 +415,9 @@ const pageSize = 20
 const showInquiry = ref(false)
 const selectedDomain = ref(null)
 
+// 搜索区域展开状态 - 根据米表配置初始化
+const searchAreaExpanded = ref(props.portfolio.enableSearchArea !== false)
+
 // 计算背景样式
 const portfolioBackgroundStyle = computed(() => {
   const styles = {}
@@ -393,6 +438,8 @@ const portfolioTextThemeClass = computed(() => {
   const theme = props.portfolio.textTheme || 'auto'
   const hasBackground = !!props.portfolio.backgroundUrl
   const hasOverlay = props.portfolio.backgroundOverlay
+  
+  // 调试日志已移除
   
   return {
     'text-theme-auto': theme === 'auto',
@@ -441,7 +488,7 @@ const extractTags = () => {
     }
   })
   tags.value = Array.from(tagMap.values()).sort((a, b) => a.name.localeCompare(b.name))
-  console.log('从域名中提取的标签:', tags.value)
+  // console.log('从域名中提取的标签:', tags.value)
 }
 
 // 获取筛选选项数据
@@ -745,6 +792,48 @@ const totalPages = computed(() => {
   return Math.ceil(filtered.length / pageSize)
 })
 
+// 计算可见的页码数组（智能分页显示）
+const visiblePages = computed(() => {
+  const current = currentPage.value
+  const total = totalPages.value
+  const pages = []
+  
+  if (total <= 7) {
+    // 少于7页，显示全部
+    for (let i = 1; i <= total; i++) {
+      pages.push(i)
+    }
+  } else {
+    // 多于7页，智能显示
+    if (current <= 4) {
+      // 当前页在前面
+      for (let i = 1; i <= 5; i++) {
+        pages.push(i)
+      }
+      pages.push('...')
+      pages.push(total)
+    } else if (current >= total - 3) {
+      // 当前页在后面
+      pages.push(1)
+      pages.push('...')
+      for (let i = total - 4; i <= total; i++) {
+        pages.push(i)
+      }
+    } else {
+      // 当前页在中间
+      pages.push(1)
+      pages.push('...')
+      for (let i = current - 1; i <= current + 1; i++) {
+        pages.push(i)
+      }
+      pages.push('...')
+      pages.push(total)
+    }
+  }
+  
+  return pages
+})
+
 // 筛选结果计数
 const filteredDomainsCount = computed(() => {
   const filtered = getFilteredAndSortedDomains()
@@ -903,6 +992,11 @@ const handlePageChange = (page) => {
   })
 }
 
+// 切换搜索区域展开/折叠状态
+const toggleSearchArea = () => {
+  searchAreaExpanded.value = !searchAreaExpanded.value
+}
+
 // 提供事件给子组件
 provide('showInquiry', (domain) => {
   selectedDomain.value = domain
@@ -974,7 +1068,7 @@ provide('showInquiry', (domain) => {
 }
 
 .portfolio-view.text-theme-dark .portfolio-title {
-  color: #1a1a1a;
+  color: #1a1a1a !important;
 }
 
 .portfolio-view.text-theme-dark .header-info {
@@ -997,6 +1091,12 @@ provide('showInquiry', (domain) => {
 .portfolio-view.text-theme-auto.has-background .portfolio-title {
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
   color: #ffffff;
+}
+
+/* 确保dark主题优先级最高 */
+.portfolio-view.text-theme-dark .portfolio-title {
+  color: #1a1a1a !important;
+  text-shadow: none !important;
 }
 
 .portfolio-view.text-theme-auto.has-background .header-info {
@@ -1601,8 +1701,10 @@ provide('showInquiry', (domain) => {
 .pagination {
   display: flex;
   justify-content: center;
+  align-items: center;
   gap: 6px;
   margin: 20px 0;
+  flex-wrap: wrap;
 }
 
 .page-btn {
@@ -1614,6 +1716,10 @@ provide('showInquiry', (domain) => {
   cursor: pointer;
   transition: all 0.3s ease;
   font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 36px;
 }
 
 .page-btn:hover,
@@ -1621,6 +1727,243 @@ provide('showInquiry', (domain) => {
   background: #1976d2;
   color: white;
   border-color: #1976d2;
+}
+
+.page-btn.disabled {
+  background: #f5f5f5;
+  color: #ccc;
+  cursor: not-allowed;
+  border-color: #e1e8ed;
+}
+
+.page-btn.disabled:hover {
+  background: #f5f5f5;
+  color: #ccc;
+  border-color: #e1e8ed;
+}
+
+.prev-btn,
+.next-btn {
+  font-weight: 500;
+}
+
+.pagination-icon {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.pagination-text {
+  font-size: 0.85rem;
+}
+
+.page-ellipsis {
+  padding: 6px 8px;
+  color: #999;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  min-height: 36px;
+}
+
+/* 移动端分页优化 */
+@media (max-width: 480px) {
+  .pagination {
+    gap: 4px;
+    margin: 15px 0;
+  }
+  
+  .page-btn {
+    padding: 5px 8px;
+    font-size: 0.8rem;
+    min-height: 32px;
+  }
+  
+  .pagination-text {
+    display: none;
+  }
+  
+  .prev-btn::before {
+    content: '上一页';
+    font-size: 0.75rem;
+  }
+  
+  .next-btn::after {
+    content: '下一页';
+    font-size: 0.75rem;
+  }
+  
+  .page-ellipsis {
+    min-height: 32px;
+    padding: 5px 6px;
+  }
+}
+
+/* 搜索区域折叠/展开样式 */
+.portfolio-filters.collapsed {
+  padding: 0;
+  background: none;
+  border: none;
+  box-shadow: none;
+  margin: 5px 0;
+}
+
+.search-toggle-collapsed {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 3px 6px;
+  background: #667eea;
+  color: white;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin: 8px auto;
+  font-size: 12px;
+  border: 1px solid #667eea;
+  max-width: fit-content;
+}
+
+.search-toggle-collapsed:hover {
+  background: #5a67d8;
+  border-color: #5a67d8;
+  transform: scale(1.02);
+}
+
+.search-icon {
+  font-size: 11px;
+  opacity: 0.8;
+  transition: all 0.2s ease;
+}
+
+.search-toggle-collapsed:hover .search-icon {
+  opacity: 1;
+  transform: rotate(90deg);
+}
+
+.search-text {
+  font-size: 12px;
+  font-weight: 400;
+  opacity: 0.9;
+}
+
+.search-area-expanded {
+  position: relative;
+}
+
+.collapse-btn {
+  padding: 8px 12px;
+  background: rgba(102, 126, 234, 0.1);
+  color: #667eea;
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.collapse-btn:hover {
+  background: rgba(102, 126, 234, 0.15);
+  color: #5a67d8;
+  transform: translateY(-1px);
+}
+
+.collapse-btn .collapse-icon {
+  font-size: 10px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.filter-buttons .reset-btn,
+.filter-buttons .collapse-btn {
+  height: 36px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 展开状态下的筛选区域动画 */
+.search-area-expanded .filter-row {
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 移动端搜索切换优化 */
+@media (max-width: 768px) {
+  .search-toggle-collapsed {
+    padding: 5px 10px;
+    gap: 3px;
+    font-size: 11px;
+    margin: 6px auto;
+  }
+  
+  .search-icon {
+    font-size: 10px;
+  }
+  
+  .search-text {
+    font-size: 11px;
+  }
+  
+  .collapse-btn {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+  
+  .collapse-btn .collapse-icon {
+    font-size: 9px;
+  }
+  
+  /* 移动端按钮平分布局 */
+  .filter-buttons {
+    display: flex;
+    gap: 8px;
+  }
+  
+  .filter-buttons .reset-btn,
+  .filter-buttons .collapse-btn {
+    flex: 1;
+    justify-content: center;
+  }
+  
+  /* 移动端筛选条件2列布局 */
+  .search-area-expanded .filter-row-advanced {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  
+  .search-area-expanded .filter-group {
+    margin-bottom: 0;
+  }
+  
+  /* 分类按钮和操作按钮单独占一行 */
+  .search-area-expanded .filter-group-category,
+  .search-area-expanded .filter-buttons {
+    grid-column: 1 / -1;
+  }
 }
 
 /* 底部样式 */
