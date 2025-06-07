@@ -204,9 +204,7 @@ abc.com 5000 500 字母域名
 
             <el-form-item label="默认状态">
               <el-select v-model="importConfig.defaultStatus">
-                <el-option label="待售" :value="1" />
-                <el-option label="已上架" :value="2" />
-                <el-option label="暂停销售" :value="4" />
+                <el-option v-for="status in SALES_STATUS_OPTIONS" :key="status.value" :label="status.label" :value="status.value" />
               </el-select>
             </el-form-item>
 
@@ -321,6 +319,7 @@ import { ref, reactive, computed, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { UploadFilled } from '@element-plus/icons-vue'
 import * as XLSX from 'xlsx'
+import { SALES_STATUS_OPTIONS } from '~/utils/constants.js'
 
 // Props and Emits
 const props = defineProps({

@@ -172,6 +172,7 @@
 
 <script setup name="DomainEdit">
 import { ElMessage } from 'element-plus'
+import { SALES_STATUS_OPTIONS } from '~/utils/constants.js'
 
 // Props
 const props = defineProps({
@@ -320,24 +321,16 @@ function getDomainStatusLabel(status) {
 function getSalesStatusType(status) {
   const statusMap = {
     1: "primary", // 待售
-    2: "warning", // 询价
-    3: "danger", // 谈判中
-    4: "success", // 已售
-    5: "info", // 暂不出售
+    2: "warning", // 已上架
+    3: "success", // 已售出
+    4: "info", // 暂停销售
   };
   return statusMap[status] || "info";
 }
 
 // 获取销售状态标签文本
 function getSalesStatusLabel(status) {
-  const statusMap = {
-    1: "待售",
-    2: "询价",
-    3: "谈判中",
-    4: "已售",
-    5: "暂不出售",
-  };
-  return statusMap[status] || "未知";
+  return SALES_STATUS_OPTIONS.find(option => option.value === status)?.label || "未知";
 }
 
 

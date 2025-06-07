@@ -195,8 +195,25 @@
           </template>
         </el-table-column>
         
-        <el-table-column label="操作" align="center" class-name="small-padding" fixed="right" width="180">
+        <el-table-column label="操作" align="center" class-name="small-padding" fixed="right" width="280">
           <template #default="scope">
+            <el-dropdown @command="(command) => handleStatusChange(scope.row, command)">
+              <el-button link type="primary" icon="Edit" size="small">
+                状态<el-icon class="el-icon--right"><ArrowDown /></el-icon>
+              </el-button>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item 
+                    v-for="status in SALES_STATUS_OPTIONS" 
+                    :key="status.value"
+                    :command="status.value"
+                    :disabled="scope.row.salesStatus === status.value"
+                  >
+                    {{ status.label }}
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
             <el-button link type="primary" icon="View" @click="handleView(scope.row)">详情</el-button>
             <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)">修改</el-button>
             <el-button 
@@ -385,6 +402,7 @@
 <script setup name="Domain">
 import { ElMessage, ElMessageBox } from 'element-plus'
 import dayjs from 'dayjs'
+import { SALES_STATUS_OPTIONS } from '~/utils/constants.js'
 
 definePageMeta({
   layout: 'admin',
@@ -681,24 +699,39 @@ function getDomainStatusLabel(status) {
 function getSalesStatusType(status) {
   const statusMap = {
     1: 'primary', // 待售
-    2: 'warning', // 询价
-    3: 'danger',  // 谈判中
-    4: 'success', // 已售
-    5: 'info'     // 暂不出售
+    2: 'warning', // 已上架
+    3: 'success', // 已售出
+    4: 'info'     // 暂停销售
   }
   return statusMap[status] || 'info'
 }
 
 // 获取销售状态标签文本
 function getSalesStatusLabel(status) {
-  const statusMap = {
-    1: '待售',
-    2: '询价',
-    3: '谈判中',
-    4: '已售',
-    5: '暂不出售'
+  return SALES_STATUS_OPTIONS.find(option => option.value === status)?.label || '未知'
+}
+
+// 单个域名状态更改
+async function handleStatusChange(row, status) {
+  try {
+    const response = await $fetch("/api/admin/domains/batch-status", {
+      method: "POST",
+      body: {
+        domainIds: [row.id],
+        salesStatus: status,
+      },
+    });
+
+    if (response.code === 200) {
+      ElMessage.success("状态更新成功");
+      getList();
+    } else {
+      ElMessage.error(response.message || "状态更新失败");
+    }
+  } catch (error) {
+    console.error("状态更新失败:", error);
+    ElMessage.error("状态更新失败");
   }
-  return statusMap[status] || '未知'
 }
 
 // 页面加载时获取数据

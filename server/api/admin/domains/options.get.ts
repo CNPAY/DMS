@@ -1,5 +1,6 @@
 import prisma from '~/server/utils/db'
 import { ResponseData } from '~/server/utils/response'
+import { SALES_STATUS_OPTIONS } from '~/utils/constants.js'
 
 export default defineEventHandler(async (event) => {
   try {
@@ -45,13 +46,7 @@ export default defineEventHandler(async (event) => {
     ]
 
     // 销售状态选项
-    const salesStatusOptions = [
-      { value: 1, label: '待售' },
-      { value: 2, label: '询价' },
-      { value: 3, label: '谈判中' },
-      { value: 4, label: '已售' },
-      { value: 5, label: '暂不出售' }
-    ]
+    const salesStatusOptions = SALES_STATUS_OPTIONS
 
     // 着陆页类型选项
     const landingPageTypeOptions = [

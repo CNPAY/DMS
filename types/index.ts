@@ -10,11 +10,10 @@ export enum DomainStatus {
 
 // 销售状态枚举
 export enum SalesStatus {
-  NOT_FOR_SALE = 1,     // 不出售
-  FOR_SALE = 2,         // 待售
-  SOLD = 3,             // 已售
-  NEGOTIATING = 4,      // 洽谈中
-  RESERVED = 5          // 保留
+  FOR_SALE = 1,         // 待售
+  LISTED = 2,           // 已上架
+  SOLD = 3,             // 已售出
+  PAUSED = 4            // 暂停销售
 }
 
 // 成本类型枚举

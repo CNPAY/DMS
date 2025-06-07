@@ -2,29 +2,107 @@
   <div class="app-container">
     <!-- 搜索面板 -->
     <el-card v-show="showSearch" class="search-panel">
-      <el-form ref="queryRef" :model="queryParams" :inline="true">
-        <el-form-item label="域名" prop="search" style="width: 220px">
-          <el-input v-model="queryParams.search" placeholder="请输入域名" clearable @keyup.enter="handleQuery" />
-        </el-form-item>
+      <el-form ref="queryRef" :model="queryParams" class="search-form" :inline="true" label-width="80px">
+        <el-row :gutter="16">
+          <!-- 基础搜索 -->
+          <el-form-item label="域名" prop="search" style="width: 300px">
+            <el-input v-model="queryParams.search" placeholder="请输入域名关键词" clearable @keyup.enter="handleQuery" />
+          </el-form-item>
+          
+          <el-form-item label="含义" prop="domainMeaning" style="width: 300px">
+            <el-input v-model="queryParams.domainMeaning" placeholder="请输入域名含义" clearable @keyup.enter="handleQuery" />
+          </el-form-item>
+          
+          <el-form-item label="域名状态" prop="domainStatus" style="width: 300px">
+            <el-select v-model="queryParams.domainStatus" placeholder="请选择域名状态" clearable style="width: 100%">
+              <el-option v-for="status in options.domainStatusOptions" :key="status.value" 
+                         :label="status.label" :value="status.value" />
+            </el-select>
+          </el-form-item>
+          
+          <el-form-item label="销售状态" prop="salesStatus" style="width: 300px">
+            <el-select v-model="queryParams.salesStatus" placeholder="请选择销售状态" clearable style="width: 100%">
+              <el-option v-for="status in options.salesStatusOptions" :key="status.value" 
+                         :label="status.label" :value="status.value" />
+            </el-select>
+          </el-form-item>
 
-        <el-form-item label="注册商" prop="registrarId" style="width: 220px">
-          <el-select v-model="queryParams.registrarId" placeholder="请选择注册商" clearable>
-            <el-option v-for="registrar in options.registrars" :key="registrar.id" :label="registrar.name"
-              :value="registrar.id" />
-          </el-select>
-        </el-form-item>
+          <!-- 分类和标签 -->
+          <el-form-item label="注册商" prop="registrarId" style="width: 300px">
+            <el-select v-model="queryParams.registrarId" placeholder="请选择注册商" clearable style="width: 100%">
+              <el-option v-for="registrar in options.registrars" :key="registrar.id" 
+                         :label="registrar.name" :value="registrar.id" />
+            </el-select>
+          </el-form-item>
+          
+          <el-form-item label="分类" prop="categoryId" style="width: 300px">
+            <el-select v-model="queryParams.categoryId" placeholder="请选择分类" clearable style="width: 100%">
+              <el-option v-for="category in options.categories" :key="category.id" 
+                         :label="category.name" :value="category.id" />
+            </el-select>
+          </el-form-item>
+          
+          <el-form-item label="标签" prop="tagIds" class="tag-select" style="width: 300px">
+            <el-select v-model="queryParams.tagIds" placeholder="请选择标签" clearable multiple 
+                      collapse-tags collapse-tags-tooltip style="width: 100%">
+              <el-option v-for="tag in options.tags" :key="tag.id" 
+                         :label="tag.name" :value="tag.id" />
+            </el-select>
+          </el-form-item>
 
-        <el-form-item label="分类" prop="categoryId" style="width: 220px">
-          <el-select v-model="queryParams.categoryId" placeholder="请选择分类" clearable>
-            <el-option v-for="category in options.categories" :key="category.id" :label="category.name"
-              :value="category.id" />
-          </el-select>
-        </el-form-item>
+   
+          <!-- 第三行：价格范围 -->
+            <el-form-item label="购买价格">
+              <div class="price-range">
+                <el-input v-model="queryParams.purchasePriceMin" :precision="2" :min="0" 
+                                placeholder="最低价" class="price-input" />
+                <span class="range-separator">-</span>
+                <el-input v-model="queryParams.purchasePriceMax" :precision="2" :min="0" 
+                                placeholder="最高价" class="price-input" />
+              </div>
+            </el-form-item>
+        
+            <el-form-item label="销售价格">
+              <div class="price-range">
+                <el-input v-model="queryParams.salesPriceMin" :precision="2" :min="0" 
+                                placeholder="最低价" class="price-input" />
+                <span class="range-separator">-</span>
+                <el-input v-model="queryParams.salesPriceMax" :precision="2" :min="0" 
+                                placeholder="最高价" class="price-input" />
+              </div>
+            </el-form-item>
+            <el-form-item label="折扣价格">
+              <div class="price-range">
+                <el-input v-model="queryParams.discountMin" :precision="2" :min="0" 
+                                placeholder="最低价" class="price-input" />
+                <span class="range-separator">-</span>
+                <el-input v-model="queryParams.discountMax" :precision="2" :min="0" 
+                                placeholder="最高价" class="price-input" />
+              </div>
+            </el-form-item>
 
-        <el-form-item>
-          <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
-          <el-button icon="Refresh" @click="resetQuery">重置</el-button>
-        </el-form-item>
+          <!-- 第四行：时间范围 -->
+            <el-form-item label="创建时间" prop="creationDateRange" style="width: 300px">
+              <el-date-picker v-model="queryParams.creationDateRange" type="daterange" 
+                             range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期"
+                             format="YYYY-MM-DD" value-format="YYYY-MM-DD" style="width: 100%" />
+            </el-form-item>
+       
+            <el-form-item label="到期时间" prop="expiryDateRange" style="width: 300px">
+              <el-date-picker v-model="queryParams.expiryDateRange" type="daterange" 
+                             range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期"
+                             format="YYYY-MM-DD" value-format="YYYY-MM-DD" style="width: 100%" />
+            </el-form-item>
+        
+            <!-- 操作按钮 -->
+            <el-form-item label=" " class="search-buttons" label-width="0px" style="width: 300px">
+              <div class="button-group">
+                <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
+                <el-button icon="Refresh" @click="resetQuery">重置</el-button>
+                <el-button icon="Download" @click="handleExport">导出</el-button>
+              </div>
+            </el-form-item>
+        </el-row>
       </el-form>
     </el-card>
 
@@ -78,6 +156,22 @@
               }}</el-link>
           </template>
         </el-table-column>
+        <el-table-column label="域名状态" align="center" width="100">
+          <template #default="{ row }">
+            <el-tag :type="getDomainStatusType(row.domainStatus)">
+              {{ getDomainStatusLabel(row.domainStatus) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+
+        <el-table-column label="销售状态" align="center" width="100">
+          <template #default="{ row }">
+            <el-tag :type="getSalesStatusType(row.salesStatus)">
+              {{ getSalesStatusLabel(row.salesStatus) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+
         <el-table-column label="含义" align="center" prop="domainMeaning" min-width="200">
           <template #default="{ row }">
             <span v-if="row.domainMeaning">{{ row.domainMeaning }}</span>
@@ -143,24 +237,25 @@
           </template>
         </el-table-column>
 
-        <el-table-column label="域名状态" align="center" width="100">
-          <template #default="{ row }">
-            <el-tag :type="getDomainStatusType(row.domainStatus)">
-              {{ getDomainStatusLabel(row.domainStatus) }}
-            </el-tag>
-          </template>
-        </el-table-column>
-
-        <el-table-column label="销售状态" align="center" width="100">
-          <template #default="{ row }">
-            <el-tag :type="getSalesStatusType(row.salesStatus)">
-              {{ getSalesStatusLabel(row.salesStatus) }}
-            </el-tag>
-          </template>
-        </el-table-column>
-
-        <el-table-column label="操作" align="center" fixed="right" width="180">
+        <el-table-column label="操作" align="center" fixed="right" width="260">
           <template #default="scope">
+            <el-dropdown @command="(command) => handleStatusChange(scope.row, command)">
+              <el-button link type="primary" icon="Edit" size="small">
+                状态<el-icon class="el-icon--right"><ArrowDown /></el-icon>
+              </el-button>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item 
+                    v-for="status in SALES_STATUS_OPTIONS" 
+                    :key="status.value"
+                    :command="status.value"
+                    :disabled="scope.row.salesStatus === status.value"
+                  >
+                    {{ status.label }}
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
             <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)">修改</el-button>
             <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)">
               删除
@@ -326,6 +421,7 @@ import dayjs from "dayjs";
 import DomainImport from "./import.vue";
 import DomainEdit from "./_edit.vue";
 import CostsEdit from "../report/_costs_edit.vue";
+import { SALES_STATUS_OPTIONS } from '~/utils/constants.js'
 
 definePageMeta({
   layout: "admin",
@@ -389,8 +485,18 @@ const options = ref({
   registrars: [],
   categories: [],
   tags: [],
-  domainStatusOptions: [],
-  salesStatusOptions: [],
+  domainStatusOptions: [
+    { value: 1, label: '有效' },
+    { value: 2, label: '已过期' },
+    { value: 3, label: '待续费' },
+    { value: 4, label: '已删除' },
+  ],
+  salesStatusOptions: [
+    { value: 1, label: '未上架' },
+    { value: 2, label: '已上架' },
+    { value: 3, label: '已售出' },
+    { value: 4, label: '暂停销售' },
+  ],
   landingPageTypeOptions: [],
 });
 
@@ -399,10 +505,20 @@ const data = reactive({
     pageNum: 1,
     pageSize: 20,
     search: null,
+    domainMeaning: null,
     categoryId: null,
     registrarId: null,
     domainStatus: null,
     salesStatus: null,
+    tagIds: [],
+    purchasePriceMin: null,
+    purchasePriceMax: null,
+    salesPriceMin: null,
+    salesPriceMax: null,
+    discountMin: null,
+    discountMax: null,
+    creationDateRange: null,
+    expiryDateRange: null,
   },
 });
 
@@ -412,16 +528,43 @@ const { queryParams } = toRefs(data);
 async function getList() {
   loading.value = true;
   try {
+    // 构建查询参数，过滤空值
+    const queryData = {
+      page: queryParams.value.pageNum,
+      limit: queryParams.value.pageSize,
+    };
+
+    // 添加非空的筛选条件
+    if (queryParams.value.search) queryData.search = queryParams.value.search;
+    if (queryParams.value.domainMeaning) queryData.domainMeaning = queryParams.value.domainMeaning;
+    if (queryParams.value.categoryId) queryData.categoryId = queryParams.value.categoryId;
+    if (queryParams.value.registrarId) queryData.registrarId = queryParams.value.registrarId;
+    if (queryParams.value.domainStatus) queryData.domainStatus = queryParams.value.domainStatus;
+    if (queryParams.value.salesStatus) queryData.salesStatus = queryParams.value.salesStatus;
+    if (queryParams.value.tagIds && queryParams.value.tagIds.length > 0) {
+      queryData.tagIds = queryParams.value.tagIds.join(',');
+    }
+    
+    // 价格范围筛选
+    if (queryParams.value.purchasePriceMin) queryData.purchasePriceMin = queryParams.value.purchasePriceMin;
+    if (queryParams.value.purchasePriceMax) queryData.purchasePriceMax = queryParams.value.purchasePriceMax;
+    if (queryParams.value.salesPriceMin) queryData.salesPriceMin = queryParams.value.salesPriceMin;
+    if (queryParams.value.salesPriceMax) queryData.salesPriceMax = queryParams.value.salesPriceMax;
+    if (queryParams.value.discountMin) queryData.discountMin = queryParams.value.discountMin;
+    if (queryParams.value.discountMax) queryData.discountMax = queryParams.value.discountMax;
+    
+    // 时间范围筛选
+    if (queryParams.value.creationDateRange && queryParams.value.creationDateRange.length === 2) {
+      queryData.creationDateStart = queryParams.value.creationDateRange[0];
+      queryData.creationDateEnd = queryParams.value.creationDateRange[1];
+    }
+    if (queryParams.value.expiryDateRange && queryParams.value.expiryDateRange.length === 2) {
+      queryData.expiryDateStart = queryParams.value.expiryDateRange[0];
+      queryData.expiryDateEnd = queryParams.value.expiryDateRange[1];
+    }
+
     const response = await $fetch("/api/admin/domains/list", {
-      query: {
-        page: queryParams.value.pageNum,
-        limit: queryParams.value.pageSize,
-        search: queryParams.value.search,
-        categoryId: queryParams.value.categoryId,
-        registrarId: queryParams.value.registrarId,
-        domainStatus: queryParams.value.domainStatus,
-        salesStatus: queryParams.value.salesStatus,
-      },
+      query: queryData,
     });
 
     if (response.code === 200) {
@@ -458,10 +601,39 @@ function handleQuery() {
 
 // 重置按钮操作
 function resetQuery() {
+  // 手动重置所有查询参数到初始值
+  queryParams.value = {
+    pageNum: 1,
+    pageSize: 20,
+    search: null,
+    domainMeaning: null,
+    categoryId: null,
+    registrarId: null,
+    domainStatus: null,
+    salesStatus: null,
+    tagIds: [],
+    purchasePriceMin: null,
+    purchasePriceMax: null,
+    salesPriceMin: null,
+    salesPriceMax: null,
+    discountMin: null,
+    discountMax: null,
+    creationDateRange: null,
+    expiryDateRange: null,
+  };
+  
+  // 重置表单验证状态
   if (queryRef.value) {
     queryRef.value.resetFields();
   }
+  
+  // 执行查询
   handleQuery();
+}
+
+// 导出功能
+function handleExport() {
+  ElMessage.info("导出功能开发中...");
 }
 
 // 多选框选中数据
@@ -617,24 +789,16 @@ function getDomainStatusLabel(status) {
 function getSalesStatusType(status) {
   const statusMap = {
     1: "primary", // 待售
-    2: "warning", // 询价
-    3: "danger", // 谈判中
-    4: "success", // 已售
-    5: "info", // 暂不出售
+    2: "warning", // 已上架
+    3: "success", // 已售出
+    4: "info", // 暂停销售
   };
   return statusMap[status] || "info";
 }
 
 // 获取销售状态标签文本
 function getSalesStatusLabel(status) {
-  const statusMap = {
-    1: "待售",
-    2: "询价",
-    3: "谈判中",
-    4: "已售",
-    5: "暂不出售",
-  };
-  return statusMap[status] || "未知";
+  return SALES_STATUS_OPTIONS.find(option => option.value === status)?.label || "未知";
 }
 
 // 批量操作命令处理
@@ -855,6 +1019,39 @@ async function executeBatchStatus() {
   }
 }
 
+// 单个域名状态更改
+async function handleStatusChange(row, status) {
+  try {
+    const response = await $fetch("/api/admin/domains/batch-status", {
+      method: "POST",
+      body: {
+        domainIds: [row.id],
+        salesStatus: status,
+      },
+    });
+
+    if (response.code === 200) {
+      ElMessage.success("状态更新成功");
+      getList();
+    } else {
+      ElMessage.error(response.message || "状态更新失败");
+    }
+  } catch (error) {
+    console.error("状态更新失败:", error);
+    ElMessage.error("状态更新失败");
+  }
+}
+
+// 显示批量状态对话框
+function showBatchStatusDialog() {
+  if (selectedDomains.value.length === 0) {
+    ElMessage.warning("请选择要操作的域名");
+    return;
+  }
+  batchForm.value.salesStatus = null;
+  batchStatusDialog.value = true;
+}
+
 // 批量成本成功回调
 function handleBatchCostSuccess() {
   batchCostDialog.value = false;
@@ -899,6 +1096,110 @@ onMounted(async () => {
 
 .batch-info {
   margin: 16px 0;
+}
+
+/* 搜索面板样式 */
+.search-panel {
+  margin-bottom: 16px;
+}
+
+.search-form {
+  padding: 8px 0;
+}
+
+.search-form .el-row {
+  margin-bottom: 8px;
+}
+
+.search-form .el-row:last-child {
+  margin-bottom: 0;
+}
+
+.search-form .el-form-item {
+  margin-bottom: 16px;
+}
+
+.search-form .el-form-item__label {
+  width: 80px !important;
+  text-align: right;
+  font-weight: 500;
+  color: #606266;
+}
+
+/* 价格范围样式 */
+.price-range {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.price-input {
+  flex: 1;
+  width: 95px!important;
+}
+
+.range-separator {
+  color: #909399;
+  font-weight: 500;
+  padding: 0 4px;
+  flex-shrink: 0;
+}
+
+
+
+.button-group {
+  display: flex;
+  gap: 8px;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 300px;
+}
+
+.button-group .el-button {
+  min-width: 80px;
+}
+
+/* 输入框和选择器样式统一 */
+.search-form .el-input,
+.search-form .el-select,
+.search-form .el-date-editor {
+  width: 100%;
+}
+
+.search-form .el-input__inner,
+.search-form .el-select__selector {
+  height: 32px;
+  line-height: 32px;
+}
+
+/* 标签多选框样式 */
+.search-form .el-select--multiple .el-select__tags {
+  max-height: 60px;
+  overflow-y: auto;
+}
+
+/* 响应式调整 */
+@media (max-width: 1200px) {
+  .search-form .el-form-item__label {
+    width: 70px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .search-form .el-form-item__label {
+    width: 60px !important;
+    font-size: 13px;
+  }
+  
+  .button-group {
+    justify-content: flex-start;
+  }
+  
+  .button-group .el-button {
+    min-width: 70px;
+    font-size: 13px;
+  }
 }
 
 

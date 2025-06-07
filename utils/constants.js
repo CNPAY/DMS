@@ -24,7 +24,7 @@ export const COLOR_THEMES = [
 
 // 域名状态选项
 export const SALES_STATUS_OPTIONS = [
-  { value: 1, label: '待售' },
+  { value: 1, label: '未上架' },
   { value: 2, label: '已上架' },
   { value: 3, label: '已售出' },
   { value: 4, label: '暂停销售' }

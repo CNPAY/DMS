@@ -18,7 +18,7 @@ export default defineEventHandler(async (event) => {
     }
 
     // 验证销售状态值
-    const validStatuses = [1, 2, 3, 4, 5] // 根据实际业务需求调整
+    const validStatuses = [1, 2, 3, 4] // 1-待售，2-已上架，3-已售出，4-暂停销售
     if (!validStatuses.includes(salesStatus)) {
       return ResponseData.error('无效的销售状态', 400)
     }

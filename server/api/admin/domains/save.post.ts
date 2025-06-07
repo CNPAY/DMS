@@ -43,7 +43,7 @@ const domainSchema = Joi.object({
     'any.only': '域名状态值无效',
     'any.required': '域名状态为必填项'
   }),
-  salesStatus: Joi.number().integer().valid(1, 2, 3, 4, 5).required().messages({
+  salesStatus: Joi.number().integer().valid(1, 2, 3, 4).required().messages({
     'any.only': '销售状态值无效',
     'any.required': '销售状态为必填项'
   }),
