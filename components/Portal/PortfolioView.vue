@@ -358,49 +358,8 @@ const props = defineProps({
 })
 
 // 处理头部和尾部页面数据
-const headerPages = ref([])
-const footerPages = ref([])
-
-// 获取静态页面数据
-async function loadStaticPages() {
-  try {
-    // 获取头部页面
-    if (props.portfolio.headerPages) {
-      const headerPageIds = JSON.parse(props.portfolio.headerPages)
-      if (headerPageIds && headerPageIds.length > 0) {
-        for (const pageId of headerPageIds) {
-          try {
-            const response = await $fetch(`/api/admin/static-pages/${pageId}`)
-            if (response.code === 200) {
-              headerPages.value.push(response.data)
-            }
-          } catch (err) {
-            console.warn(`获取头部页面 ${pageId} 失败:`, err)
-          }
-        }
-      }
-    }
-    
-    // 获取尾部页面
-    if (props.portfolio.footerPages) {
-      const footerPageIds = JSON.parse(props.portfolio.footerPages)
-      if (footerPageIds && footerPageIds.length > 0) {
-        for (const pageId of footerPageIds) {
-          try {
-            const response = await $fetch(`/api/admin/static-pages/${pageId}`)
-            if (response.code === 200) {
-              footerPages.value.push(response.data)
-            }
-          } catch (err) {
-            console.warn(`获取尾部页面 ${pageId} 失败:`, err)
-          }
-        }
-      }
-    }
-  } catch (err) {
-    console.error('加载静态页面数据失败:', err)
-  }
-}
+const headerPages = computed(() => props.portfolio.headerPagesData || [])
+const footerPages = computed(() => props.portfolio.footerPagesData || [])
 
 // 响应式数据
 const searchTerm = ref('')
@@ -636,7 +595,6 @@ const resetWaterfallState = () => {
 
 // 组件挂载时加载静态页面
 onMounted(() => {
-  loadStaticPages()
   loadFilterOptions()
   
   // 添加滚动监听器（仅在瀑布流模式下）

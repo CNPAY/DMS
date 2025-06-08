@@ -39,12 +39,6 @@
 
     <h3 class="drawer-title">系统布局配置</h3>
 
-    <div class="drawer-item">
-      <span>开启 TopNav</span>
-      <span class="comp-style">
-        <el-switch v-model="settingsStore.topNav" @change="topNavChange" class="drawer-switch" />
-      </span>
-    </div>
 
     <div class="drawer-item">
       <span>开启 Tags-Views</span>
@@ -67,12 +61,12 @@
       </span>
     </div>
 
-    <div class="drawer-item">
+    <!-- <div class="drawer-item">
       <span>动态标题</span>
       <span class="comp-style">
         <el-switch v-model="settingsStore.dynamicTitle" class="drawer-switch" />
       </span>
-    </div>
+    </div> -->
 
     <el-divider />
 
