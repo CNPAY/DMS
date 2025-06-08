@@ -433,7 +433,8 @@
 definePageMeta({
   layout: 'admin',
   title: '仪表盘',
-  middleware: 'auth'
+  middleware: 'auth',
+  affix: true  // 固定标签，不允许关闭
 })
 
 // 使用智能 UI 库管理器

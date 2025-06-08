@@ -1,9 +1,9 @@
 <template>
-  <div id="tags-view-container" class="tags-view-container">
+  <div id="tags-view-container" class="tags-view-container" :key="forceRenderKey">
     <scroll-pane ref="scrollPaneRef" class="tags-view-wrapper" @scroll="handleScroll">
       <router-link
         v-for="tag in visitedViews"
-        :key="tag.path"
+        :key="tag.fullPath || tag.path"
         :data-path="tag.path"
         :class="isActive(tag) ? 'active' : ''"
         :to="{ path: tag.path, query: tag.query, fullPath: tag.fullPath }"
@@ -42,18 +42,29 @@ const left = ref(0);
 const selectedTag = ref({});
 const affixTags = ref([]);
 const scrollPaneRef = ref(null);
+const forceRenderKey = ref(0);
+const isClosingTab = ref(false);
 
-const { proxy } = getCurrentInstance();
+const nuxtApp = useNuxtApp();
 const route = useRoute();
 const router = useRouter();
+const tagsViewStore = useTagsViewStore();
 
-const visitedViews = computed(() => useTagsViewStore().visitedViews);
+const visitedViews = computed(() => tagsViewStore.visitedViews);
 const theme = computed(() => useSettingsStore().theme);
 const routes = computed(() =>  sidebarRoutes);
 
 watch(route, () => {
-  addTags();
-  moveToCurrentTag();
+  if (isClosingTab.value) {
+    setTimeout(() => {
+      isClosingTab.value = false;
+      addTags();
+      moveToCurrentTag();
+    }, 100);
+  } else {
+    addTags();
+    moveToCurrentTag();
+  }
 });
 watch(visible, (value) => {
   if (value) {
@@ -68,7 +79,8 @@ onMounted(() => {
 });
 
 function isActive(r) {
-  return r.path === route.path;
+  // 优先使用fullPath比较，确保query参数不同的页面能正确区分
+  return r.fullPath === route.fullPath || (r.path === route.path && !r.fullPath);
 }
 function activeStyle(tag) {
   if (!isActive(tag)) return {};
@@ -138,51 +150,89 @@ function addTags() {
 function moveToCurrentTag() {
   nextTick(() => {
     for (const r of visitedViews.value) {
-      if (r.path === route.path) {
-        scrollPaneRef.value.moveToTarget(r);
+      // 优先使用fullPath比较
+      if (r.fullPath === route.fullPath || (r.path === route.path && !r.fullPath)) {
+        scrollPaneRef.value?.moveToTarget(r);
         // when query is different then update
         if (r.fullPath !== route.fullPath) {
           useTagsViewStore().updateVisitedView(route);
         }
+        break; // 找到匹配项后立即停止循环
       }
     }
   });
 }
 function refreshSelectedTag(view) {
-  proxy.$tab.refreshPage(view);
+  nuxtApp.$tab.refreshPage(view);
   if (route.meta.link) {
     useTagsViewStore().delIframeView(route);
   }
 }
 function closeSelectedTag(view) {
-  proxy.$tab.closePage(view).then(({ visitedViews }) => {
+  // 立即关闭右键菜单
+  closeMenu();
+  
+  // 设置关闭标志
+  isClosingTab.value = true;
+  
+  // 直接调用store方法，避免通过plugin
+  tagsViewStore.delView(view).then(({ visitedViews }) => {
+    // 只有当关闭的是当前活跃标签时才需要跳转到其他页面
     if (isActive(view)) {
       toLastView(visitedViews, view);
+    } else {
+      // 如果关闭的不是当前标签，立即重置标志
+      isClosingTab.value = false;
     }
+    
+    // 强制重新渲染
+    forceRerender();
+    
+    // 等待DOM更新后再移动到当前标签
+    nextTick(() => {
+      if (scrollPaneRef.value && scrollPaneRef.value.moveToTarget) {
+        moveToCurrentTag();
+      }
+    });
+  }).catch((error) => {
+    console.error('关闭标签页失败:', error);
+    isClosingTab.value = false;
   });
 }
 function closeRightTags() {
-  proxy.$tab.closeRightPage(selectedTag.value).then((visitedViews) => {
+  closeMenu();
+  nuxtApp.$tab.closeRightPage(selectedTag.value).then((visitedViews) => {
     if (!visitedViews.find((i) => i.fullPath === route.fullPath)) {
       toLastView(visitedViews);
     }
+    nextTick(() => {
+      moveToCurrentTag();
+    });
   });
 }
 function closeLeftTags() {
-  proxy.$tab.closeLeftPage(selectedTag.value).then((visitedViews) => {
+  closeMenu();
+  nuxtApp.$tab.closeLeftPage(selectedTag.value).then((visitedViews) => {
     if (!visitedViews.find((i) => i.fullPath === route.fullPath)) {
       toLastView(visitedViews);
     }
+    nextTick(() => {
+      moveToCurrentTag();
+    });
   });
 }
 function closeOthersTags() {
+  closeMenu();
   router.push(selectedTag.value).catch(() => {});
-  proxy.$tab.closeOtherPage(selectedTag.value).then(() => {
-    moveToCurrentTag();
+  nuxtApp.$tab.closeOtherPage(selectedTag.value).then(() => {
+    nextTick(() => {
+      moveToCurrentTag();
+    });
   });
 }
 function closeAllTags(view) {
-  proxy.$tab.closeAllPage().then(({ visitedViews }) => {
+  closeMenu();
+  nuxtApp.$tab.closeAllPage().then(({ visitedViews }) => {
     if (affixTags.value.some((tag) => tag.path === route.path)) {
       return;
     }
@@ -192,22 +242,36 @@ function closeAllTags(view) {
 function toLastView(visitedViews, view) {
   const latestView = visitedViews.slice(-1)[0];
   if (latestView) {
-    router.push(latestView.fullPath);
+    router.push(latestView.fullPath).finally(() => {
+      // 路由跳转完成后重置标志
+      setTimeout(() => {
+        isClosingTab.value = false;
+      }, 50);
+    });
   } else {
     // now the default is to redirect to the home page if there is no tags-view,
     // you can adjust it according to your needs.
     if (view.name === 'Dashboard') {
       // to reload home page
-      router.replace({ path: '/redirect' + view.fullPath });
+      router.replace({ path: '/redirect' + view.fullPath }).finally(() => {
+        setTimeout(() => {
+          isClosingTab.value = false;
+        }, 50);
+      });
     } else {
-      router.push('/');
+      router.push('/').finally(() => {
+        setTimeout(() => {
+          isClosingTab.value = false;
+        }, 50);
+      });
     }
   }
 }
 function openMenu(tag, e) {
   const menuMinWidth = 105;
-  const offsetLeft = proxy.$el.getBoundingClientRect().left; // container margin left
-  const offsetWidth = proxy.$el.offsetWidth; // container width
+  const container = document.getElementById('tags-view-container');
+  const offsetLeft = container?.getBoundingClientRect().left || 0; // container margin left
+  const offsetWidth = container?.offsetWidth || 0; // container width
   const maxLeft = offsetWidth - menuMinWidth; // left boundary
   const l = e.clientX - offsetLeft + 15; // 15: margin right
 
@@ -226,6 +290,9 @@ function closeMenu() {
 }
 function handleScroll() {
   closeMenu();
+}
+function forceRerender() {
+  forceRenderKey.value += 1;
 }
 </script>
 

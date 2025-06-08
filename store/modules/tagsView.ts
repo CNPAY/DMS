@@ -49,7 +49,11 @@ const useTagsViewStore = defineStore('tags-view', {
     },
     
     addVisitedView(view: TagView): void {
-      if (this.visitedViews.some((v) => v.path === view.path)) return;
+      const existingView = this.visitedViews.find((v) => v.fullPath === view.fullPath);
+      if (existingView) {
+        Object.assign(existingView, view);
+        return;
+      }
       this.visitedViews.push({
         ...view,
         title: view.meta.title || 'no-name'
@@ -76,13 +80,21 @@ const useTagsViewStore = defineStore('tags-view', {
     
     delVisitedView(view: TagView): Promise<TagView[]> {
       return new Promise((resolve) => {
-        for (const [i, v] of this.visitedViews.entries()) {
-          if (v.path === view.path) {
-            this.visitedViews.splice(i, 1);
-            break;
-          }
+        // 使用findIndex和splice确保响应式更新
+        const index = this.visitedViews.findIndex(v => 
+          (view.fullPath && v.fullPath === view.fullPath) || v.path === view.path
+        );
+        
+        if (index > -1) {
+          // 使用splice触发响应式更新
+          this.visitedViews.splice(index, 1);
         }
-        this.iframeViews = this.iframeViews.filter((item) => item.path !== view.path);
+        
+        // 同时清理iframe视图
+        this.iframeViews = this.iframeViews.filter((item) => 
+          (view.fullPath && item.fullPath !== view.fullPath) || item.path !== view.path
+        );
+        
         resolve([...this.visitedViews]);
       });
     },
@@ -170,7 +182,7 @@ const useTagsViewStore = defineStore('tags-view', {
     
     updateVisitedView(view: TagView): void {
       for (let v of this.visitedViews) {
-        if (v.path === view.path) {
+        if ((view.fullPath && v.fullPath === view.fullPath) || v.path === view.path) {
           Object.assign(v, view);
           break;
         }
