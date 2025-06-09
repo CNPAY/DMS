@@ -1,7 +1,5 @@
 import bcrypt from 'bcryptjs'
 import { PrismaClient } from '@prisma/client'
-import { dbConfig } from '~/config'
-
 const prisma = new PrismaClient()
 
 async function createDefaultUser() {
