@@ -44,7 +44,11 @@
                 {{ row.name }}
                 <el-tag v-if="row.isDefault" type="success" size="small" style="margin-left: 8px">默认</el-tag>
               </div>
-              <div style="font-size: 12px; color: #666;">/{{ row.slug }}</div>
+              <div style="font-size: 12px; color: #666;">
+                <a :href="`/${row.slug}`" target="_blank" style="color: blue; text-decoration: none;">
+                  /{{ row.slug }}
+                </a>
+              </div>
 
             </div>
           </template>
@@ -75,18 +79,25 @@
         </el-table-column>
         <el-table-column label="操作" align="center" class-name="small-padding" fixed="right" width="300">
           <template #default="scope">
-            <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)">修改</el-button>
-            <el-button link type="success" icon="Link" @click="handleAssociate(scope.row)">关联</el-button>
-            <el-button 
-             v-if="!scope.row.isDefault"
-              link 
-              type="warning" 
-              icon="Star" 
-              @click="handleSetDefault(scope.row)"
-            >
+            <div>
+              <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)">修改</el-button>
+              <el-button link type="success" icon="Link" @click="handleAssociate(scope.row)">关联</el-button>
+              <el-button 
+              v-if="!scope.row.isDefault"
+                link 
+                type="warning" 
+                icon="Star" 
+                @click="handleSetDefault(scope.row)"
+              >
               设为默认
             </el-button>
             <el-button link type="danger" icon="Delete" @click="handleDelete(scope.row)">删除</el-button>
+            </div>
+            <div>
+              <el-button link type="warning" icon="Discount" @click="handlePromotion(scope.row)">促销</el-button>
+            </div>
+           
+           
           </template>
         </el-table-column>
       </el-table>
@@ -109,7 +120,6 @@
     
     <!-- 米表编辑组件 -->
     <PortfolioEdit 
-      
       v-model="open" 
       :portfolio-data="currentEditData"
       @success="handleEditSuccess"
@@ -144,6 +154,14 @@
         </div>
       </template>
     </el-dialog>
+
+    <!-- 促销设置对话框 -->
+    <PromotionDialog
+      v-model="promotionVisible"
+      :portfolio-id="currentPromotionData?.id"
+      :portfolio-name="currentPromotionData?.name"
+      @success="handlePromotionSuccess"
+    />
   </div>
 </template>
 
@@ -153,6 +171,7 @@
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Loading } from '@element-plus/icons-vue'
 import PortfolioEdit from './Edit.vue'
+import PromotionDialog from './components/PromotionDialog.vue'
 import { 
   getTemplateLabel,
   getTemplateTagType,
@@ -220,6 +239,10 @@ const associateForm = ref({
   categories: []
 })
 const associateRef = ref()
+
+// 促销对话框数据
+const promotionVisible = ref(false)
+const currentPromotionData = ref(null)
 
 function formatDate(date) {
   return new Date(date).toLocaleString('zh-CN')
@@ -461,7 +484,16 @@ function handleCurrentChange(val) {
   getList()
 }
 
-// getTemplateLabel, getTemplateTagType, getThemeLabel 函数已从 utils/constants.js 导入
+// 促销按钮操作
+const handlePromotion = (row) => {
+  currentPromotionData.value = row
+  promotionVisible.value = true
+}
+
+// 促销成功回调
+const handlePromotionSuccess = () => {
+  getList() // 刷新列表
+}
 
 // 修改按钮操作
 async function handleUpdate(row) {
