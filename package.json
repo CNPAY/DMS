@@ -5,7 +5,7 @@
   "version": "1.0.0",
   "description": "DMS - 域名资产管理与展示系统",
   "scripts": {
-    "build": "npx prisma generate && npx prisma db push && npx tsx scripts/init-db.ts && nuxt build",
+    "build": "npx prisma generate && npx prisma db push && npx tsx server/utils/init-db.ts && nuxt build",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
