@@ -59,7 +59,7 @@ async function loadPortfolioData() {
     // 2. 如果没有找到指定的米表，尝试获取默认米表
     if (!portfolioData || portfolioData.code !== 200) {
       try {
-        const defaultData = await $fetch('/api/portal/default-portfolio')
+        const defaultData = await $fetch('/api/portal/portfolio')
         
         // 如果访问的是默认米表的slug，使用默认米表数据
         if (defaultData.code === 200 && defaultData.data) {

@@ -11,20 +11,41 @@
         <el-card>
           <template #header>
             <div class="card-header">
-              <span>基本信息</span>
+              <span>个人资料</span>
             </div>
           </template>
 
-          <el-form ref="profileRef" :model="profileForm" :rules="profileRules" label-width="100px">
+          <el-form
+            ref="formRef"
+            :model="form"
+            :rules="rules"
+            label-width="120px"
+            class="profile-form"
+          >
+            <!-- 基本信息 -->
+            <el-divider content-position="left">基本信息</el-divider>
             <el-row :gutter="20">
               <el-col :span="12">
                 <el-form-item label="用户名" prop="username">
-                  <el-input v-model="profileForm.username" placeholder="请输入用户名" />
+                  <el-input v-model="form.username" />
                 </el-form-item>
               </el-col>
               <el-col :span="12">
                 <el-form-item label="邮箱" prop="email">
-                  <el-input v-model="profileForm.email" placeholder="请输入邮箱" />
+                  <el-input v-model="form.email" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+
+            <el-row :gutter="20">
+              <el-col :span="12">
+                <el-form-item label="真实姓名" prop="realName">
+                  <el-input v-model="form.realName" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="昵称" prop="nickname">
+                  <el-input v-model="form.nickname" />
                 </el-form-item>
               </el-col>
             </el-row>
@@ -32,33 +53,123 @@
             <el-row :gutter="20">
               <el-col :span="12">
                 <el-form-item label="手机号码" prop="phone">
-                  <el-input v-model="profileForm.phone" placeholder="请输入手机号码" />
-                </el-form-item>
-              </el-col>
-              <el-col :span="12">
-                <el-form-item label="真实姓名" prop="realName">
-                  <el-input v-model="profileForm.realName" placeholder="请输入真实姓名" />
+                  <el-input v-model="form.phone" />
                 </el-form-item>
               </el-col>
             </el-row>
 
             <el-form-item label="个人简介" prop="bio">
-              <el-input 
-                v-model="profileForm.bio" 
-                type="textarea" 
-                :rows="3"
-                placeholder="请输入个人简介"
-                maxlength="200"
-                show-word-limit
-              />
+              <el-input v-model="form.bio" type="textarea" :rows="3" />
             </el-form-item>
 
-            <el-form-item>
-              <el-button type="primary" @click="updateProfile" :loading="profileLoading">
-                保存资料
-              </el-button>
-              <el-button @click="resetProfileForm">重置</el-button>
-            </el-form-item>
+            <el-row :gutter="20">
+              <el-col :span="12">
+                <el-form-item label="公司名称" prop="company">
+                  <el-input v-model="form.company" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="职位" prop="position">
+                  <el-input v-model="form.position" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+
+            <el-row :gutter="20">
+              <el-col :span="12">
+                <el-form-item label="所在地" prop="location">
+                  <el-input v-model="form.location" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="个人网站" prop="website">
+                  <el-input v-model="form.website" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+
+            <!-- 联系方式 -->
+            <el-divider content-position="left">联系方式</el-divider>
+            <el-row :gutter="20">
+              <el-col :span="12">
+                <el-form-item label="微信" prop="wechat">
+                  <el-input v-model="form.wechat" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="QQ" prop="qq">
+                  <el-input v-model="form.qq" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+
+            <el-row :gutter="20">
+              <el-col :span="12">
+                <el-form-item label="Telegram" prop="telegram">
+                  <el-input v-model="form.telegram" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="WhatsApp" prop="whatsapp">
+                  <el-input v-model="form.whatsapp" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+
+            <el-row :gutter="20">
+              <el-col :span="12">
+                <el-form-item label="Skype" prop="skype">
+                  <el-input v-model="form.skype" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="X" prop="twitter">
+                  <el-input v-model="form.twitter" placeholder="@username" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+
+            <!-- 偏好设置 -->
+            <el-divider content-position="left">偏好设置</el-divider>
+            <el-row :gutter="20">
+              <el-col :span="12">
+                <el-form-item label="界面语言" prop="language">
+                  <el-select v-model="form.language" style="width: 100%">
+                    <el-option label="简体中文" value="zh-CN" />
+                    <el-option label="English" value="en-US" />
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="界面主题" prop="theme">
+                  <el-select v-model="form.theme" style="width: 100%">
+                    <el-option label="浅色" value="light" />
+                    <el-option label="深色" value="dark" />
+                  </el-select>
+                </el-form-item>
+              </el-col>
+            </el-row>
+
+            <el-row :gutter="20">
+              <el-col :span="12">
+                <el-form-item label="时区" prop="timezone">
+                  <el-select v-model="form.timezone" style="width: 100%">
+                    <el-option label="北京时间 (UTC+8)" value="Asia/Shanghai" />
+                    <el-option label="UTC" value="UTC" />
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="通知设置" prop="notification">
+                  <el-switch v-model="form.notification" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+
+            <el-form item>
+              <el-button type="primary" @click="handleSubmit" :loading="loading">保存</el-button>
+              <el-button @click="resetForm">重置</el-button>
+            </el-form>
           </el-form>
         </el-card>
 
@@ -121,13 +232,16 @@
             <div class="avatar-upload">
               <el-upload
                 class="avatar-uploader"
-                action="#"
+                action="/api/admin/upload/image"
                 :show-file-list="false"
                 :before-upload="beforeAvatarUpload"
                 :on-success="handleAvatarSuccess"
                 :on-error="handleAvatarError"
+                :headers="{
+                  'Accept': 'application/json'
+                }"
               >
-                <img v-if="profileForm.avatar" :src="profileForm.avatar" class="avatar" />
+                <img v-if="form.avatar" :src="form.avatar" class="avatar" />
                 <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
               </el-upload>
               <div class="avatar-tips">
@@ -225,6 +339,8 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
+import type { FormInstance, FormRules } from 'element-plus'
+import type { ResponseData, UploadResponse, UserProfile } from '~/types/response'
 
 definePageMeta({
   layout: 'admin',
@@ -233,27 +349,48 @@ definePageMeta({
 })
 
 // 响应式数据
-const profileRef = ref()
+const formRef = ref<FormInstance>()
 const passwordRef = ref()
-const profileLoading = ref(false)
+const loading = ref(false)
 const passwordLoading = ref(false)
 
 // 用户信息
-const userInfo = ref({
+const userInfo = ref<{
+  id: number
+  createdAt: string
+  lastLoginAt: string | null
+  loginCount: number
+  status: 'active' | 'inactive'
+}>({
   id: 1,
-  createdAt: '2023-01-01T00:00:00Z',
-  lastLoginAt: '2025-01-27T10:30:00Z',
-  loginCount: 156,
+  createdAt: '',
+  lastLoginAt: '',
+  loginCount: 0,
   status: 'active'
 })
 
-// 个人资料表单
-const profileForm = reactive({
-  username: 'admin',
-  email: 'admin@dms.com',
-  phone: '',
+// 表单数据
+const form = ref({
+  username: '',
+  email: '',
   realName: '',
+  nickname: '',
+  phone: '',
   bio: '',
+  company: '',
+  position: '',
+  location: '',
+  website: '',
+  wechat: '',
+  qq: '',
+  telegram: '',
+  whatsapp: '',
+  skype: '',
+  twitter: '',
+  language: 'zh-CN',
+  theme: 'light',
+  timezone: 'Asia/Shanghai',
+  notification: true,
   avatar: ''
 })
 
@@ -272,19 +409,22 @@ const securitySettings = reactive({
 })
 
 // 表单验证规则
-const profileRules = {
+const rules = ref<FormRules>({
   username: [
     { required: true, message: '请输入用户名', trigger: 'blur' },
-    { min: 3, max: 20, message: '用户名长度为3-20个字符', trigger: 'blur' }
+    { min: 3, max: 20, message: '长度在 3 到 20 个字符', trigger: 'blur' }
   ],
   email: [
     { required: true, message: '请输入邮箱', trigger: 'blur' },
-    { type: 'email', message: '请输入正确的邮箱格式', trigger: 'blur' }
+    { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' }
   ],
   phone: [
     { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号码', trigger: 'blur' }
+  ],
+  website: [
+    { type: 'url', message: '请输入正确的网址', trigger: 'blur' }
   ]
-}
+})
 
 const passwordRules = {
   currentPassword: [
@@ -310,34 +450,52 @@ const passwordRules = {
 }
 
 // 方法
-const loadUserProfile = async () => {
+const fetchProfile = async () => {
   try {
-    // 模拟加载用户资料
-    // const response = await $fetch('/api/admin/profile')
-    // Object.assign(profileForm, response.profile)
-    // Object.assign(securitySettings, response.securitySettings)
+    const response = await $fetch('/api/admin/profile/profile')
+    if (response.code === 200 && response.data) {
+      form.value  = response.data;
+      // 更新用户信息
+      userInfo.value = {
+        id: response.data.id,
+        createdAt: response.data.createdAt,
+        lastLoginAt: response.data.lastLoginAt || null,
+        loginCount: response.data.loginCount || 0,
+        status: response.data.status
+      }
+    } else {
+      ElMessage.error(response.message || '获取个人资料失败')
+    }
   } catch (error) {
-    ElMessage.error('加载用户资料失败')
-    console.error(error)
+    console.error('获取个人资料失败:', error)
+    ElMessage.error('获取个人资料失败')
   }
 }
 
-const updateProfile = async () => {
+const handleSubmit = async () => {
+  if (!formRef.value) return
+  
   try {
-    await profileRef.value.validate()
-    profileLoading.value = true
+    const valid = await formRef.value.validate()
+    if (!valid) return
     
-    // 模拟API调用
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    loading.value = true
+    const response = await $fetch('/api/admin/profile/update', {
+      method: 'POST',
+      body: form.value
+    })
     
-    ElMessage.success('个人资料更新成功')
-  } catch (error) {
-    if (error !== false) {
-      ElMessage.error('更新个人资料失败')
-      console.error(error)
+    if (response.code === 200) {
+      ElMessage.success('保存成功')
+      await fetchProfile() // 重新加载数据
+    } else {
+      ElMessage.error(response.message || '保存失败')
     }
+  } catch (error) {
+    console.error('保存个人资料失败:', error)
+    ElMessage.error('保存失败')
   } finally {
-    profileLoading.value = false
+    loading.value = false
   }
 }
 
@@ -346,11 +504,17 @@ const updatePassword = async () => {
     await passwordRef.value.validate()
     passwordLoading.value = true
     
-    // 模拟API调用
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    const response = await $fetch('/api/admin/profile/password', {
+      method: 'POST',
+      body: passwordForm
+    })
     
-    ElMessage.success('密码修改成功')
-    resetPasswordForm()
+    if (response.code === 200) {
+      ElMessage.success(response.message || '密码修改成功')
+      resetPasswordForm()
+    } else {
+      ElMessage.error(response.message || '修改密码失败')
+    }
   } catch (error) {
     if (error !== false) {
       ElMessage.error('修改密码失败')
@@ -361,7 +525,13 @@ const updatePassword = async () => {
   }
 }
 
-const beforeAvatarUpload = (file) => {
+interface UploadFile {
+  type: string
+  size: number
+  raw: File
+}
+
+const beforeAvatarUpload = (file: UploadFile) => {
   const isJPGOrPNG = file.type === 'image/jpeg' || file.type === 'image/png'
   const isLt2M = file.size / 1024 / 1024 < 2
 
@@ -376,16 +546,23 @@ const beforeAvatarUpload = (file) => {
   return true
 }
 
-const handleAvatarSuccess = (response, file) => {
-  profileForm.avatar = URL.createObjectURL(file.raw)
-  ElMessage.success('头像上传成功')
+const handleAvatarSuccess = async (response: any) => {
+  if (response.code === 200 && response.data?.url) {
+    form.value.avatar = response.data.url
+    // 更新用户资料
+    await handleSubmit()
+    ElMessage.success('头像上传成功')
+  } else {
+    ElMessage.error(response.message || '头像上传失败')
+  }
 }
 
-const handleAvatarError = () => {
+const handleAvatarError = (error: any) => {
+  console.error('头像上传失败:', error)
   ElMessage.error('头像上传失败')
 }
 
-const updateSecuritySetting = async (setting) => {
+const updateSecuritySetting = async (setting: string) => {
   try {
     // 模拟API调用
     await new Promise(resolve => setTimeout(resolve, 500))
@@ -396,8 +573,11 @@ const updateSecuritySetting = async (setting) => {
   }
 }
 
-const resetProfileForm = () => {
-  profileRef.value?.resetFields()
+const resetForm = () => {
+  if (formRef.value) {
+    formRef.value.resetFields()
+    fetchProfile()
+  }
 }
 
 const resetPasswordForm = () => {
@@ -409,13 +589,14 @@ const resetPasswordForm = () => {
   })
 }
 
-const formatDate = (dateString) => {
+const formatDate = (dateString: string | null): string => {
+  if (!dateString) return '未知'
   return new Date(dateString).toLocaleString('zh-CN')
 }
 
 // 生命周期
 onMounted(() => {
-  loadUserProfile()
+  fetchProfile()
 })
 </script>
 

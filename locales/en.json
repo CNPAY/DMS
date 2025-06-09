@@ -40,7 +40,8 @@
     "securityConfig": "Account Setting",
     "iconLibrary": "Icon Library",
     "landingConfig": "Landing Page Config",
-    "staticPages": "Page Management"
+    "staticPages": "Page Management",
+    "userProfile": "User Profile"
   },
   "auth": {
     "welcome": "Welcome to DMS",

@@ -12,12 +12,42 @@ datasource db {
 
 // 用户表
 model User {
-  id        Int      @id @default(autoincrement())
-  username  String   @unique @db.VarChar(50)
-  email     String   @unique @db.VarChar(100)
-  passwordHash String @map("password_hash") @db.VarChar(255)
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id            Int       @id @default(autoincrement())
+  username      String    @unique @db.VarChar(50)
+  email         String    @unique @db.VarChar(100)
+  passwordHash  String    @map("password_hash") @db.VarChar(255)
+  
+  // 基本信息
+  realName      String?   @db.VarChar(50)    @map("real_name")  // 真实姓名
+  nickname      String?   @db.VarChar(50)    // 昵称
+  phone         String?   @db.VarChar(20)    // 手机号码
+  avatar        String?   @db.VarChar(255)   // 头像URL
+  bio           String?   @db.Text           // 个人简介
+  company       String?   @db.VarChar(100)   // 公司名称
+  position      String?   @db.VarChar(50)    // 职位
+  location      String?   @db.VarChar(100)   // 所在地
+  website       String?   @db.VarChar(255)   // 个人网站
+
+  // 联系方式
+  wechat        String?   @db.VarChar(50)    // 微信号
+  qq            String?   @db.VarChar(20)    // QQ号
+  telegram      String?   @db.VarChar(50)    // Telegram
+  whatsapp      String?   @db.VarChar(50)    // WhatsApp
+  skype         String?   @db.VarChar(50)    // Skype
+  twitter       String?   @db.VarChar(50)    // X(Twitter)
+
+  // 偏好设置
+  language      String    @default("zh-CN") @db.VarChar(10)   // 界面语言
+  theme         String    @default("light") @db.VarChar(10)   // 界面主题
+  timezone      String    @default("Asia/Shanghai") @db.VarChar(50) // 时区
+  notification  Boolean   @default(true)     // 通知开关
+  twoFactorEnabled Boolean @default(false)   @map("two_factor_enabled") // 两步验证
+  
+  // 时间戳
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  lastLoginAt   DateTime? @map("last_login_at")
+  lastLoginIp   String?   @map("last_login_ip") @db.VarChar(50)
 
   // 关联关系
   domains         Domain[]
@@ -29,8 +59,53 @@ model User {
   aiPrompts       AiPrompt[]
   systemSettings  SystemSetting[]
   staticPages     StaticPage[]
+  
+  // 统计信息
+  loginCount    Int       @default(0)        // 登录次数
+  domainCount   Int       @default(0)        // 域名总数
+  
+  // 日志和记录
+  loginLogs      LoginLog[]       // 登录日志
+  operationLogs  OperationLog[]   // 操作日志
+  notifications  Notification[]   // 通知消息
 
   @@map("users")
+}
+
+// 登录日志
+model LoginLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  ip        String   // 登录IP
+  device    String   // 设备信息
+  location  String?  // 登录地点
+  status    String   // 登录状态：success, failed
+  createdAt DateTime @default(now())
+}
+
+// 操作日志
+model OperationLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  action    String   // 操作类型
+  target    String   // 操作对象
+  detail    String   // 操作详情
+  ip        String   // 操作IP
+  createdAt DateTime @default(now())
+}
+
+// 通知消息
+model Notification {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  type      String   // 通知类型：system, domain, security
+  title     String   // 通知标题
+  content   String   // 通知内容
+  read      Boolean  @default(false) // 是否已读
+  createdAt DateTime @default(now())
 }
 
 // 注册商表

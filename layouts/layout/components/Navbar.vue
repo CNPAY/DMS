@@ -37,13 +37,13 @@
       <div class="avatar-container">
         <el-dropdown @command="handleCommand" class="right-menu-item hover-effect" trigger="click">
           <div class="avatar-wrapper">
-            <!-- <img :src="userStore.avatar" class="user-avatar" /> -->
-            <span class="user-avatar round-item">{{ "A" }}</span>
+            <img  v-if="userStore.avatar" :src="userStore.avatar" class="user-avatar" />
+            <span  v-else class="user-avatar round-item">{{ "A" }}</span>
             <span class="user-name">{{ userStore.name }}</span>
           </div>
           <template #dropdown>
             <el-dropdown-menu>
-              <router-link to="/admin/user/profile">
+              <router-link to="/admin/system/profile">
                 <el-dropdown-item>个人中心</el-dropdown-item>
               </router-link>
               <el-dropdown-item command="setLayout" v-if="settingsStore.showSettings">
@@ -84,7 +84,6 @@ function toggleSideBar() {
 }
 function dartModeChange() {
   settingsStore.darkMode = !settingsStore.darkMode;
-  debugger;
   var dark = settingsStore.darkMode;
   let html = document.documentElement;
   if (dark) {

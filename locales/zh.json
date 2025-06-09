@@ -40,7 +40,8 @@
     "securityConfig": "个人设置",
     "iconLibrary": "图标库",
     "landingConfig": "着陆页配置",
-    "staticPages": "页面管理"
+    "staticPages": "页面管理",
+    "userProfile": "个人设置"
   },
   "auth": {
     "welcome": "欢迎使用 DMS",
