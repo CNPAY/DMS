@@ -35,11 +35,14 @@ export default defineEventHandler(async (event) => {
       select: {
         id: true,
         domainName: true,
-        purchasePrice: true,
+        salesPrice: true,          // 销售价格
+        priceExpiry: true,         // 销售价格过期时间
+        discount: true,            // 折扣价格
+        discountExpiry: true,      // 折扣过期时间
         notes: true,
         registrarId: true,
         creationDate: true,
-        expiryDate: true,
+        expiryDate: true,          // 域名过期时间
         categoryId: true,
         createdAt: true,
         registrar: {
@@ -73,10 +76,13 @@ export default defineEventHandler(async (event) => {
     const formattedDomains = domains.map(domain => ({
       id: domain.id,
       name: domain.domainName,
-      salePrice: domain.purchasePrice,
+      salePrice: domain.salesPrice,         // 销售价格（从 salesPrice 转换为前端使用的 salePrice）
+      salePriceExpirationDate: domain.priceExpiry,  // 销售价格过期时间
+      discountPrice: domain.discount,       // 折扣价格
+      discountExpirationDate: domain.discountExpiry, // 折扣过期时间
       description: domain.notes,
       registrationDate: domain.creationDate,
-      expirationDate: domain.expiryDate,
+      expirationDate: domain.expiryDate,    // 域名过期时间
       registrar: domain.registrar?.name,
       categoryId: domain.categoryId,
       category: domain.category?.name,

@@ -5,10 +5,17 @@
     <div class="card-header">
       <div class="domain-name-section">
         <h3 class="domain-name">{{ domain.name }}</h3>
-        <span v-if="domain.category" class="category-badge">{{ domain.category }}</span>
+        <div class="domain-info">
+          <span v-if="domain.category" class="category-badge">{{ domain.category }}</span>
+        </div>
       </div>
-      <div v-if="domain.salePrice && portfolio.showPrice" class="price-badge">
-        ¥{{ formatPrice(domain.salePrice) }}
+      <div v-if="showPrice" class="price-container">
+        <div v-if="hasValidDiscount" class="price-badge discount">
+          ¥{{ formatPrice(domain.discountPrice) }}
+        </div>
+        <div :class="{'price-badge':!hasValidDiscount,'sale-price':hasValidDiscount, 'line-through': hasValidDiscount }">
+          ¥{{ formatPrice(domain.salePrice) }}
+        </div>
       </div>
     </div>
     
@@ -55,6 +62,8 @@
 </template>
 
 <script setup>
+import { inject, computed } from 'vue'
+
 const props = defineProps({
   domain: {
     type: Object,
@@ -67,6 +76,31 @@ const props = defineProps({
 })
 
 const showInquiry = inject('showInquiry')
+
+// 检查日期是否过期
+const isDateExpired = (date) => {
+  if (!date) return false
+  return new Date(date) < new Date()
+}
+
+// 判断销售价格是否有效
+const hasValidSalePrice = computed(() => {
+  return props.domain.salePrice && 
+         !isDateExpired(props.domain.salePriceExpirationDate) &&
+         !isDateExpired(props.domain.expirationDate)
+})
+
+// 判断是否显示价格
+const showPrice = computed(() => {
+  return props.portfolio.showPrice && hasValidSalePrice.value
+})
+
+// 判断是否有有效的折扣价
+const hasValidDiscount = computed(() => {
+  return showPrice.value && 
+         props.domain.discountPrice && 
+         !isDateExpired(props.domain.discountExpirationDate)
+})
 
 const formatDate = (date) => {
   if (!date) return ''
@@ -135,6 +169,13 @@ const handleInquiry = () => {
   font-weight: 500;
 }
 
+.price-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
 .price-badge {
   background: rgba(255, 255, 255, 0.95);
   color: #e74c3c;
@@ -143,6 +184,16 @@ const handleInquiry = () => {
   font-size: 1.1rem;
   font-weight: bold;
   white-space: nowrap;
+}
+
+.price-badge.discount {
+  color: #f56565;
+}
+
+.sale-price.line-through {
+  color: #a0aec0;
+  text-decoration: line-through;
+  opacity: 0.8;
 }
 
 .card-body {
@@ -245,12 +296,18 @@ const handleInquiry = () => {
     gap: 12px;
   }
 
-  .price-badge {
+  .price-container {
     align-self: flex-start;
   }
 
   .domain-info-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .price-container {
+    align-self: flex-start;
   }
 }
 </style> 

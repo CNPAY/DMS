@@ -4,8 +4,13 @@
   <div class="domain-item-grid">
     <div class="domain-header">
       <h3 class="domain-name">{{ domain.name }}</h3>
-      <div v-if="domain.salePrice && portfolio.showPrice" class="price">
-        ¥{{ formatPrice(domain.salePrice) }}
+      <div v-if="showPrice" class="price-container">
+        <div v-if="hasValidDiscount" class="discount-price">
+          ¥{{ formatPrice(domain.discountPrice) }}
+        </div>
+        <div :class="['original-price', { 'has-discount': hasValidDiscount }]">
+          ¥{{ formatPrice(domain.salePrice) }}
+        </div>
       </div>
     </div>
     
@@ -38,13 +43,15 @@
     
     <div class="domain-footer">
       <button @click="handleInquiry" class="inquiry-btn">
-        询价购买
+        <span>询价购买</span>
       </button>
     </div>
   </div>
 </template>
 
 <script setup>
+import { inject, computed } from 'vue'
+
 const props = defineProps({
   domain: {
     type: Object,
@@ -57,6 +64,31 @@ const props = defineProps({
 })
 
 const showInquiry = inject('showInquiry')
+
+// 检查日期是否过期
+const isDateExpired = (date) => {
+  if (!date) return false
+  return new Date(date) < new Date()
+}
+
+// 判断销售价格是否有效
+const hasValidSalePrice = computed(() => {
+  return props.domain.salePrice && 
+         !isDateExpired(props.domain.salePriceExpirationDate) &&
+         !isDateExpired(props.domain.expirationDate)
+})
+
+// 判断是否显示价格
+const showPrice = computed(() => {
+  return props.portfolio.showPrice && hasValidSalePrice.value
+})
+
+// 判断是否有有效的折扣价
+const hasValidDiscount = computed(() => {
+  return showPrice.value && 
+         props.domain.discountPrice && 
+         !isDateExpired(props.domain.discountExpirationDate)
+})
 
 const formatDate = (date) => {
   if (!date) return ''
@@ -76,62 +108,85 @@ const handleInquiry = () => {
 <style scoped>
 .domain-item-grid {
   border: 1px solid #e1e8ed;
-  border-radius: 8px;
+  border-radius: 12px;
   background: white;
   overflow: hidden;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
   height: 100%;
+  position: relative;
 }
 
 .domain-item-grid:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
   transform: translateY(-2px);
 }
 
 .domain-header {
-  padding: 16px;
+  padding: 20px;
   border-bottom: 1px solid #f1f3f4;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 12px;
+  gap: 16px;
 }
 
 .domain-name {
-  font-size: 1.1rem;
-  font-weight: bold;
-  color: #2c3e50;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1a202c;
   margin: 0;
   cursor: pointer;
   word-break: break-all;
   line-height: 1.4;
+  letter-spacing: -0.02em;
 }
 
 .domain-name:hover {
-  color: #1976d2;
+  color: #4a5568;
 }
 
-.price {
-  font-size: 1.1rem;
-  font-weight: bold;
-  color: #e74c3c;
-  white-space: nowrap;
+.price-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.discount-price {
+  color: #e53e3e;
+  font-weight: 600;
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+}
+
+.original-price {
+  color: #e53e3e;
+  font-weight: 600;
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+}
+
+.original-price.has-discount {
+  color: #718096;
+  font-size: 1rem;
+  text-decoration: line-through;
+  font-weight: 500;
 }
 
 .domain-body {
-  padding: 16px;
+  padding: 20px;
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
 }
 
 .domain-description {
-  color: #5a6c7d;
-  font-size: 0.875rem;
-  line-height: 1.5;
+  color: #4a5568;
+  font-size: 0.9375rem;
+  line-height: 1.6;
   margin: 0;
   display: -webkit-box;
   -webkit-line-clamp: 3;
@@ -142,59 +197,142 @@ const handleInquiry = () => {
 .domain-meta {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
+  margin-top: auto;
 }
 
 .meta-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.8rem;
+  font-size: 0.875rem;
 }
 
 .meta-label {
-  color: #6c757d;
+  color: #718096;
   font-weight: 500;
 }
 
 .meta-value {
-  color: #2c3e50;
+  color: #2d3748;
+  font-weight: 500;
 }
 
 .domain-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 8px;
+  margin-top: 4px;
 }
 
 .tag {
-  background: #e3f2fd;
-  color: #1976d2;
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-size: 0.7rem;
+  background: rgba(102, 126, 234, 0.1);
+  color: #667eea;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 0.75rem;
   font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.tag:hover {
+  background: rgba(102, 126, 234, 0.15);
 }
 
 .domain-footer {
-  padding: 16px;
+  padding: 20px;
   border-top: 1px solid #f1f3f4;
+  background: #fafafa;
 }
 
 .inquiry-btn {
   width: 100%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border: none;
-  padding: 10px 16px;
-  border-radius: 6px;
+  background: #f8fafc;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  padding: 12px 24px;
+  border-radius: 8px;
   font-weight: 500;
+  font-size: 0.9375rem;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.inquiry-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+}
+
+.inquiry-btn span {
+  position: relative;
+  z-index: 2;
+  transition: color 0.3s ease;
 }
 
 .inquiry-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  transform: translateY(-2px);
+  border-color: #667eea;
+  color: #fff;
+}
+
+.inquiry-btn:hover::before {
+  opacity: 1;
+}
+
+.inquiry-btn:active {
+  transform: translateY(0);
+}
+
+.inquiry-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.4);
+}
+
+.inquiry-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+@media (max-width: 768px) {
+  .domain-header {
+    padding: 16px;
+  }
+  
+  .domain-body {
+    padding: 16px;
+  }
+  
+  .domain-footer {
+    padding: 16px;
+  }
+  
+  .domain-name {
+    font-size: 1.125rem;
+  }
+  
+  .price {
+    font-size: 1.125rem;
+  }
+  
+  .inquiry-btn {
+    padding: 10px 20px;
+    font-size: 0.875rem;
+  }
 }
 </style> 

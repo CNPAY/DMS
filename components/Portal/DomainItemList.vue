@@ -30,11 +30,16 @@
         </div>
       </div>
       <div class="domain-actions">
-        <div v-if="domain.salePrice && portfolio.showPrice" class="price-section">
-          <span class="price">¥{{ formatPrice(domain.salePrice) }}</span>
+        <div v-if="showPrice" class="price-container">
+          <div v-if="hasValidDiscount" class="discount-price">
+            ¥{{ formatPrice(domain.discountPrice) }}
+          </div>
+          <div :class="['original-price', { 'has-discount': hasValidDiscount }]">
+            ¥{{ formatPrice(domain.salePrice) }}
+          </div>
         </div>
         <button @click="handleInquiry" class="inquiry-btn">
-          询价购买
+          <span>询价购买</span>
         </button>
       </div>
     </div>
@@ -42,6 +47,8 @@
 </template>
 
 <script setup>
+import { inject, computed } from 'vue'
+
 const props = defineProps({
   domain: {
     type: Object,
@@ -54,6 +61,31 @@ const props = defineProps({
 })
 
 const showInquiry = inject('showInquiry')
+
+// 检查日期是否过期
+const isDateExpired = (date) => {
+  if (!date) return false
+  return new Date(date) < new Date()
+}
+
+// 判断销售价格是否有效
+const hasValidSalePrice = computed(() => {
+  return props.domain.salePrice && 
+         !isDateExpired(props.domain.salePriceExpirationDate) &&
+         !isDateExpired(props.domain.expirationDate)
+})
+
+// 判断是否显示价格
+const showPrice = computed(() => {
+  return props.portfolio.showPrice && hasValidSalePrice.value
+})
+
+// 判断是否有有效的折扣价
+const hasValidDiscount = computed(() => {
+  return showPrice.value && 
+         props.domain.discountPrice && 
+         !isDateExpired(props.domain.discountExpirationDate)
+})
 
 const formatDate = (date) => {
   if (!date) return ''
@@ -150,31 +182,93 @@ const handleInquiry = () => {
   min-width: 120px;
 }
 
-.price-section {
-  text-align: right;
+.price-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  margin-right: 16px;
 }
 
-.price {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #e74c3c;
+.discount-price {
+  color: #e53e3e;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.original-price {
+  color: #e53e3e;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.original-price.has-discount {
+  color: #718096;
+  font-size: 0.9rem;
+  text-decoration: line-through;
+  font-weight: 500;
 }
 
 .inquiry-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border: none;
+  background: #f8fafc;
+  color: #475569;
+  border: 1px solid #e2e8f0;
   padding: 10px 20px;
   border-radius: 6px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.inquiry-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+}
+
+.inquiry-btn span {
+  position: relative;
+  z-index: 2;
+  transition: color 0.3s ease;
 }
 
 .inquiry-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  border-color: #667eea;
+  color: #fff;
+}
+
+.inquiry-btn:hover::before {
+  opacity: 1;
+}
+
+.inquiry-btn:active {
+  transform: translateY(0);
+}
+
+.inquiry-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.4);
+}
+
+.inquiry-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 /* 响应式设计 */
@@ -191,8 +285,9 @@ const handleInquiry = () => {
     min-width: auto;
   }
 
-  .price-section {
-    text-align: left;
+  .price-container {
+    margin-left: 0;
+    margin-right: 0;
   }
 }
 </style> 

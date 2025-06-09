@@ -11,7 +11,18 @@
       <div class="modal-body">
         <div v-if="domain" class="domain-info">
           <h4>{{ domain.name }}</h4>
-          <p v-if="domain.salePrice" class="price">售价：¥{{ formatPrice(domain.salePrice) }}</p>
+          <div v-if="showPrice" class="price-info">
+            <div class="price-container">
+              <p v-if="hasValidDiscount" class="discount-price">
+                <span class="price-label">折扣价</span>
+                <span class="price-value">¥{{ formatPrice(domain.discountPrice) }}</span>
+              </p>
+              <p :class="{'price': !hasValidDiscount, 'sale-price': hasValidDiscount}">
+                <span class="price-label">售价</span>
+                <span  :class="{'price-value':true, 'sales-price':!hasValidDiscount}">¥{{ formatPrice(domain.salePrice) }}</span>
+              </p>
+            </div>
+          </div>
         </div>
         
         <form @submit.prevent="submitInquiry" class="inquiry-form">
@@ -68,16 +79,16 @@
               placeholder="请详细说明您的需求..."
             ></textarea>
           </div>
-          
-          <div class="form-actions">
-            <button type="button" @click="closeModal" class="cancel-btn">
-              取消
-            </button>
-            <button type="submit" :disabled="submitting" class="submit-btn">
-              {{ submitting ? '提交中...' : '提交报价' }}
-            </button>
-          </div>
         </form>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" @click="closeModal" class="cancel-btn">
+          取消
+        </button>
+        <button type="submit" :disabled="submitting" class="submit-btn" @click="submitInquiry">
+          {{ submitting ? '提交中...' : '提交报价' }}
+        </button>
       </div>
     </div>
   </div>
@@ -86,7 +97,8 @@
 <script setup>
 const props = defineProps({
   modelValue: Boolean,
-  domain: Object
+  domain: Object,
+  portfolio: Object
 })
 
 const emit = defineEmits(['update:modelValue'])
@@ -142,7 +154,7 @@ const submitInquiry = async () => {
     
     if (response.success) {
       // 显示成功消息
-      alert('线索提交成功！我们会尽快与您联系。')
+      alert('提交成功！我们会尽快与您联系。')
       closeModal()
     } else {
       alert(response.message || '提交失败，请重试')
@@ -160,6 +172,28 @@ watch(() => props.domain, () => {
   if (props.domain) {
     resetForm()
   }
+})
+// 判断销售价格是否有效
+const hasValidSalePrice = computed(() => {
+  return props.domain.salePrice && 
+         !isDateExpired(props.domain.salePriceExpirationDate) &&
+         !isDateExpired(props.domain.expirationDate)
+})
+// 检查日期是否过期
+const isDateExpired = (date) => {
+  if (!date) return false
+  return new Date(date) < new Date()
+}
+// 判断是否显示价格
+const showPrice = computed(() => {
+  return props.portfolio.showPrice && hasValidSalePrice.value
+})
+
+// 判断是否有有效的折扣价
+const hasValidDiscount = computed(() => {
+  return showPrice.value && 
+         props.domain.discountPrice && 
+         !isDateExpired(props.domain.discountExpirationDate)
 })
 </script>
 
@@ -184,7 +218,8 @@ watch(() => props.domain, () => {
   width: 100%;
   max-width: 500px;
   max-height: 90vh;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
 }
 
@@ -194,6 +229,7 @@ watch(() => props.domain, () => {
   align-items: center;
   padding: 20px 24px;
   border-bottom: 1px solid #e1e8ed;
+  flex-shrink: 0;
 }
 
 .modal-header h3 {
@@ -225,6 +261,29 @@ watch(() => props.domain, () => {
 
 .modal-body {
   padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 美化滚动条 */
+.modal-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
 }
 
 .domain-info {
@@ -250,6 +309,7 @@ watch(() => props.domain, () => {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  flex: 1;
 }
 
 .form-group {
@@ -288,7 +348,12 @@ watch(() => props.domain, () => {
   display: flex;
   gap: 12px;
   justify-content: flex-end;
-  margin-top: 24px;
+  padding: 16px 24px;
+  background: white;
+  border-top: 1px solid #e1e8ed;
+  flex-shrink: 0;
+  margin-top: auto;
+  border-radius: 0 0 12px 12px;
 }
 
 .cancel-btn,
@@ -338,6 +403,7 @@ watch(() => props.domain, () => {
   }
   
   .form-actions {
+    padding: 12px 16px;
     flex-direction: column;
   }
   
@@ -345,5 +411,58 @@ watch(() => props.domain, () => {
   .submit-btn {
     width: 100%;
   }
+}
+
+.price-container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: #f8f9fa;
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin-top: 8px;
+}
+
+.price-container p {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0;
+  padding: 2px 0;
+}
+
+.price-label {
+  color: #64748b;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-right: 12px;
+}
+
+.price-value {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.sales-price {
+  color: #f56565;
+  background: rgba(245, 101, 101, 0.1);
+}
+
+.discount-price .price-value {
+  color: #f56565;
+  background: rgba(245, 101, 101, 0.1);
+}
+
+.sale-price {
+  opacity: 0.75;
+}
+
+.sale-price .price-value {
+  color: #64748b;
+  text-decoration: line-through;
+  background: none;
+  padding: 2px 8px;
 }
 </style> 

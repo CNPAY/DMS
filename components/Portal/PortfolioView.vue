@@ -337,7 +337,7 @@
       </div>
 
       <!-- 线索模态框 -->
-      <PortalInquiryModal v-model="showInquiry" :domain="selectedDomain" />
+      <PortalInquiryModal v-model="showInquiry" :domain="selectedDomain" :portfolio="portfolio" />
     </div>
   </div>
 </template>
