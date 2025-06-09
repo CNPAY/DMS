@@ -240,7 +240,7 @@
         <el-table-column label="操作" align="center" fixed="right" width="260">
           <template #default="scope">
             <el-dropdown @command="(command) => handleStatusChange(scope.row, command)">
-              <el-button link type="primary" icon="Edit" size="small">
+              <el-button link type="primary" icon="Edit">
                 状态<el-icon class="el-icon--right"><ArrowDown /></el-icon>
               </el-button>
               <template #dropdown>
