@@ -1,6 +1,6 @@
 // import { login, logout, getInfo, loginOuth } from '@/api/login';
 import { getToken, setToken, removeToken } from '@/utils/auth';
-import defAva from '@/assets/images/profile.jpg';
+import defAva from '';
 import { defineStore } from 'pinia';
 
 // 用户相关的类型定义
