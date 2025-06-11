@@ -167,7 +167,7 @@ const handleInquiry = () => {
 
 .tag {
   background: var(--theme-tertiary);
-  color: var(--theme-primary);
+  color: color-mix(in srgb, var(--theme-primary) 90%, white 10%);
   padding: 4px 12px;
   border-radius: 16px;
   font-size: 0.75rem;

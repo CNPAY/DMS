@@ -117,7 +117,7 @@ const handleInquiry = () => {
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .domain-item-card {
   background: white;
   border-radius: 12px;
@@ -249,7 +249,7 @@ const handleInquiry = () => {
 
 .tag {
   background: linear-gradient(135deg, var(--theme-tertiary) 0%, #f3e5f5 100%);
-  color: var(--theme-primary);
+  color: color-mix(in srgb, var(--theme-primary) 90%, white 10%);
   padding: 4px 12px;
   border-radius: 16px;
   font-size: 0.75rem;

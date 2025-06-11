@@ -276,8 +276,8 @@ const handleInquiry = (domain) => {
 
 /* 分类徽章 */
 .category-badge {
-  background: var(--theme-tertiary);
-  color: var(--theme-primary);
+  background: linear-gradient(135deg, var(--theme-tertiary) 0%, #f3e5f5 100%);
+  color: color-mix(in srgb, var(--theme-primary) 90%, white 10%);
   padding: 4px 12px;
   border-radius: 16px;
   font-size: 0.75rem;
@@ -304,8 +304,8 @@ const handleInquiry = (domain) => {
 }
 
 .tag {
-  background: #f1f3f4;
-  color: #5a6c7d;
+  background:  var(--theme-tertiary);
+  color: color-mix(in srgb, var(--theme-primary) 90%, white 10%);
   padding: 2px 8px;
   border-radius: 12px;
   font-size: 0.7rem;
