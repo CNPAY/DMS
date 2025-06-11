@@ -963,7 +963,7 @@ provide('showInquiry', (domain) => {
 })
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .portfolio-view {
   min-height: 100vh;
 }
@@ -1038,13 +1038,7 @@ provide('showInquiry', (domain) => {
   background-clip: text;
 }
 
-.portfolio-view.text-theme-dark .nav-link {
-  color: #555555;
-}
 
-.portfolio-view.text-theme-dark .nav-link:hover {
-  color: #333333;
-}
 
 /* 自动适应主题 - 有背景图时添加文字阴影增强可读性 */
 .portfolio-view.text-theme-auto.has-background .portfolio-title {
@@ -1078,32 +1072,32 @@ provide('showInquiry', (domain) => {
 }
 
 /* 有遮罩时调整文字对比度 */
-.portfolio-view.has-overlay .portfolio-filters {
-  background: rgba(248, 249, 250, 0.95);
-  backdrop-filter: blur(10px);
-}
+// .portfolio-view.has-overlay .portfolio-filters {
+//   background: rgba(248, 249, 250, 0.95);
+//   backdrop-filter: blur(10px);
+// }
 
-.portfolio-view.text-theme-light .portfolio-filters {
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(10px);
-  color: #ffffff;
-}
+// .portfolio-view.text-theme-light .portfolio-filters {
+//   background: rgba(0, 0, 0, 0.7);
+//   backdrop-filter: blur(10px);
+//   color: #ffffff;
+// }
 
-.portfolio-view.text-theme-light .filter-label {
-  color: #e0e0e0;
-}
+// .portfolio-view.text-theme-light .filter-label {
+//   color: #e0e0e0;
+// }
 
-.portfolio-view.text-theme-light .search-input,
-.portfolio-view.text-theme-light .sort-select,
-.portfolio-view.text-theme-light .filter-select {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.3);
-  color: #ffffff;
-}
+// .portfolio-view.text-theme-light .search-input,
+// .portfolio-view.text-theme-light .sort-select,
+// .portfolio-view.text-theme-light .filter-select {
+//   background: rgba(255, 255, 255, 0.1);
+//   border-color: rgba(255, 255, 255, 0.3);
+//   color: #ffffff;
+// }
 
-.portfolio-view.text-theme-light .search-input::placeholder {
-  color: #cccccc;
-}
+// .portfolio-view.text-theme-light .search-input::placeholder {
+//   color: #cccccc;
+// }
 
 /* 头部样式 */
 .portfolio-header {
@@ -1269,6 +1263,8 @@ provide('showInquiry', (domain) => {
 .nav-link:hover {
   color: var(--theme-primary);
   text-shadow: 0 0 8px rgba(var(--theme-primary), 0.3);
+
+  
 }
 
 .nav-link:hover::before {
@@ -1489,10 +1485,10 @@ provide('showInquiry', (domain) => {
   align-items: center;
   margin-bottom: 16px;
   padding: 8px 16px;
-  background: #e8f4fd;
   border-radius: 4px;
   font-size: 14px;
-  color: var(--theme-primary);
+  background: linear-gradient(135deg, var(--theme-tertiary) 0%, #f3e5f5 100%);
+  color: color-mix(in srgb, var(--theme-primary) 90%, white 10%);
 }
 
 /* 域名展示区域 */
