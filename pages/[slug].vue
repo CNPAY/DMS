@@ -1,5 +1,5 @@
 <template>
-  <div class="portal-theme" :data-theme="portfolio.colorTheme">
+  <div class="portal-theme" >
     <!-- 加载状态 -->
     <div v-if="pending" class="loading-container">
       <div class="loading-content">
