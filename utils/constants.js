@@ -10,7 +10,7 @@ export const LAYOUT_TEMPLATES = [
 
 // 颜色主题选项
 export const COLOR_THEMES = [
-  { value: 'moonlight', label: '🌙 月光白', description: '简约纯净风格' },
+  // { value: 'moonlight', label: '🌙 月光白', description: '简约纯净风格' },
   { value: 'ocean', label: '🌊 海洋蓝', description: '清新专业风格' },
   { value: 'forest', label: '🌿 森林绿', description: '自然生机风格' },
   { value: 'sunset', label: '🌅 暖阳橙', description: '温暖活力风格' },

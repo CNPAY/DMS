@@ -1,0 +1,74 @@
+.portal-theme {
+    --theme-primary: #764ba2;
+    --theme-secondary: #667eea;
+    --theme-tertiary: #667eea1a;
+
+    --theme-text-active: white;
+    --theme-text-hover: var(--theme-primary);
+
+}
+
+/* 海洋蓝 (ocean) - 清新专业风格 */
+.portal-theme[data-theme="ocean"] {
+    --theme-primary: #2196f3;
+    --theme-secondary: #4caf50;
+    --theme-tertiary: #e3f2fd;
+}
+
+/* 森林绿 (forest) - 自然生机风格 */
+.portal-theme[data-theme="forest"] {
+    --theme-primary: #4caf50;
+    --theme-secondary: #8bc34a;
+    --theme-tertiary: #e8f5e8;
+}
+
+/* 暖阳橙 (sunset) - 温暖活力风格 */
+.portal-theme[data-theme="sunset"] {
+    --theme-primary: #ff9800;
+    --theme-secondary: #ffc107;
+    --theme-tertiary: #fff3e0;
+}
+
+/* 玫瑰红 (rose) - 优雅浪漫风格 */
+.portal-theme[data-theme="rose"] {
+    --theme-primary: #e91e63;
+    --theme-secondary: #9c27b0;
+    --theme-tertiary: #fce4ec;
+}
+
+/* 薰衣草 (lavender) - 梦幻柔美风格 */
+.portal-theme[data-theme="lavender"] {
+    --theme-primary: #673ab7;
+    --theme-secondary: #9c27b0;
+    --theme-tertiary: #f3e5f5;
+}
+
+/* 暗夜黑 (midnight) - 深沉神秘风格 */
+.portal-theme[data-theme="midnight"] {
+    --theme-primary: #424242;
+    --theme-secondary: #212121;
+    --theme-tertiary: #e8eaf6;
+}
+
+/* 樱花粉 (sakura) - 清雅甜美风格 */
+.portal-theme[data-theme="sakura"] {
+    --theme-primary: #f06292;
+    --theme-secondary: #f48fb1;
+    --theme-tertiary: #fce4ec;
+}
+
+/* 翡翠绿 (emerald) - 典雅高贵风格 */
+.portal-theme[data-theme="emerald"] {
+    --theme-primary: #00796b;
+    --theme-secondary: #00695c;
+    --theme-tertiary: #e0f2f1;
+}
+
+/* 琥珀金 (amber) - 奢华品质风格 */
+.portal-theme[data-theme="amber"] {
+    --theme-primary: #ff8f00;
+    --theme-secondary: #ffd54f;
+    --theme-tertiary: #fff8e1;
+}
+
+

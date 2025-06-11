@@ -1,5 +1,5 @@
 <template>
-  <div class="portfolio-view" :class="[`theme-${portfolio.colorTheme}`, `layout-${portfolio.layoutTemplate}`, portfolioTextThemeClass]" :style="portfolioBackgroundStyle">
+  <div class="portfolio-view" :class="[`layout-${portfolio.layoutTemplate}`, portfolioTextThemeClass]" :style="portfolioBackgroundStyle">
     <!-- 背景遮罩层 -->
     <div v-if="portfolio.backgroundUrl && portfolio.backgroundOverlay" class="background-overlay"></div>
     <div class="portfolio-container">
@@ -345,6 +345,7 @@
 <script setup>
 import { Loading } from '@element-plus/icons-vue'
 import { nextTick } from 'vue'
+
 
 const props = defineProps({
   portfolio: {
@@ -1142,7 +1143,7 @@ provide('showInquiry', (domain) => {
   font-size: 0.8rem;
   line-height: 1.5;
   margin: 0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  background: linear-gradient(135deg, var(--theme-primary) 0%, var(--theme-secondary) 50%, #f093fb 100%);
   background-size: 200% 200%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -1328,7 +1329,7 @@ provide('showInquiry', (domain) => {
 
 .search-input:focus {
   outline: none;
-  border-color: #1976d2;
+  border-color: var(--theme-primary);
   box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.1);
 }
 
@@ -1388,12 +1389,12 @@ provide('showInquiry', (domain) => {
 
 .layout-btn:hover {
   background: #f5f5f5;
-  color: #1976d2;
+  color: var(--theme-primary);
 }
-
+  
 .layout-btn.active {
-  background: #1976d2;
-  color: white;
+  background: var(--theme-primary);
+  color: var(--theme-text-active);
 }
 
 .layout-icon {
@@ -1442,14 +1443,14 @@ provide('showInquiry', (domain) => {
 }
 
 .category-btn:hover {
-  border-color: #1976d2;
-  color: #1976d2;
+  border-color: var(--theme-text-hover);
+  color: var(--theme-primary);
 }
 
 .category-btn.active {
-  background: #1976d2;
-  color: white;
-  border-color: #1976d2;
+  background: var(--theme-primary);
+  color: var(--theme-text-active);
+  border-color: var(--theme-text-active);
   font-weight: 500;
 }
 
@@ -1466,8 +1467,8 @@ provide('showInquiry', (domain) => {
 .reset-btn {
   padding: 6px 12px;
   background: #ffffff;
-  color: #1976d2;
-  border: 1px solid #1976d2;
+  color: var(--theme-primary);
+  border: 1px solid var(--theme-primary);
   border-radius: 4px;
   font-size: 13px;
   font-weight: 500;
@@ -1477,7 +1478,7 @@ provide('showInquiry', (domain) => {
 }
 
 .reset-btn:hover {
-  background: #1976d2;
+  background: var(--theme-primary);
   color: #ffffff;
 }
 
@@ -1491,7 +1492,7 @@ provide('showInquiry', (domain) => {
   background: #e8f4fd;
   border-radius: 4px;
   font-size: 14px;
-  color: #1976d2;
+  color: var(--theme-primary);
 }
 
 /* 域名展示区域 */
@@ -1680,11 +1681,15 @@ provide('showInquiry', (domain) => {
   min-height: 36px;
 }
 
-.page-btn:hover,
+.page-btn:hover{
+  background: var(--theme-primary);
+  color: var(--theme-text-active);
+  border-color: var(--theme-text-active);
+}
 .page-btn.active {
-  background: #1976d2;
-  color: white;
-  border-color: #1976d2;
+  background: var(--theme-primary);
+  color: var(--theme-text-active);
+  border-color: var(--theme-text-active);
 }
 
 .page-btn.disabled {
@@ -1771,14 +1776,14 @@ provide('showInquiry', (domain) => {
   justify-content: center;
   gap: 4px;
   padding: 3px 6px;
-  background: #667eea;
+  background: var(--theme-primary);
   color: white;
   border-radius: 20px;
   cursor: pointer;
   transition: all 0.2s ease;
   margin: 8px auto;
   font-size: 12px;
-  border: 1px solid #667eea;
+  border: 1px solid var(--theme-primary);
   max-width: fit-content;
 }
 
@@ -1812,7 +1817,7 @@ provide('showInquiry', (domain) => {
 .collapse-btn {
   padding: 8px 12px;
   background: rgba(102, 126, 234, 0.1);
-  color: #667eea;
+  color: var(--theme-primary);
   border: 1px solid rgba(102, 126, 234, 0.2);
   border-radius: 6px;
   cursor: pointer;

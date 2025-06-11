@@ -1,7 +1,5 @@
-# 自定义米表页面
-
 <template>
-  <div>
+  <div class="portal-theme" :data-theme="portfolio.colorTheme">
     <!-- 加载状态 -->
     <div v-if="pending" class="loading-container">
       <div class="loading-content">
@@ -38,6 +36,8 @@ const domains = ref([])
 const pending = ref(true)
 const error = ref(null)
 
+import { useTheme } from '@/composables/useTheme'
+const { setTheme } = useTheme()
 // 数据加载函数
 async function loadPortfolioData() {
   try {
@@ -75,7 +75,7 @@ async function loadPortfolioData() {
     // 3. 处理米表数据
     if (portfolioData?.code === 200 && portfolioData.data) {
       portfolio.value = portfolioData.data
-      
+      // setTheme(portfolio.value.colorTheme)
       // 设置页面SEO - 使用米表配置的SEO信息
       const portfolioConfig = portfolio.value
       

@@ -227,7 +227,7 @@ const handleInquiry = () => {
 
 .tag {
   background: rgba(102, 126, 234, 0.1);
-  color: #667eea;
+  color: var(--theme-primary);
   padding: 4px 12px;
   border-radius: 16px;
   font-size: 0.75rem;
@@ -271,7 +271,7 @@ const handleInquiry = () => {
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--theme-primary) 0%, var(--theme-secondary) 100%);
   opacity: 0;
   transition: opacity 0.3s ease;
   z-index: 1;
@@ -285,7 +285,7 @@ const handleInquiry = () => {
 
 .inquiry-btn:hover {
   transform: translateY(-2px);
-  border-color: #667eea;
+  border-color: var(--theme-primary);
   color: #fff;
 }
 

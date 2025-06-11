@@ -336,7 +336,7 @@ const hasValidDiscount = computed(() => {
 .form-group input:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #1976d2;
+  border-color: var(--theme-primary);
 }
 
 .form-group textarea {
@@ -376,7 +376,7 @@ const hasValidDiscount = computed(() => {
 }
 
 .submit-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--theme-primary) 0%, var(--theme-secondary) 100%);
   color: white;
 }
 

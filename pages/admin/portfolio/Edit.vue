@@ -673,7 +673,7 @@ const form = ref({
   slug: null,
   isDefault: false,
   layoutTemplate: 'list',
-  colorTheme: 'moonlight',
+  colorTheme: 'lavender',
   enableGrouping: false,
   enableWaterfall: false,
   logoUrl: null,
@@ -860,7 +860,7 @@ function reset() {
     slug: null,
     isDefault: false,
     layoutTemplate: 'list',
-    colorTheme: 'moonlight',
+    colorTheme: 'lavender',
     enableGrouping: false,
     enableWaterfall: false,
     logoUrl: null,
@@ -1290,31 +1290,7 @@ defineExpose({
   font-size: 9px;
   padding: 1px 4px;
 }
-
-/* 🌙 月光白主题 */
-.theme-moonlight {
-  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-}
-
-.theme-moonlight .preview-header {
-  background: #ffffff;
-  border-bottom-color: #e9ecef;
-}
-
-.theme-moonlight .preview-logo {
-  color: #2c3e50;
-}
-
-.theme-moonlight .preview-nav span:hover {
-  background: #e9ecef;
-  color: #495057;
-}
-
-.theme-moonlight .preview-domain-item {
-  background: #ffffff;
-  border-color: #e9ecef;
-}
-
+ 
 /* 🌊 海洋蓝主题 */
 .theme-ocean {
   background: linear-gradient(135deg, #e3f2fd 0%, #f1f8e9 100%);

@@ -136,7 +136,7 @@ const handleInquiry = () => {
 
 .card-header {
   padding: 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--theme-primary) 0%, var(--theme-secondary) 100%);
   color: white;
   display: flex;
   justify-content: space-between;
@@ -248,8 +248,8 @@ const handleInquiry = () => {
 }
 
 .tag {
-  background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
-  color: #1976d2;
+  background: linear-gradient(135deg, var(--theme-tertiary) 0%, #f3e5f5 100%);
+  color: var(--theme-primary);
   padding: 4px 12px;
   border-radius: 16px;
   font-size: 0.75rem;
@@ -264,7 +264,7 @@ const handleInquiry = () => {
 
 .inquiry-btn {
   width: 100%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--theme-primary) 0%, var(--theme-secondary) 100%);
   color: white;
   border: none;
   padding: 12px 20px;

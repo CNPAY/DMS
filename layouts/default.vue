@@ -1,11 +1,10 @@
 <template>
-  <div class="main-container">
+  <div class="main-container portal-theme">
     <slot />
   </div>
 </template>
 
 <style lang="scss">
-// 导入门户专用的轻量级样式
 @import '~/assets/styles/portal.scss';
 </style>
 
