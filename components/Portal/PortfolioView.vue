@@ -1248,7 +1248,7 @@ provide('showInquiry', (domain) => {
   left: 0;
   width: 0;
   height: 2px;
-  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+  background: linear-gradient(90deg, var(--theme-primary), var(--theme-secondary));
   transition: width 0.3s ease;
 }
 
@@ -1259,7 +1259,7 @@ provide('showInquiry', (domain) => {
   left: -8px;
   width: 4px;
   height: 4px;
-  background: #3b82f6;
+  background: var(--theme-primary);
   border-radius: 50%;
   transform: translateY(-50%) scale(0);
   transition: transform 0.3s ease;
@@ -1267,8 +1267,8 @@ provide('showInquiry', (domain) => {
 }
 
 .nav-link:hover {
-  color: #3b82f6;
-  text-shadow: 0 0 8px rgba(59, 130, 246, 0.3);
+  color: var(--theme-primary);
+  text-shadow: 0 0 8px rgba(var(--theme-primary), 0.3);
 }
 
 .nav-link:hover::before {
@@ -1974,19 +1974,19 @@ provide('showInquiry', (domain) => {
   left: 50%;
   width: 0;
   height: 1px;
-  background: linear-gradient(90deg, #8b5cf6, #06b6d4);
+  background: linear-gradient(90deg, var(--theme-primary), var(--theme-secondary));
   transition: all 0.3s ease;
   transform: translateX(-50%);
 }
 
 .footer-nav-link::after {
   content: '';
-  position: absolute;
+  position: absolute; 
   top: 50%;
   right: -6px;
   width: 3px;
   height: 3px;
-  background: #8b5cf6;
+  background: var(--theme-primary);
   border-radius: 50%;
   transform: translateY(-50%) scale(0);
   transition: transform 0.3s ease;
@@ -1994,8 +1994,8 @@ provide('showInquiry', (domain) => {
 }
 
 .footer-nav-link:hover {
-  color: #8b5cf6;
-  text-shadow: 0 0 6px rgba(139, 92, 246, 0.3);
+  color: var(--theme-primary);
+  text-shadow: 0 0 6px rgba(var(--theme-primary), 0.3);
 }
 
 .footer-nav-link:hover::before {
