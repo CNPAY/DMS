@@ -1,6 +1,6 @@
 // import { login, logout, getInfo, loginOuth } from '@/api/login';
 import { getToken, setToken, removeToken } from '@/utils/auth';
-import defAva from '';
+// import defAva from '';
 import { defineStore } from 'pinia';
 
 // 用户相关的类型定义
@@ -144,7 +144,7 @@ const useUserStore = defineStore('user', {
           user: {
             userId: '1',
             userName: 'admin',
-            avatar: defAva,
+            avatar: '',
             groupId: null,
             storeId: null,
             groupName: null,
@@ -164,7 +164,7 @@ const useUserStore = defineStore('user', {
       return new Promise((resolve) => {
         this.id = user.id?.toString() || '';
         this.name = user.username || user.name || '';
-        this.avatar = user.avatar || defAva;
+        this.avatar = user.avatar || '';
         this.roles = user.roles || ['admin'];
         this.permissions = user.permissions || ['*:*:*'];
         this.token = token || '';
