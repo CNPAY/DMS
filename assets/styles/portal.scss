@@ -1,7 +1,7 @@
 // 门户样式 - 轻量级，追求简单快速
 @use './variables.module.scss' as *;
 @use './mixin.scss' as *;
-@use './portal/themes.scss' as *;
+@use './Portal/themes.scss' as *;
 
 // 基础样式重置
 body {
