@@ -1,13 +1,15 @@
 import { ResponseData } from '~/server/utils/response'
+import fs from 'fs'
+import path from 'path'
 
 export default defineEventHandler(async (event) => {
   try {
-    // 预定义的AI场景
+    // 1. 预设场景元数据
     const scenes = [
       {
-        code: 'domain_analysis',
-        name: '域名分析',
-        description: '分析域名的商业价值、可用性等'
+        code: 'domain_description_generate',
+        name: '域名描述生成',
+        description: '生成域名的营销描述'
       },
       {
         code: 'domain_tags_suggest',
@@ -15,19 +17,14 @@ export default defineEventHandler(async (event) => {
         description: '为域名推荐合适的标签'
       },
       {
-        code: 'domain_description_generate',
-        name: '域名描述生成',
-        description: '生成域名的营销描述'
+        code: 'inquiry_analysis',
+        name: '线索分析',
+        description: '分析客户线索意图和价值'
       },
       {
         code: 'domain_price_suggest',
         name: '域名定价建议',
         description: '分析域名价值并建议售价'
-      },
-      {
-        code: 'inquiry_analysis',
-        name: '线索分析',
-        description: '分析客户线索意图和价值'
       },
       {
         code: 'inquiry_reply_suggest',
@@ -65,96 +62,17 @@ export default defineEventHandler(async (event) => {
         description: '生成着陆页和米表内容'
       }
     ]
-
-    // 预定义的AI模型
-    const models = [
-      {
-        value: 'auto',
-        label: '自动选择',
-        description: '系统根据场景自动选择最适合的模型'
-      },
-      {
-        value: 'gpt-4',
-        label: 'GPT-4',
-        description: 'OpenAI GPT-4 模型，适合复杂分析'
-      },
-      {
-        value: 'gpt-4-turbo',
-        label: 'GPT-4 Turbo',
-        description: 'OpenAI GPT-4 Turbo，性能更快'
-      },
-      {
-        value: 'gpt-3.5-turbo',
-        label: 'GPT-3.5 Turbo',
-        description: 'OpenAI GPT-3.5 Turbo，成本较低'
-      },
-      {
-        value: 'claude-3-opus',
-        label: 'Claude-3 Opus',
-        description: 'Anthropic Claude-3 Opus，文本分析优秀'
-      },
-      {
-        value: 'claude-3-sonnet',
-        label: 'Claude-3 Sonnet',
-        description: 'Anthropic Claude-3 Sonnet，平衡性能'
-      },
-      {
-        value: 'claude-3-haiku',
-        label: 'Claude-3 Haiku',
-        description: 'Anthropic Claude-3 Haiku，响应快速'
-      },
-      {
-        value: 'gemini-pro',
-        label: 'Gemini Pro',
-        description: 'Google Gemini Pro，多模态能力'
-      },
-      {
-        value: 'moonshot-v1-8k',
-        label: 'Moonshot v1 8K',
-        description: '月之暗面 Moonshot v1 8K'
-      },
-      {
-        value: 'moonshot-v1-32k',
-        label: 'Moonshot v1 32K',
-        description: '月之暗面 Moonshot v1 32K'
-      },
-      {
-        value: 'moonshot-v1-128k',
-        label: 'Moonshot v1 128K',
-        description: '月之暗面 Moonshot v1 128K'
-      },
-      {
-        value: 'glm-4',
-        label: 'GLM-4',
-        description: '智谱AI GLM-4'
-      },
-      {
-        value: 'glm-3-turbo',
-        label: 'GLM-3 Turbo',
-        description: '智谱AI GLM-3 Turbo'
-      },
-      {
-        value: 'qwen-turbo',
-        label: 'Qwen Turbo',
-        description: '阿里云通义千问 Turbo'
-      },
-      {
-        value: 'qwen-plus',
-        label: 'Qwen Plus',
-        description: '阿里云通义千问 Plus'
-      },
-      {
-        value: 'qwen-max',
-        label: 'Qwen Max',
-        description: '阿里云通义千问 Max'
+    // 2. 读取txt内容作为systemPrompt
+    const promptsDir = path.resolve('server/config/prompts')
+    const scenesWithPrompt = scenes.map(scene => {
+      const promptPath = path.join(promptsDir, `${scene.code}.txt`)
+      let systemPrompt = ''
+      if (fs.existsSync(promptPath)) {
+        systemPrompt = fs.readFileSync(promptPath, 'utf-8')
       }
-    ]
-
-    return ResponseData.success({
-      scenes,
-      models
-    }, '获取AI场景和模型选项成功')
-
+      return { ...scene, systemPrompt }
+    })
+    return ResponseData.success({ scenes: scenesWithPrompt }, '获取AI场景和系统提示词成功')
   } catch (error: any) {
     console.error('获取AI选项失败:', error)
     return ResponseData.error('获取AI选项失败', 500)

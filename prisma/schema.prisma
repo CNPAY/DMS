@@ -372,8 +372,8 @@ model AiPrompt {
   sceneName           String   @map("scene_name") @db.VarChar(200)
   systemPromptDefault String   @map("system_prompt_default") @db.Text
   userPromptCustom    String?  @map("user_prompt_custom") @db.Text
-  isActiveCustom      Boolean  @default(false) @map("is_active_custom")
   modelPreference     String?  @map("model_preference") @db.VarChar(100)
+  enabled             Boolean  @default(true)
   createdAt           DateTime @default(now()) @map("created_at")
   updatedAt           DateTime @updatedAt @map("updated_at")
 

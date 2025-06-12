@@ -12,21 +12,6 @@
           />
         </el-form-item>
         
-        <el-form-item label="场景类型" prop="sceneCode" style="width: 280px">
-          <el-select
-            v-model="queryParams.sceneCode"
-            placeholder="请选择场景类型"
-            clearable
-          >
-            <el-option
-              v-for="scene in sceneOptions"
-              :key="scene.code"
-              :label="scene.name"
-              :value="scene.code"
-            />
-          </el-select>
-        </el-form-item>
-        
         <el-form-item label="状态" prop="hasCustomPrompt" style="width: 280px">
           <el-select
             v-model="queryParams.hasCustomPrompt"
@@ -50,7 +35,6 @@
       <div style="display: flex;">
         <el-button type="primary" plain icon="Plus" @click="handleAdd">新增</el-button>
         <el-button type="danger" plain icon="Delete" :disabled="multiple" @click="handleDelete()">删除</el-button>
-        <el-button type="warning" plain icon="MagicStick" @click="initPrompts">初始化</el-button>
       </div>
       <div style="display: flex; gap: 10px;">
         <el-button circle @click="showSearch = !showSearch">
@@ -84,12 +68,20 @@
             <template #default="{ row }">
               <div class="prompt-preview" style="text-align: left;">
                 <el-tag 
-                  v-if="row.isActiveCustom" 
+                  v-if="row.extend" 
                   type="warning" 
                   size="small" 
                   style="margin-bottom: 5px;"
                 >
-                  自定义
+                  自定义系统提示词
+                </el-tag>
+                <el-tag 
+                  v-if="row.custom" 
+                  type="warning" 
+                  size="small" 
+                  style="margin-bottom: 5px;"
+                >
+                  自定义场景提示词
                 </el-tag>
                 <el-tag 
                   v-else 
@@ -106,23 +98,15 @@
             </template>
           </el-table-column>
           
-          <el-table-column label="优选模型" align="center" width="120">
+          <el-table-column label="状态" align="center" width="120">
             <template #default="{ row }">
-              <el-tag v-if="row.modelPreference" size="small" type="success">
-                {{ getModelLabel(row.modelPreference) }}
-              </el-tag>
-              <span v-else class="text-gray-400">未设置</span>
-            </template>
-          </el-table-column>
-          
-          <el-table-column label="状态" align="center" width="100">
-            <template #default="{ row }">
-              <el-tag 
-                :type="row.hasCustomPrompt ? 'warning' : 'info'" 
-                size="small"
-              >
-                {{ row.hasCustomPrompt ? '已定制' : '默认' }}
-              </el-tag>
+              <template v-if="row.canToggle">
+                <el-switch
+                  v-model="row.enabled"
+                  @change="onToggleEnabled(row)"
+                />
+              </template>
+           
             </template>
           </el-table-column>
           
@@ -134,27 +118,12 @@
           
           <el-table-column label="操作" align="center" class-name="small-padding" fixed="right" width="220">
             <template #default="scope">
-              <el-button link type="primary" icon="View" @click="handleView(scope.row)">详情</el-button>
               <el-button link type="primary" icon="Edit" @click="handleEdit(scope.row)">编辑</el-button>
-              <el-button link type="danger" icon="Delete" @click="handleDelete(scope.row)">删除</el-button>
+              <el-button v-if="scope.row.canToggle" link type="danger" icon="Delete" @click="handleDelete(scope.row)">删除</el-button>
             </template>
           </el-table-column>
         </el-table>
 
-        <!-- 分页 -->
-        <div class="pagination-container">
-          <el-pagination
-            v-show="total > 0"
-            :current-page="queryParams.pageNum"
-            :page-size="queryParams.pageSize"
-            :page-sizes="[10, 20, 30, 40]"
-            :total="total"
-            background
-            layout="total, sizes, prev, pager, next, jumper"
-            @size-change="handleSizeChange"
-            @current-change="handleCurrentChange"
-          />
-        </div>
     </el-card>
 
     <!-- 编辑对话框 -->
@@ -252,6 +221,7 @@
               v-model="formData.systemPromptDefault"
               type="textarea"
               :rows="6"
+              :disabled="true"
               placeholder="请输入系统默认提示词..."
               show-word-limit
               maxlength="2000"
@@ -263,47 +233,11 @@
               v-model="formData.userPromptCustom"
               type="textarea"
               :rows="6"
-              placeholder="可选：输入用户自定义提示词，留空则使用系统默认提示词..."
+              placeholder="对内置提示词进行自定义"
               show-word-limit
               maxlength="2000"
             />
           </el-form-item>
-
-          <el-row :gutter="20">
-            <el-col :span="12">
-              <el-form-item label="启用自定义">
-                <el-switch
-                  v-model="formData.isActiveCustom"
-                  :disabled="!formData.userPromptCustom"
-                />
-                <div style="color: #666; font-size: 12px; margin-top: 5px;">
-                  只有设置了自定义提示词才能启用
-                </div>
-              </el-form-item>
-            </el-col>
-            <el-col :span="12">
-              <el-form-item label="优选AI模型">
-                <el-select
-                  v-model="formData.modelPreference"
-                  placeholder="选择优选模型"
-                  clearable
-                  style="width: 100%;"
-                >
-                  <el-option
-                    v-for="model in modelOptions"
-                    :key="model.value"
-                    :label="model.label"
-                    :value="model.value"
-                  >
-                    <div>
-                      <div>{{ model.label }}</div>
-                      <div style="color: #8492a6; font-size: 12px;">{{ model.description }}</div>
-                    </div>
-                  </el-option>
-                </el-select>
-              </el-form-item>
-            </el-col>
-          </el-row>
         </template>
 
         <!-- 自定义场景的提示词配置 -->
@@ -327,27 +261,6 @@
               maxlength="2000"
             />
           </el-form-item>
-
-          <el-form-item label="优选AI模型">
-            <el-select
-              v-model="formData.modelPreference"
-              placeholder="选择优选模型"
-              clearable
-              style="width: 100%;"
-            >
-              <el-option
-                v-for="model in modelOptions"
-                :key="model.value"
-                :label="model.label"
-                :value="model.value"
-              >
-                <div>
-                  <div>{{ model.label }}</div>
-                  <div style="color: #8492a6; font-size: 12px;">{{ model.description }}</div>
-                </div>
-              </el-option>
-            </el-select>
-          </el-form-item>
         </template>
       </el-form>
 
@@ -356,69 +269,6 @@
         <el-button type="primary" @click="handleSubmit" :loading="submitLoading">
           {{ isEdit ? '更新' : '创建' }}
         </el-button>
-      </template>
-    </el-dialog>
-
-    <!-- 查看对话框 -->
-    <el-dialog
-      v-model="viewDialogVisible"
-      title="查看提示词详情"
-      width="800px"
-    >
-      <div v-if="viewData" class="view-content">
-        <el-descriptions :column="2" border>
-          <el-descriptions-item label="场景代码">{{ viewData.sceneCode }}</el-descriptions-item>
-          <el-descriptions-item label="场景名称">{{ viewData.sceneName }}</el-descriptions-item>
-          <el-descriptions-item label="优选模型">
-            {{ viewData.modelPreference ? getModelLabel(viewData.modelPreference) : '未设置' }}
-          </el-descriptions-item>
-          <el-descriptions-item label="当前状态">
-            <el-tag :type="viewData.isActiveCustom ? 'warning' : 'info'">
-              {{ viewData.isActiveCustom ? '使用自定义' : '使用系统默认' }}
-            </el-tag>
-          </el-descriptions-item>
-          <el-descriptions-item label="创建时间" :span="2">
-            {{ formatDateTime(viewData.createdAt) }}
-          </el-descriptions-item>
-          <el-descriptions-item label="更新时间" :span="2">
-            {{ formatDateTime(viewData.updatedAt) }}
-          </el-descriptions-item>
-        </el-descriptions>
-
-        <div style="margin-top: 20px;">
-          <h4>系统默认提示词：</h4>
-          <el-input
-            :model-value="viewData.systemPromptDefault"
-            type="textarea"
-            :rows="8"
-            readonly
-          />
-        </div>
-
-        <div v-if="viewData.userPromptCustom" style="margin-top: 20px;">
-          <h4>用户自定义提示词：</h4>
-          <el-input
-            :model-value="viewData.userPromptCustom"
-            type="textarea"
-            :rows="8"
-            readonly
-          />
-        </div>
-
-        <div style="margin-top: 20px;">
-          <h4>当前生效提示词：</h4>
-          <el-input
-            :model-value="viewData.currentPrompt"
-            type="textarea"
-            :rows="8"
-            readonly
-          />
-        </div>
-      </div>
-
-      <template #footer>
-        <el-button @click="viewDialogVisible = false">关闭</el-button>
-        <el-button type="primary" @click="handleEditFromView">编辑此提示词</el-button>
       </template>
     </el-dialog>
   </div>
@@ -442,14 +292,12 @@ useHead({
 const loading = ref(true)
 const showSearch = ref(true)
 const dialogVisible = ref(false)
-const viewDialogVisible = ref(false)
 const submitLoading = ref(false)
 const isEdit = ref(false)
 const selectedRows = ref([])
 const multiple = ref(true)
 const total = ref(0)
 const promptList = ref([])
-const viewData = ref(null)
 const sceneOptions = ref([])
 const modelOptions = ref([])
 
@@ -469,7 +317,7 @@ const formData = ref({
   sceneName: '',
   systemPromptDefault: '',
   userPromptCustom: '',
-  isActiveCustom: false,
+  enabled: true,
   modelPreference: ''
 })
 
@@ -576,8 +424,10 @@ function handleCurrentChange() {
 
 // 选择处理
 function handleSelectionChange(selection) {
-  selectedRows.value = selection
-  multiple.value = !selection.length
+  // 只允许选中 custom 为 true 或 extend 非空的行
+  const filtered = selection.filter(row => row.custom || row.extend)
+  selectedRows.value = filtered
+  multiple.value = !filtered.length
 }
 
 // 新增
@@ -591,39 +441,27 @@ function handleAdd() {
 function handleEdit(row) {
   resetForm()
   isEdit.value = true
-  
-  // 只复制需要的字段，避免包含额外的计算字段
+  const isPresetScene = sceneOptions.value.some(scene => scene.code === row.sceneCode)
+  sceneType.value = isPresetScene ? 'preset' : 'custom'
   formData.value = {
     id: row.id,
     sceneCode: row.sceneCode,
     sceneName: row.sceneName,
-    systemPromptDefault: row.systemPromptDefault,
+    systemPromptDefault: sceneType.value === 'custom' ? (row.userPromptCustom || '') : (row.systemPromptDefault || ''),
     userPromptCustom: row.userPromptCustom || '',
-    isActiveCustom: row.isActiveCustom || false,
+    enabled: row.enabled,
     modelPreference: row.modelPreference || ''
   }
-  
-  // 判断是预设场景还是自定义场景
-  const isPresetScene = sceneOptions.value.some(scene => scene.code === row.sceneCode)
-  sceneType.value = isPresetScene ? 'preset' : 'custom'
-  
   dialogVisible.value = true
-}
-
-// 查看
-function handleView(row) {
-  viewData.value = row
-  viewDialogVisible.value = true
-}
-
-// 从查看对话框编辑
-function handleEditFromView() {
-  viewDialogVisible.value = false
-  handleEdit(viewData.value)
 }
 
 // 删除
 function handleDelete(row) {
+  // 只允许删除 custom 为 true 或 extend 非空的行
+  if (row && !(row.canToggle)) {
+    ElMessage.warning('系统默认提示词不可删除')
+    return
+  }
   // 如果传入了row参数，则删除单个记录
   if (row) {
     ElMessageBox.confirm(
@@ -693,22 +531,15 @@ function handleSceneTypeChange(type) {
   // 如果切换到自定义场景，清空预设场景相关字段
   if (type === 'custom') {
     formData.value.userPromptCustom = ''
-    formData.value.isActiveCustom = false
   }
 }
 
 // 预设场景选择处理
-function handleSceneChange(sceneCode) {
-  const scene = sceneOptions.value.find(s => s.code === sceneCode)
-  
+function handleSceneChange(code) {
+  const scene = sceneOptions.value.find(s => s.code === code)
   if (scene) {
-    // 自动填充场景名称
     formData.value.sceneName = scene.name
-    
-    // 如果没有设置过系统默认提示词，提供模板建议
-    if (!isEdit.value && !formData.value.systemPromptDefault) {
-      providePromptSuggestion(sceneCode)
-    }
+    formData.value.systemPromptDefault = scene.systemPrompt
   }
 }
 
@@ -736,27 +567,22 @@ function providePromptSuggestion(sceneCode) {
 // 提交表单
 async function handleSubmit() {
   if (!formRef.value) return
-  
   try {
     await formRef.value.validate()
     submitLoading.value = true
-
-    // 构建提交数据，只包含需要的字段
     const submitData = {
       id: formData.value.id,
       sceneCode: formData.value.sceneCode,
       sceneName: formData.value.sceneName,
       systemPromptDefault: formData.value.systemPromptDefault,
-      userPromptCustom: sceneType.value === 'custom' ? '' : (formData.value.userPromptCustom || ''),
-      isActiveCustom: sceneType.value === 'custom' ? false : (formData.value.isActiveCustom || false),
+      userPromptCustom: sceneType.value === 'custom' ? formData.value.systemPromptDefault : formData.value.userPromptCustom,
+      enabled: formData.value.enabled,
       modelPreference: formData.value.modelPreference || ''
     }
-
     const response = await $fetch('/api/admin/ai/prompts/save', {
       method: 'POST',
       body: submitData
     })
-
     if (response.code === 200) {
       ElMessage.success(response.message)
       dialogVisible.value = false
@@ -784,7 +610,7 @@ function resetForm() {
     sceneName: '',
     systemPromptDefault: '',
     userPromptCustom: '',
-    isActiveCustom: false,
+    enabled: true,
     modelPreference: ''
   }
   sceneType.value = 'preset'
@@ -792,26 +618,7 @@ function resetForm() {
     formRef.value.resetFields()
   }
 }
-
-// 初始化默认提示词
-async function initPrompts() {
-  ElMessageBox.confirm(
-    '确定要初始化默认提示词吗？这将创建系统预设的AI场景提示词。',
-    '确认初始化',
-    {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'info'
-    }
-  ).then(async () => {
-    try {
-      // 这里可以批量创建默认提示词
-      ElMessage.info('功能开发中，敬请期待')
-    } catch (error) {
-      ElMessage.error('初始化失败')
-    }
-  })
-}
+ 
 
 // 工具函数
 function truncateText(text, length) {
@@ -832,12 +639,27 @@ onMounted(() => {
   ])
 })
 
-// 监听自定义提示词变化，自动启用/禁用开关
-watch(() => formData.value.userPromptCustom, (newVal) => {
-  if (!newVal) {
-    formData.value.isActiveCustom = false
+// 启用/禁用切换
+async function onToggleEnabled(row) {
+  try {
+    await $fetch('/api/admin/ai/prompts/save', {
+      method: 'POST',
+      body: {
+        id: row.id,
+        sceneCode: row.sceneCode,
+        sceneName: row.sceneName,
+        systemPromptDefault: row.systemPromptDefault,
+        userPromptCustom: row.userPromptCustom,
+        enabled: row.enabled
+      }
+    })
+    ElMessage.success('状态已更新')
+    getPromptList()
+  } catch (error) {
+    ElMessage.error('状态更新失败')
+    row.enabled = !row.enabled // 回滚
   }
-})
+}
 </script>
 
 <style scoped>

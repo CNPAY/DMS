@@ -9,8 +9,8 @@ const savePromptSchema = Joi.object({
   sceneName: Joi.string().max(200).required(),
   systemPromptDefault: Joi.string().required(),
   userPromptCustom: Joi.string().allow('').optional(),
-  isActiveCustom: Joi.boolean().default(false),
-  modelPreference: Joi.string().max(100).optional().allow('')
+  modelPreference: Joi.string().max(100).optional().allow(''),
+  enabled: Joi.boolean().optional()
 })
 
 export default defineEventHandler(async (event) => {
@@ -23,7 +23,7 @@ export default defineEventHandler(async (event) => {
       return ResponseData.error(`数据验证失败: ${error.details[0].message}`, 400)
     }
 
-    const { id, sceneCode, sceneName, systemPromptDefault, userPromptCustom, isActiveCustom, modelPreference } = value
+    const { id, sceneCode, sceneName, systemPromptDefault, userPromptCustom, modelPreference, enabled } = value
     const userId = 1 // 单用户系统，固定用户ID为1
 
     let savedPrompt
@@ -59,8 +59,8 @@ export default defineEventHandler(async (event) => {
           sceneName,
           systemPromptDefault,
           userPromptCustom: userPromptCustom || null,
-          isActiveCustom,
-          modelPreference: modelPreference || null
+          modelPreference: modelPreference || null,
+          enabled: typeof enabled === 'boolean' ? enabled : true
         }
       })
     } else {
@@ -81,8 +81,8 @@ export default defineEventHandler(async (event) => {
           sceneName,
           systemPromptDefault,
           userPromptCustom: userPromptCustom || null,
-          isActiveCustom,
-          modelPreference: modelPreference || null
+          modelPreference: modelPreference || null,
+          enabled: typeof enabled === 'boolean' ? enabled : true
         }
       })
     }
@@ -94,10 +94,9 @@ export default defineEventHandler(async (event) => {
       sceneName: savedPrompt.sceneName,
       systemPromptDefault: savedPrompt.systemPromptDefault,
       userPromptCustom: savedPrompt.userPromptCustom,
-      isActiveCustom: savedPrompt.isActiveCustom,
       modelPreference: savedPrompt.modelPreference,
       hasCustomPrompt: !!savedPrompt.userPromptCustom,
-      currentPrompt: savedPrompt.isActiveCustom && savedPrompt.userPromptCustom ? savedPrompt.userPromptCustom : savedPrompt.systemPromptDefault,
+      currentPrompt: savedPrompt.userPromptCustom ? savedPrompt.userPromptCustom : savedPrompt.systemPromptDefault,
       createdAt: savedPrompt.createdAt,
       updatedAt: savedPrompt.updatedAt
     }

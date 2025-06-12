@@ -186,7 +186,6 @@ export interface AiPrompt {
   sceneName: string
   systemPromptDefault: string
   userPromptCustom?: string
-  isActiveCustom: boolean
   modelPreference?: string
   createdAt: Date
   updatedAt: Date

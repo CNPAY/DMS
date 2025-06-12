@@ -30,7 +30,6 @@ export default defineEventHandler(async (event) => {
       sceneName: prompt.sceneName,
       systemPromptDefault: prompt.systemPromptDefault,
       userPromptCustom: prompt.userPromptCustom,
-      isActiveCustom: prompt.isActiveCustom,
       modelPreference: prompt.modelPreference,
       hasCustomPrompt: !!prompt.userPromptCustom,
       currentPrompt: prompt.isActiveCustom && prompt.userPromptCustom ? prompt.userPromptCustom : prompt.systemPromptDefault,
