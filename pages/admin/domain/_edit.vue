@@ -65,9 +65,15 @@
           </el-col>
           <el-col :span="12">
             <el-form-item label="标签" prop="tagIds">
-              <el-select v-model="form.tagIds" multiple placeholder="请选择标签" style="width: 100%">
-                <el-option v-for="tag in options.tags" :key="tag.id" :label="tag.name" :value="tag.id" />
-              </el-select>
+              <div class="tag-ai-input">
+                <el-select v-model="form.tagIds" multiple placeholder="请选择标签" style="width: 100%">
+                  <el-option v-for="tag in options.tags" :key="tag.id" :label="tag.name" :value="tag.id" />
+                </el-select>
+                <el-button type="primary" size="small" :icon="aiTagLoading ? 'Loading' : 'MagicStick'"
+                  :loading="aiTagLoading" @click="generateAITags" class="ai-btn-tag">
+                  AI标签建议
+                </el-button>
+              </div>
             </el-form-item>
           </el-col>
         </el-row>
@@ -131,10 +137,10 @@
           <div class="description-input">
             <el-input v-model="form.domainDescription" type="textarea" :rows="4" placeholder="详细描述域名的价值、用途、特点等"
               maxlength="500" show-word-limit style="width: 100%;" />
-            <el-button type="primary" size="small" :icon="aiGenerating ? 'Loading' : 'MagicStick'"
-                :loading="aiGenerating" @click="generateAIDescription" class="ai-btn">
+            <el-button type="primary" size="small" :icon="aiAnalysisLoading ? 'Loading' : 'MagicStick'"
+                :loading="aiAnalysisLoading" @click="generateAIAnalysis" class="ai-btn">
                 AI生成
-              </el-button>
+            </el-button>
           </div>
         </el-form-item>
 
@@ -166,6 +172,13 @@
           <el-button type="primary" @click="submitForm">确 定</el-button>
           <el-button @click="cancel">取 消</el-button>
         </div>
+      </template>
+    </el-dialog>
+    <el-dialog v-model="aiAnalysisDialog" title="AI域名分析结果" width="600px">
+      <el-input type="textarea" :rows="10" v-model="aiAnalysisResult" readonly />
+      <template #footer>
+        <el-button @click="aiAnalysisDialog = false">关闭</el-button>
+        <el-button type="primary" @click="copyAIAnalysis">复制分析内容</el-button>
       </template>
     </el-dialog>
 </template>
@@ -206,7 +219,10 @@ const open = computed({
   set: (val) => emit('update:modelValue', val)
 })
 
-const aiGenerating = ref(false)
+const aiTagLoading = ref(false)
+const aiAnalysisLoading = ref(false)
+const aiAnalysisDialog = ref(false)
+const aiAnalysisResult = ref('')
 
 // 直接使用传入的title属性
 
@@ -332,38 +348,59 @@ function getSalesStatusType(status) {
 function getSalesStatusLabel(status) {
   return SALES_STATUS_OPTIONS.find(option => option.value === status)?.label || "未知";
 }
+ 
 
-
-// AI生成域名描述
-async function generateAIDescription() {
+// AI生成标签建议
+async function generateAITags() {
   if (!form.value.domainName) {
     ElMessage.warning("请先输入域名");
     return;
   }
-
-  aiGenerating.value = true;
+  aiTagLoading.value = true;
   try {
-    const response = await $fetch("/api/admin/ai/generate-domain-description", {
+    // 1. 获取AI标签建议
+    const response = await $fetch("/api/admin/ai/adapter/generate", {
       method: "POST",
       body: {
-        domain: form.value.domainName,
-        meaning: form.value.domainMeaning,
-      },
+        sceneCode: "domain_tags_suggest",
+        input: { domainName: form.value.domainName }
+      }
     });
-
-    if (response.code === 200) {
-      form.value.domainDescription = response.data.description;
-      ElMessage.success("AI描述生成成功");
-    } else {
-      ElMessage.error(response.message || "AI描述生成失败");
+    let tagStr = ''
+    if (response.code === 200 && response.data) {
+      tagStr = response.data.content || response.data.tags?.map(t => t.name).join(',') || ''
     }
+    if (!tagStr) {
+      ElMessage.error(response.message || "AI标签建议失败");
+      return;
+    }
+    // 2. 批量创建/查找标签
+    const tagSaveRes = await $fetch("/api/admin/tags/save", {
+      method: "POST",
+      body: { name: tagStr }
+    });
+    const tagArr = Array.isArray(tagSaveRes.data) ? tagSaveRes.data : [tagSaveRes.data];
+    const tagIds = tagArr.map(t => t.id);
+    form.value.tagIds = tagIds;
+    // 3. 自动刷新options.tags（如有新标签）
+    if (props.options.tags) {
+      // 合并新老标签
+      const oldTagIds = props.options.tags.map(t => t.id)
+      tagArr.forEach(t => {
+        if (!oldTagIds.includes(t.id)) {
+          props.options.tags.push(t)
+        }
+      })
+    }
+    ElMessage.success("AI标签建议已填充");
   } catch (error) {
-    console.error("AI描述生成失败:", error);
-    ElMessage.error("AI描述生成失败");
+    console.error("AI标签建议失败:", error);
+    ElMessage.error("AI标签建议失败");
   } finally {
-    aiGenerating.value = false;
+    aiTagLoading.value = false;
   }
 }
+
 // 监听弹窗开启，初始化数据
 watch(() => props.modelValue, (newVal) => {
   if (newVal) {
@@ -381,6 +418,41 @@ watch(() => props.modelValue, (newVal) => {
 defineExpose({
   reset,
 })
+
+async function generateAIAnalysis() {
+  if (!form.value.domainName) {
+    ElMessage.warning("请先输入域名");
+    return;
+  }
+  aiAnalysisLoading.value = true;
+  try {
+    const response = await $fetch("/api/admin/ai/adapter/generate", {
+      method: "POST",
+      body: {
+        sceneCode: "domain_analysis",
+        input: { domainName: form.value.domainName }
+      }
+    });
+    if (response.code === 200 && response.data && response.data.content) {
+      aiAnalysisResult.value = response.data.content
+      aiAnalysisDialog.value = true
+      ElMessage.success("AI域名分析已生成");
+    } else {
+      ElMessage.error(response.message || "AI域名分析失败");
+    }
+  } catch (error) {
+    console.error("AI域名分析失败:", error);
+    ElMessage.error("AI域名分析失败");
+  } finally {
+    aiAnalysisLoading.value = false;
+  }
+}
+
+function copyAIAnalysis() {
+  if (!aiAnalysisResult.value) return
+  navigator.clipboard.writeText(aiAnalysisResult.value)
+  ElMessage.success('已复制到剪贴板')
+}
 </script>
 <style scoped>
 /* 域名对话框样式 */
@@ -403,5 +475,21 @@ defineExpose({
   top: 8px;
   right: 8px;
   z-index: 10;
+}
+
+.tag-ai-input {
+  position: relative;
+  width: 100%;
+}
+
+.ai-btn-tag {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 10;
+}
+
+.ai-btn-analysis {
+  margin-left: 0;
 }
 </style>

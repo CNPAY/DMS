@@ -51,7 +51,8 @@ export default defineEventHandler(async (event) => {
       })
 
       if (duplicateTag) {
-        return ResponseData.error('该标签名称已存在', 409)
+        // 直接返回已存在标签id和name
+        return ResponseData.success({ id: duplicateTag.id, name: duplicateTag.name }, '标签已存在，直接返回')
       }
 
       // 更新标签
@@ -62,10 +63,37 @@ export default defineEventHandler(async (event) => {
         }
       })
 
-      return ResponseData.success(tag, '域名标签更新成功')
+      return ResponseData.success({ id: tag.id, name: tag.name }, '域名标签更新成功')
     } else {
-      // 新增模式
-      
+      // 支持批量标签
+      const names = value.name.split(',').map((n: string) => n.trim()).filter((n: string) => n)
+      if (names.length > 1) {
+        // 批量模式
+        const tagResults = []
+        for (const name of names) {
+          // 检查标签名称是否已存在
+          const existingTag = await prisma.domainTag.findFirst({
+            where: {
+              userId,
+              name
+            }
+          })
+          if (existingTag) {
+            tagResults.push({ id: existingTag.id, name: existingTag.name })
+            continue
+          }
+          // 创建新标签
+          const tag = await prisma.domainTag.create({
+            data: {
+              userId,
+              name
+            }
+          })
+          tagResults.push({ id: tag.id, name: tag.name })
+        }
+        return ResponseData.success(tagResults, '批量标签处理成功')
+      }
+      // 新增/查找模式
       // 检查标签名称是否已存在
       const existingTag = await prisma.domainTag.findFirst({
         where: {
@@ -75,7 +103,8 @@ export default defineEventHandler(async (event) => {
       })
 
       if (existingTag) {
-        return ResponseData.error('该标签名称已存在', 409)
+        // 直接返回已存在标签id和name
+        return ResponseData.success({ id: existingTag.id, name: existingTag.name }, '标签已存在，直接返回')
       }
 
       // 创建新标签
@@ -86,7 +115,7 @@ export default defineEventHandler(async (event) => {
         }
       })
 
-      return ResponseData.success(tag, '域名标签创建成功')
+      return ResponseData.success({ id: tag.id, name: tag.name }, '域名标签创建成功')
     }
   } catch (error: any) {
     console.error('保存域名标签失败:', error)

@@ -16,20 +16,16 @@ export default defineEventHandler(async (event) => {
     const config = getAIServiceConfig()
     if (!config) return ResponseData.error('AI服务未配置', 400)
     let result = ''
-    if (config.serviceKey === 'openai') {
-      const openai = useAI()
-      if (!openai) return ResponseData.error('OpenAI未配置或未启用', 400)
-      const modelToUse = reqModel || config.model || config.models?.[0] || 'gpt-3.5-turbo'
-      const completion = await openai.chat.completions.create({
-        model: modelToUse,
-        messages: [
-          { role: 'user', content: prompt }
-        ]
-      })
-      result = completion.choices?.[0]?.message?.content || ''
-    } else {
-      return ResponseData.error('暂不支持该AI服务商', 400)
-    }
+    const openai = useAI()
+    if (!openai) return ResponseData.error('OpenAI未配置或未启用', 400)
+    const modelToUse = reqModel || config.model || config.models?.[0] || 'gpt-3.5-turbo'
+    const completion = await openai.chat.completions.create({
+      model: modelToUse,
+      messages: [
+        { role: 'user', content: prompt }
+      ]
+    })
+    result = completion.choices?.[0]?.message?.content || ''
     return ResponseData.success({ result }, 'AI调用成功')
   } catch (error: any) {
     console.error('AI适配层调用失败:', error)
