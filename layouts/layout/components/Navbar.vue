@@ -57,6 +57,7 @@
         </el-dropdown>
       </div>
     </div>
+    <ChatBot />
   </div>
 </template>
 
@@ -72,6 +73,7 @@ import useAppStore from '~/store/modules/app';
 import useUserStore from '~/store/modules/user';
 import useSettingsStore from '~/store/modules/settings';
 import { useI18n } from 'vue-i18n';
+import ChatBot from '~/components/ChatBot/ChatBot.vue'
 
 const appStore = useAppStore();
 const userStore = useUserStore();
