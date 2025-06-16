@@ -82,6 +82,8 @@ model LoginLog {
   location  String?  // 登录地点
   status    String   // 登录状态：success, failed
   createdAt DateTime @default(now())
+  
+  @@map("login_logs")
 }
 
 // 操作日志
@@ -94,6 +96,8 @@ model OperationLog {
   detail    String   // 操作详情
   ip        String   // 操作IP
   createdAt DateTime @default(now())
+  
+  @@map("operation_logs")
 }
 
 // 通知消息
@@ -106,6 +110,8 @@ model Notification {
   content   String   // 通知内容
   read      Boolean  @default(false) // 是否已读
   createdAt DateTime @default(now())
+  
+  @@map("notifications")
 }
 
 // 注册商表
