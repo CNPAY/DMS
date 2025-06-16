@@ -534,7 +534,9 @@ async function handleUpdate(row) {
       showPrice: row.showPrice,
       showDescription: row.showDescription,
       showTags: row.showTags,
-      enableSearchArea: row.enableSearchArea !== undefined ? row.enableSearchArea : true
+      enableSearchArea: row.enableSearchArea !== undefined ? row.enableSearchArea : true,
+      defaultClickBehavior: row.defaultClickBehavior || 'popup',
+      externalUrl: row.externalUrl || '',
     }
   } 
   currentEditData.value = editData

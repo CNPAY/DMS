@@ -191,6 +191,10 @@ model Domain {
   domainMeaning       String?  @map("domain_meaning") @db.VarChar(100)   // 域名含义
   domainDescription   String?  @map("domain_description") @db.Text       // 域名描述
   
+  // 新增字段 - 域名点击行为
+  clickBehavior       String?  @map("click_behavior") @db.VarChar(20)  // 点击行为: landing(着陆页)/popup(弹窗)/external(外部链接)
+  externalUrl         String?  @map("external_url") @db.VarChar(500)  // 外部链接URL
+  
   createdAt           DateTime @default(now()) @map("created_at")
   updatedAt           DateTime @updatedAt @map("updated_at")
 
@@ -276,6 +280,9 @@ model Portfolio {
   ogImage         String?  @map("og_image") @db.VarChar(500)       // OG图片URL
   twitterCard     String?  @default("summary") @map("twitter_card") @db.VarChar(50) // Twitter卡片类型
   analyticsCode   String?  @map("analytics_code") @db.Text         // 统计代码(GA/百度统计等)
+  
+  // 域名点击行为配置
+  defaultClickBehavior String? @default("popup") @map("default_click_behavior") @db.VarChar(20) // 默认点击行为: landing(着陆页)/popup(弹窗)
   
   showPrice       Boolean  @default(true) @map("show_price")
   showDescription Boolean  @default(false) @map("show_description")

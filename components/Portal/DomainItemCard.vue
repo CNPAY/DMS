@@ -4,7 +4,7 @@
   <div class="domain-item-card">
     <div class="card-header">
       <div class="domain-name-section">
-        <h3 class="domain-name">{{ domain.name }}</h3>
+        <h3 class="domain-name" @click="handleDomainClick">{{ domain.name }}</h3>
         <div class="domain-info">
           <span v-if="domain.category" class="category-badge">{{ domain.category }}</span>
         </div>
@@ -51,7 +51,7 @@
     </div>
     
     <div class="card-footer">
-      <button @click="handleInquiry" class="inquiry-btn">
+      <button @click="handleDomainClick" class="inquiry-btn">
         <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
         </svg>
@@ -63,7 +63,9 @@
 
 <script setup>
 import { inject, computed } from 'vue'
+import { useRouter } from '#imports'
 
+const router = useRouter()
 const props = defineProps({
   domain: {
     type: Object,
@@ -112,8 +114,38 @@ const formatPrice = (price) => {
   return new Intl.NumberFormat('zh-CN').format(price)
 }
 
+// 处理询价按钮点击
 const handleInquiry = () => {
   showInquiry(props.domain)
+}
+
+// 处理域名点击
+const handleDomainClick = () => {
+  // 优先使用域名自身的点击行为配置，如果没有则使用米表的默认配置
+  const clickBehavior = props.domain.clickBehavior || props.portfolio.defaultClickBehavior || 'popup'
+  
+  switch (clickBehavior) {
+    case 'landing':
+      // 跳转到域名着陆页
+      router.push(`/domains/${props.domain.name}`)
+      break
+    case 'popup':
+      // 显示询价弹窗
+      showInquiry(props.domain)
+      break
+    case 'external':
+      // 跳转到外部链接
+      if (props.domain.externalUrl) {
+        window.open(props.domain.externalUrl, '_blank')
+      } else {
+        // 如果没有设置外部链接，默认显示询价弹窗
+        showInquiry(props.domain)
+      }
+      break
+    default:
+      // 默认跳转到着陆页
+      router.push(`/domains/${props.domain.name}`)
+  }
 }
 </script>
 

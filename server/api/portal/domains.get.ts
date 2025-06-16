@@ -32,19 +32,7 @@ export default defineEventHandler(async (event) => {
           in: [1, 2] // 1: 待售, 2: 已上架
         }
       },
-      select: {
-        id: true,
-        domainName: true,
-        salesPrice: true,          // 销售价格
-        priceExpiry: true,         // 销售价格过期时间
-        discount: true,            // 折扣价格
-        discountExpiry: true,      // 折扣过期时间
-        notes: true,
-        registrarId: true,
-        creationDate: true,
-        expiryDate: true,          // 域名过期时间
-        categoryId: true,
-        createdAt: true,
+      include: {
         registrar: {
           select: {
             name: true
@@ -86,6 +74,8 @@ export default defineEventHandler(async (event) => {
       registrar: domain.registrar?.name,
       categoryId: domain.categoryId,
       category: domain.category?.name,
+      clickBehavior: domain.clickBehavior,  // 点击行为
+      externalUrl: domain.externalUrl,      // 外部链接URL
       tags: domain.tags.map((tagMap: any) => ({
         id: tagMap.tag.id,
         name: tagMap.tag.name

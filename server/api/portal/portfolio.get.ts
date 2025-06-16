@@ -46,7 +46,8 @@ export default defineEventHandler(async (event) => {
         showTags: true,
         enableSearchArea: true,
         createdAt: true,
-        updatedAt: true
+        updatedAt: true,
+        defaultClickBehavior: true,
       }
     })
 

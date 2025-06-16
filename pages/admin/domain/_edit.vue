@@ -143,6 +143,23 @@
             </el-button>
           </div>
         </el-form-item>
+        
+        <!-- 点击行为设置 -->
+        <el-divider content-position="left">
+          <span style="color: #409eff; font-weight: 600">🔗 点击行为</span>
+        </el-divider>
+        
+        <el-form-item label="点击行为" prop="clickBehavior">
+          <el-select v-model="form.clickBehavior" placeholder="请选择域名点击行为" style="width: 100%">
+            <el-option label="跳转到着陆页" value="landing" />
+            <el-option label="显示询价弹窗" value="popup" />
+            <el-option label="跳转到外部链接" value="external" />
+          </el-select>
+        </el-form-item>
+        
+        <el-form-item v-if="form.clickBehavior === 'external'" label="外部链接" prop="externalUrl">
+          <el-input v-model="form.externalUrl" placeholder="请输入外部链接URL，例如：https://example.com" />
+        </el-form-item>
 
         <!-- 技术信息 -->
         <el-divider content-position="left">
@@ -245,6 +262,35 @@ const data = reactive({
     salesStatus: [
       { required: true, message: "请选择销售状态", trigger: "change" },
     ],
+    clickBehavior: [
+      { required: false, message: "请选择点击行为", trigger: "change" },
+    ],
+    externalUrl: [
+      { 
+        required: true, 
+        message: "外部链接不能为空", 
+        trigger: "blur",
+        validator: (rule, value, callback) => {
+          if (form.value.clickBehavior === 'external' && !value) {
+            callback(new Error('选择外部链接行为时，外部URL为必填项'));
+          } else {
+            callback();
+          }
+        }
+      },
+      {
+        pattern: /^https?:\/\/.+/,
+        message: "请输入有效的URL，以http://或https://开头",
+        trigger: "blur",
+        validator: (rule, value, callback) => {
+          if (form.value.clickBehavior === 'external' && value && !/^https?:\/\/.+/.test(value)) {
+            callback(new Error('请输入有效的URL，以http://或https://开头'));
+          } else {
+            callback();
+          }
+        }
+      }
+    ],
   },
 });
 
@@ -272,6 +318,8 @@ function reset() {
     salesStatus: 1,
     categoryId: null,
     tagIds: [],
+    clickBehavior: 'landing',
+    externalUrl: null,
   };
   if (domainRef.value) {
     domainRef.value.resetFields();

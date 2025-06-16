@@ -377,6 +377,18 @@
                 <el-checkbox v-model="form.showTags">显示标签</el-checkbox>
               </div>
             </el-form-item>
+            
+            <el-form-item label="域名点击行为" prop="defaultClickBehavior">
+              <el-select v-model="form.defaultClickBehavior" placeholder="选择域名点击行为" style="width: 100%">
+                <el-option label="跳转到着陆页" value="landing" />
+                <el-option label="显示询价弹窗" value="popup" />
+                <el-option label="跳转到外部链接" value="external" />
+              </el-select>
+              <div style="font-size: 12px; color: #666; margin-top: 4px;">
+                设置米表中所有域名的默认点击行为，单个域名可在域名编辑页面单独设置覆盖此配置。选择"跳转到外部链接"时，需要在域名编辑页面为每个域名设置具体的外部链接URL。
+              </div>
+            </el-form-item>
+            
             <el-form-item label="搜索区域" prop="enableSearchArea">
               <div style="display: flex; flex-direction: column; gap: 8px;">
                 <el-switch v-model="form.enableSearchArea" />
@@ -698,7 +710,8 @@ const form = ref({
   showPrice: true,
   showDescription: false,
   showTags: false,
-  enableSearchArea: true
+  enableSearchArea: true,
+  defaultClickBehavior: 'popup'
 })
 
 // 表单验证规则
@@ -885,7 +898,8 @@ function reset() {
     showPrice: true,
     showDescription: false,
     showTags: false,
-    enableSearchArea: true
+    enableSearchArea: true,
+    defaultClickBehavior: 'popup'
   }
   portfolioRef.value?.resetFields()
 }

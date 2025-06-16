@@ -52,6 +52,15 @@ const domainSchema = Joi.object({
   landingPageContent: Joi.string().max(5000).allow('', null).optional().messages({
     'string.max': '着陆页内容不能超过5000个字符'
   }),
+  clickBehavior: Joi.string().valid('landing', 'popup', 'external').allow(null).optional(),
+  externalUrl: Joi.string().max(500).allow('', null).optional().when('clickBehavior', {
+    is: 'external',
+    then: Joi.string().required().messages({
+      'any.required': '选择外部链接行为时，外部URL为必填项'
+    })
+  }).messages({
+    'string.max': '外部URL不能超过500个字符'
+  }),
   tagIds: Joi.array().items(Joi.number().integer()).optional()
 })
 
@@ -139,7 +148,9 @@ export default defineEventHandler(async (event) => {
             discountExpiry: domainData.discountExpiry,
             priceExpiry: domainData.priceExpiry,
             domainMeaning: domainData.domainMeaning || null,
-            domainDescription: domainData.domainDescription || null
+            domainDescription: domainData.domainDescription || null,
+            clickBehavior: domainData.clickBehavior || 'landing',
+            externalUrl: domainData.externalUrl || null
           }
         })
 
@@ -235,7 +246,9 @@ export default defineEventHandler(async (event) => {
             discountExpiry: domainData.discountExpiry,
             priceExpiry: domainData.priceExpiry,
             domainMeaning: domainData.domainMeaning || null,
-            domainDescription: domainData.domainDescription || null
+            domainDescription: domainData.domainDescription || null,
+            clickBehavior: domainData.clickBehavior || 'popup',
+            externalUrl: domainData.externalUrl || null
           }
         })
 

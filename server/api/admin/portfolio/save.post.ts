@@ -23,6 +23,7 @@ export default defineEventHandler(async (event) => {
       footerInfo,
       footerPages,
       footerRichText,
+      defaultClickBehavior,
       // SEO配置
       seoTitle,
       seoDescription,
@@ -84,6 +85,7 @@ export default defineEventHandler(async (event) => {
           footerInfo,
           footerPages: footerPages ? JSON.stringify(footerPages) : null,
           footerRichText,
+          defaultClickBehavior,
           // SEO配置
           seoTitle,
           seoDescription,
@@ -121,6 +123,7 @@ export default defineEventHandler(async (event) => {
           footerInfo,
           footerPages: footerPages ? JSON.stringify(footerPages) : null,
           footerRichText,
+          defaultClickBehavior,
           // SEO配置
           seoTitle,
           seoDescription,

@@ -4,7 +4,7 @@
   <div class="domain-item-list">
     <div class="domain-content">
       <div class="domain-info">
-        <h3 class="domain-name">{{ domain.name }}</h3>
+        <h3 class="domain-name" @click="handleDomainClick">{{ domain.name }}</h3>
         <p v-if="domain.description && portfolio.showDescription" class="domain-description">
           {{ domain.description }}
         </p>
@@ -38,7 +38,7 @@
             ¥{{ formatPrice(domain.salePrice) }}
           </div>
         </div>
-        <button @click="handleInquiry" class="inquiry-btn">
+        <button @click="handleDomainClick" class="inquiry-btn">
           <span>询价购买</span>
         </button>
       </div>
@@ -48,7 +48,9 @@
 
 <script setup>
 import { inject, computed } from 'vue'
+import { useRouter } from '#imports'
 
+const router = useRouter()
 const props = defineProps({
   domain: {
     type: Object,
@@ -97,8 +99,38 @@ const formatPrice = (price) => {
   return new Intl.NumberFormat('zh-CN').format(price)
 }
 
+// 处理询价按钮点击
 const handleInquiry = () => {
   showInquiry(props.domain)
+}
+
+// 处理域名点击
+const handleDomainClick = () => {
+  // 优先使用域名自身的点击行为配置，如果没有则使用米表的默认配置
+  const clickBehavior = props.domain.clickBehavior || props.portfolio.defaultClickBehavior || 'popup'
+  debugger
+  switch (clickBehavior) {
+    case 'landing':
+      // 跳转到域名着陆页
+      router.push(`/domains/${props.domain.name}`)
+      break
+    case 'popup':
+      // 显示询价弹窗
+      showInquiry(props.domain)
+      break
+    case 'external':
+      // 跳转到外部链接
+      if (props.domain.externalUrl) {
+        window.open(props.domain.externalUrl, '_blank')
+      } else {
+        // 如果没有设置外部链接，默认显示询价弹窗
+        showInquiry(props.domain)
+      }
+      break
+    default:
+      // 默认跳转到着陆页
+      router.push(`/domains/${props.domain.name}`)
+  }
 }
 </script>
 
