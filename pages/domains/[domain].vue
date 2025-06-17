@@ -1,32 +1,32 @@
 <template>
-  <div class="domain-container">
-    <div class="lang-icon" @click="changeLang">
-      <!-- {{ currentLang === 'zh' ? '🇬🇧' : '🇨🇳' }} -->
-    </div>
-
+  <div class="domain-container portal-theme" :data-theme="landing.backgroundColorInfo.value">
     <div class="container-wrap">
       <!-- 域名展示卡片 -->
       <div class="card parking-card">
         <div class="parking-card-form">
           <div class="parking-header">
             <h1 class="parking-brand">
-              域名大师
-              <span>一个域名一个品牌</span>
+              {{landing?.mainTitle}}
+              <span>  {{landing?.subTitle}}</span>
             </h1>
-            <div class="contact-button" @click="showContact">报价</div>
+            <div class="contact-button" @click="showContact">联系</div>
           </div>
           <div class="parking-title">
             <div class="parking-title-top">
-              <h1 class="parking-domain" ref="domainRef">{{ domainInfo.domainName }}</h1>
+              <div class="parking-domain" ref="domainRef">{{ domainInfo?.domainName }}</div>
+              <!-- <d class="price-text" v-if="domainInfo.price"><strong>{{ formatPrice(domainInfo?.price) }}</strong> 元</d> -->
+            </div>
+             <!-- 域名简介 -->
+            <div class="domain-content">
+              <div v-html="domainInfo.domainDescription"></div>
             </div>
             <div class="parking-title-bottom">
-              <p class="sale-text">此域名<strong>正在出售中</strong>.</p>
-              <p class="show-text">不仅仅是为了 <span>秀<sup>(show)</sup></span> <span>秀<sup>(show)</sup></span>.</p>
-              <p class="price-text" v-if="domainInfo.price">参考价格: <strong>{{ formatPrice(domainInfo.price) }}</strong> 元</p>
+               <div v-html="landing?.footerTitle"></div>
             </div>
           </div>
         </div>
       </div>
+     
 
       <!-- 询价表单卡片 -->
       <div :class="{'card':true, 'contact-card':true, 'fore-contact':showContactFlag}">
@@ -88,7 +88,7 @@
             ></textarea>
           </label>
           
-          <div v-if="submitSuccess" class="inquiry-success">提交成功，我们会尽快与您联系！</div>
+          <div  v-if="submitSuccess" class="inquiry-success">提交成功，我们会尽快与您联系！</div>
           <div v-if="submitError" class="inquiry-error">{{ submitError }}</div>
         </form>
       </div>
@@ -97,12 +97,16 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed, nextTick } from 'vue'
-import { useRoute, useHead, useRuntimeConfig } from '#imports'
-
+import { ref, reactive, onMounted, computed, watch } from 'vue'
+import { useRoute, useHead, useRuntimeConfig, useFetch, useAsyncData } from '#imports'
+import { 
+  COLOR_THEMES, 
+} from '~/utils/constants.js'
 const route = useRoute()
 const config = useRuntimeConfig()
 const domain = route.params.domain
+
+// 使用响应式引用存储数据
 const domainInfo = reactive({
   id: null,
   domainName: domain,
@@ -114,9 +118,19 @@ const domainInfo = reactive({
   externalUrl: '',
   image: ''
 })
+
+const landing = reactive({
+  backgroundColorInfo: {},
+  mainTitle: '',
+  subTitle: '',
+  footerTitle: ''
+})
+const size = ref({})
 definePageMeta({
   layout: 'default',
 })
+defineOptions({ name: 'DomainDetail' })
+
 // 显示联系表单标志
 const showContactFlag = ref(false)
 
@@ -135,43 +149,59 @@ function formatPrice(price) {
   return new Intl.NumberFormat('zh-CN').format(price)
 }
 
-// 获取域名信息
-async function fetchDomainInfo() {
-  try {
-    const res = await $fetch(`/api/portal/domain-info?domain=${domain}`)
-    Object.assign(domainInfo, res.data)
-    
-    // 如果是重定向类型且有外部链接，则执行重定向
-    if (domainInfo.landingPageType === 'redirect' && domainInfo.externalUrl) {
-      setTimeout(() => {
-        window.location.href = domainInfo.externalUrl
-      }, 2000)
-    }
-    
-    // 调整域名字体大小
-    nextTick(() => {
-      autoFitDomain()
-    })
-  } catch {
-    domainInfo.domainDescription = '未找到该域名信息。'
-    domainInfo.content = ''
+// 使用useAsyncData获取域名信息，支持SSR
+const { data: domainData } = await useAsyncData(
+  'domainInfo',
+  () => $fetch(`/api/portal/domain-info?domain=${domain}`),
+  { lazy: false }
+)
+
+// 使用useAsyncData获取着陆页配置，支持SSR
+const { data: landingData } = await useAsyncData(
+  'landingConfig',
+  () => $fetch(`/api/portal/landing`),
+  { lazy: false }
+)
+
+// 直接更新响应式对象
+if (domainData.value?.data) {
+  Object.assign(domainInfo, domainData.value.data)
+  
+  // 如果是重定向类型且有外部链接，则执行重定向（仅在客户端）
+  if (process.client && domainInfo.landingPageType === 'redirect' && domainInfo.externalUrl) {
+    setTimeout(() => {
+      window.location.href = domainInfo.externalUrl
+    }, 2000)
   }
 }
 
-// 自动调整域名字体大小
+if (landingData.value?.data) {
+  Object.assign(landing, landingData.value.data)
+  landing.backgroundColorInfo = COLOR_THEMES.find(theme => theme.value === landing.backgroundColor || 'lavender')
+}
+function computeFontSize (domain, size, fontFamily){
+  let spanDom = document.createElement("span");
+  spanDom.style.fontSize = size;
+  spanDom.style.opacity = "0";
+  // spanDom.style.fontFamily = family;
+  spanDom.innerHTML = domain;
+  document.body.append(spanDom);
+  let sizeD = {};
+  sizeD.width = spanDom.offsetWidth;
+  sizeD.height = spanDom.offsetHeight;
+  spanDom.remove();
+  return sizeD;
+}
+// 自动调整域名字体大小 - 仅在客户端执行
 function autoFitDomain() {
-  if (!domainRef.value) return
+  if (!process.client || !domainRef.value) return
   
   const dom = domainRef.value
-  const parentWidth = dom.parentNode.clientWidth
-  const domainLength = domainInfo.domainName.length
-  
-  // 根据域名长度和容器宽度调整缩放比例
-  const baseSize = 40 // 基础字体大小
-  const estimatedWidth = baseSize * 0.6 * domainLength // 估算宽度
-  const multNum = (parentWidth - 50) / estimatedWidth
-  const num = Math.min(1, Math.floor(multNum * 100) / 100) // 限制最大缩放为1
-  
+  const width = size.value.width;
+  const parentWidth = dom.clientWidth;
+
+  const multNum = process.client && window.innerWidth <= 768 ? (parentWidth-60) / width : ((parentWidth/2)-100) / width;
+  const num = Math.floor(multNum * 100) / 100;
   dom.style.transform = `scale(${num})`
   dom.style.transformOrigin = 'left center'
 }
@@ -182,59 +212,69 @@ function showContact() {
 }
 
 onMounted(() => {
-  fetchDomainInfo()
+  // DOM操作仅在客户端执行
+  size.value = computeFontSize(domain, "40px", "TypoUbuntuBold");
+  autoFitDomain()
   
   // 监听窗口大小变化，调整域名字体大小
-  window.addEventListener('resize', autoFitDomain)
+  if (process.client) {
+    window.addEventListener('resize', autoFitDomain)
+  }
 })
 
 // 动态生成SEO图片URL
-const getSeoImageUrl = () => {
+const getSeoImageUrl = computed(() => {
   if (domainInfo.image) return domainInfo.image
   
-  // 使用我们自己的API服务来动态生成HTML版本的SEO图片
-  // 获取当前站点的URL，优先使用客户端的window.location，服务器端则使用配置
+  // 获取当前站点的URL
   let baseUrl = ''
   if (process.client) {
     baseUrl = window.location.origin
   } else {
     // 在服务器端，使用请求的host或配置的URL
-    const host = process.server ? (route.fullPath.startsWith('http') ? '' : 'https://') + domain : ''
-    baseUrl = host || ''
+    baseUrl = config.public.appUrl || `https://${domain}`
   }
   
   return `${baseUrl}/api/portal/seo-image?domain=${encodeURIComponent(domainInfo.domainName)}&description=${encodeURIComponent(domainInfo.domainDescription || '')}&price=${encodeURIComponent(domainInfo.price || '')}`
-}
+})
+
+// 计算规范的URL
+const canonicalUrl = computed(() => {
+  if (process.client) {
+    return window.location.href
+  }
+  return `https://${domain}/domains/${domain}`
+})
 
 // 增强的SEO/OG/Twitter Card meta
 useHead({
-  title: () => `${domainInfo.domainName} - 优质域名出售` ,
+  title: () => domainInfo.seoTitle ? `${domainInfo.seoTitle} - ${landing.mainTitle}` : `${domainInfo.domainName} - ${landing.mainTitle}`,
   meta: [
     // 基本SEO
-    { name: 'description', content: () => domainInfo.domainDescription || `${domainInfo.domainName} - 优质域名，现正出售中。立即询价！` },
-    { name: 'keywords', content: () => `${domainInfo.domainName},域名出售,域名交易,域名询价` },
+    { name: 'description', content: () => domainInfo.seoDescription || `${domainInfo.domainName} - 优质域名，现正出售中。立即询价！` },
+    { name: 'keywords', content: () => domainInfo.seoKeywords || `${domainInfo.domainName},域名出售,域名交易,域名询价` },
     
     // Open Graph
     { property: 'og:type', content: 'website' },
-    { property: 'og:title', content: () => `${domainInfo.domainName} - 优质域名出售` },
-    { property: 'og:description', content: () => domainInfo.domainDescription || `${domainInfo.domainName} - 优质域名，现正出售中。立即询价！` },
+    { property: 'og:title', content: () => domainInfo.seoTitle || `${domainInfo.domainName} - 优质域名出售` },
+    { property: 'og:description', content: () => domainInfo.seoDescription || `${domainInfo.domainName} - 优质域名，现正出售中。立即询价！` },
     { property: 'og:image', content: getSeoImageUrl },
-    { property: 'og:url', content: () => process.client ? window.location.href : `https://${domain}/domains/${domain}` },
-    { property: 'og:site_name', content: '域名交易平台' },
+    { property: 'og:url', content: canonicalUrl },
+    { property: 'og:site_name', content: landing.mainTitle },
     
     // Twitter Card
     { name: 'twitter:card', content: 'summary_large_image' },
-    { name: 'twitter:title', content: () => `${domainInfo.domainName} - 优质域名出售` },
-    { name: 'twitter:description', content: () => domainInfo.domainDescription || `${domainInfo.domainName} - 优质域名，现正出售中。立即询价！` },
+    { name: 'twitter:title', content: () => domainInfo.seoTitle || `${domainInfo.domainName} - 优质域名出售` },
+    { name: 'twitter:description', content: () => domainInfo.seoDescription || `${domainInfo.domainName} - 优质域名，现正出售中。立即询价！` },
     { name: 'twitter:image', content: getSeoImageUrl },
     
     // 其他社交媒体
-    { property: 'weibo:title', content: () => `${domainInfo.domainName} - 优质域名出售` },
-    { property: 'weibo:description', content: () => domainInfo.domainDescription || `${domainInfo.domainName} - 优质域名，现正出售中。立即询价！` },
+    { property: 'weibo:title', content: () => domainInfo.seoTitle || `${domainInfo.domainName} - 优质域名出售` },
+    { property: 'weibo:description', content: () => domainInfo.seoDescription || `${domainInfo.domainName} - 优质域名，现正出售中。立即询价！` },
     { property: 'weibo:image', content: getSeoImageUrl }
   ],
   link: [
-    { rel: 'canonical', href: () => process.client ? window.location.href : `https://${domain}/domains/${domain}` }
+    { rel: 'canonical', href: canonicalUrl }
   ]
 })
 
@@ -293,7 +333,7 @@ const validateForm = () => {
   return isValid
 }
 
-// 提交表单
+// 提交表单 - 使用useFetch
 async function onSubmit() {
   submitError.value = ''
   
@@ -303,7 +343,7 @@ async function onSubmit() {
   
   loading.value = true
   try {
-    await $fetch('/api/portal/inquiry', {
+    const { data, error } = await $fetch('/api/portal/inquiry', {
       method: 'POST',
       body: {
         domainId: domainInfo.id,
@@ -314,6 +354,11 @@ async function onSubmit() {
         message: form.message
       }
     })
+    
+    if (error) {
+      throw new Error('提交失败')
+    }
+    
     submitSuccess.value = true
     setTimeout(() => { submitSuccess.value = false }, 4000)
     Object.assign(form, { visitorName: '', visitorLastName: '', visitorEmail: '', visitorPhone: '', offerPrice: '', message: '' })
@@ -423,7 +468,7 @@ html, body {
 
 .parking-title-top {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   justify-content: center;
   width: 100%;
   flex: 1;
@@ -432,13 +477,13 @@ html, body {
 .parking-card .parking-domain {
   color: white;
   font-weight: bold;
-  font-family: "TypoUbuntuBold", Arial, sans-serif;
+  font-family: "TypoUbuntuBold";
   margin: 0;
   white-space: nowrap;
-  font-size: 60px;
-  overflow: hidden;
+  font-size: 40px;
+  overflow: none;
+  transform-origin: left center;
   width: 100%;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .parking-title-bottom {
@@ -560,6 +605,7 @@ html, body {
 
 .contact-card-form input[type="text"],
 .contact-card-form input[type="email"],
+.contact-card-form input[type="number"],
 .contact-card-form textarea,
 .contact-card-form select {
   border: 1px solid #DADADA;
@@ -589,19 +635,39 @@ html, body {
 
 .contact-button {
   outline: none;
-  width: 55px;
-  height: 30px;
+  width: 65px;
+  height: 36px;
   background-color: transparent;
   background-size: contain;
   cursor: pointer;
-  font-size: 20px;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  color:white;
+  font-weight: 500;
+  border: 1px solid white;
+  
+  &:hover {
+    background-color: var(--theme-primary);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(90, 147, 203, 0.2);
+  }
+  
+  &:active {
+    transform: translateY(0);
+    box-shadow: none;
+  }
 }
 
 .send {
-  background: #5a93cb;
+  background: linear-gradient(135deg, var(--theme-primary) 0%, var(--theme-secondary) 100%);
+  color: white;
   border: none;
   padding: 10px 25px 10px 25px;
-  color: #FFF;
   box-shadow: 1px 1px 5px #B6B6B6;
   border-radius: 3px;
   text-shadow: 1px 1px 1px #5a93cb;
@@ -610,21 +676,22 @@ html, body {
   bottom: 20px;
   left: 13px;
   right: 13px;
-  font-size: 25px;
+  font-size: 20px;
   z-index: 66;
   width: calc(100% - 13px * 2);
 }
 
 .send:hover {
-  background: #9656b9;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
 }
-
 .inquiry-success {
   color: #52c41a;
   font-size: 1.1rem;
-  margin: 16px 10px;
+  margin: 0px 10px;
+  margin-bottom: 3px;
   text-align: center;
-  padding: 10px;
+  padding:  3px;
   background: rgba(82,196,26,0.1);
   border-radius: 8px;
 }
@@ -632,24 +699,31 @@ html, body {
 .inquiry-error {
   color: #ff4d4f;
   font-size: 1.1rem;
-  margin: 16px 10px;
+  margin: 0px 10px;
+  margin-bottom: 3px;
   text-align: center;
-  padding: 10px;
+  padding:  3px;
   background: rgba(255,77,79,0.1);
   border-radius: 8px;
 }
 
 @media only screen and (max-height: 667px) {
+  .domain-content{
+    display: none !important;
+  }
   .contact-card-form textarea {
     height: 80px;
   }
 }
 
 @media only screen and (max-width: 640px) {
+  .domain-content{
+    display: none !important;
+  }
   .container-wrap {
     padding: 15px;
-    height: calc(100% - 30px);
-    width: calc(100% - 30px);
+    height: calc(100%);
+    width: calc(100%);
     position: relative;
   }
   
@@ -687,5 +761,46 @@ html, body {
     font-size: 22px;
     margin-top: 20px;
   }
+}
+.domain-content{
+  position: absolute; 
+ //右半部分
+  padding: 30px;
+  font-size: 18px;
+  right: 0;
+  width: 50%;
+  height: 100%;
+  word-wrap:  pre-wrap;
+  white-space: pre-wrap;
+  word-break: break-all;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 10;
+  -webkit-box-orient: vertical;
+}
+.h1{
+  font-size: 32px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+.h2{  
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+.h3{
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+.h4{
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+.p{
+  font-size: 18px;
+  margin-bottom: 10px;
 }
 </style> 

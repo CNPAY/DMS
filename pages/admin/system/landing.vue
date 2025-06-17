@@ -26,108 +26,22 @@
       <!-- 左侧配置面板 -->
       <div class="config-panel">
         <el-form :model="configForm" label-width="30px" ref="configFormRef">
-          <!-- 页面主题 -->
-          <div class="config-section">
-            <h3 class="section-title">待售页面主题</h3>
-            <p class="section-desc">选择最符合您个人品牌的主题</p>
-            <el-form-item prop="theme">
-              <el-radio-group
-                v-model="configForm.theme"
-                @change="updatePreview"
-                direction="vertical"
-              >
-                <el-radio label="standard" class="theme-radio" border>
-                  <div class="theme-option">
-                    <div class="theme-label">标准</div>
-                    <div class="theme-desc">经典的域名销售页面布局</div>
-                  </div>
-                </el-radio>
-                <el-radio label="branded" class="theme-radio" border>
-                  <div class="theme-option">
-                    <div class="theme-label">有品牌展示</div>
-                    <div class="theme-desc">突出展示您的品牌信息</div>
-                  </div>
-                </el-radio>
-                <el-radio label="minimal" class="theme-radio" border>
-                  <div class="theme-option">
-                    <div class="theme-label">极简</div>
-                    <div class="theme-desc">简洁明了的设计风格</div>
-                  </div>
-                </el-radio>
-              </el-radio-group>
-            </el-form-item>
-          </div>
-
-          <!-- 页面背景类型 -->
-          <div class="config-section">
-            <h3 class="section-title">页面背景类型</h3>
-            <p class="section-desc">选择页面背景的显示方式</p>
-            <el-form-item prop="backgroundType">
-              <el-radio-group
-                v-model="configForm.backgroundType"
-                @change="updatePreview"
-              >
-                <el-radio label="solid">纯色</el-radio>
-                <el-radio label="image">自有图片</el-radio>
-              </el-radio-group>
-            </el-form-item>
-          </div>
-
-          <!-- 默认背景颜色 -->
-          <div class="config-section">
-            <h3 class="section-title">默认的待售页面背景</h3>
-            <el-form-item prop="backgroundColor">
-              <div class="color-options">
-                <div
-                  v-for="color in backgroundColors"
-                  :key="color.value"
-                  class="color-option"
-                  :class="{
-                    active: configForm.backgroundColor === color.value,
-                  }"
-                  :style="{ background: color.gradient || color.color }"
-                  @click="selectBackgroundColor(color.value)"
+          <h3 class="section-title">米表主题</h3>
+          <el-form-item label="" prop="colorTheme">
+              <el-select v-model="configForm.backgroundColor" placeholder="选择米表主题风格" style="width: 100%" @change="selectBackgroundColor">
+                <el-option
+                  v-for="theme in backgroundColors"
+                  :key="theme.value"
+                  :label="theme.label"
+                  :value="theme.value"
                 >
-                  <span class="color-name">{{ color.name }}</span>
-                </div>
-                <div
-                  class="color-option custom"
-                  :class="{ active: configForm.backgroundColor === 'custom' }"
-                  @click="selectBackgroundColor('custom')"
-                >
-                  <span class="color-name">自定义</span>
-                </div>
-              </div>
-              <el-color-picker
-                v-if="configForm.backgroundColor === 'custom'"
-                v-model="configForm.customBackgroundColor"
-                @change="updatePreview"
-                style="margin-top: 10px"
-              />
-            </el-form-item>
-          </div>
-
-          <!-- 字体颜色 -->
-          <div class="config-section">
-            <h3 class="section-title">字体颜色</h3>
-            <p class="section-desc">选择与您的背景最搭配的颜色</p>
-            <el-form-item prop="fontColor">
-              <el-radio-group
-                v-model="configForm.fontColor"
-                @change="updatePreview"
-              >
-                <el-radio label="auto">
-                  <div class="font-option">
-                    <span class="font-label">自动</span>
-                    <span class="font-desc">（推荐）</span>
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>{{ theme.label }}</span>
+                    <span style="color: #999; font-size: 12px;">{{ theme.description }}</span>
                   </div>
-                </el-radio>
-                <el-radio label="dark">深色</el-radio>
-                <el-radio label="light">浅色</el-radio>
-              </el-radio-group>
+                </el-option>
+              </el-select>
             </el-form-item>
-          </div>
-
           <!-- 出售选项 -->
           <div class="config-section">
             <h3 class="section-title">出售选项</h3>
@@ -157,30 +71,58 @@
                       <span class="option-desc">显示询价联系表单</span>
                     </div>
                   </el-checkbox>
-                  <el-checkbox label="auction" class="sale-option">
-                    <div class="option-content">
-                      <span class="option-label">竞价清算</span>
-                      <span class="option-desc">支持竞价模式销售</span>
-                    </div>
-                  </el-checkbox>
                 </div>
               </el-checkbox-group>
             </el-form-item>
           </div>
 
-          <!-- 价格显示 -->
+          <!-- 标题配置 -->
           <div class="config-section">
-            <h3 class="section-title">价格显示</h3>
-            <p class="section-desc">设置在待售页面上显示的价格信息</p>
-            <el-form-item prop="priceDisplay">
-              <el-radio-group
-                v-model="configForm.priceDisplay"
-                @change="updatePreview"
-              >
-                <el-radio label="show">显示</el-radio>
-                <el-radio label="hide">隐藏</el-radio>
-                <el-radio label="onRequest">面议</el-radio>
-              </el-radio-group>
+            <h3 class="section-title">标题配置</h3>
+            <p class="section-desc">设置着陆页显示的标题文本</p>
+            <el-form-item
+              label="主标题"
+              prop="mainTitle"
+              label-width="100px"
+            >
+              <el-input
+                v-model="configForm.mainTitle"
+                placeholder="请输入主标题"
+                @input="updatePreview"
+              />
+            </el-form-item>
+            <el-form-item
+              label="副标题"
+              prop="subTitle"
+              label-width="100px"
+            >
+              <el-input
+                v-model="configForm.subTitle"
+                placeholder="请输入副标题"
+                @input="updatePreview"
+              />
+            </el-form-item>
+            <el-form-item
+              label="底部标题"
+              prop="footerTitle"
+              label-width="100px"
+            >
+              <el-input
+                v-model="configForm.footerTitle"
+                placeholder="请输入底部标题"
+                @input="updatePreview"
+              />
+            </el-form-item>
+            <el-form-item
+              label="版权信息"
+              prop="copyrightTitle"
+              label-width="100px"
+            >
+              <el-input
+                v-model="configForm.copyrightTitle"
+                placeholder="请输入版权信息"
+                @input="updatePreview"
+              />
             </el-form-item>
           </div>
 
@@ -198,22 +140,6 @@
                 <el-radio label="always">始终查看</el-radio>
                 <el-radio label="monthly100">仅限月访问量100+</el-radio>
                 <el-radio label="never">始终关闭</el-radio>
-              </el-radio-group>
-            </el-form-item>
-          </div>
-
-          <!-- 域名商店推广 -->
-          <div class="config-section">
-            <h3 class="section-title">推广您的域名商店</h3>
-            <p class="section-desc">显示您的其他域名或者推广自己的域名商店</p>
-            <el-form-item prop="storePromotion">
-              <el-radio-group
-                v-model="configForm.storePromotion"
-                @change="updatePreview"
-              >
-                <el-radio label="show">显示域名</el-radio>
-                <el-radio label="showStore">显示商店</el-radio>
-                <el-radio label="hide">不显示</el-radio>
               </el-radio-group>
             </el-form-item>
           </div>
@@ -308,7 +234,12 @@
 
 <script setup lang="ts">
 import { ElMessage } from "element-plus";
-
+import { 
+  LAYOUT_TEMPLATES, 
+  COLOR_THEMES, 
+  getTemplateLabel,
+  getThemeLabel
+} from '~/utils/constants.js'
 definePageMeta({
   layout: "admin",
   title: "默认着陆页配置",
@@ -326,37 +257,14 @@ const configFormRef = ref();
 const saving = ref(false);
 const previewDevice = ref("desktop");
 const previewHTML = ref("");
+const backgroundColors = ref(COLOR_THEMES)
 
-// 背景颜色选项
-const backgroundColors = [
-  { name: "深色", value: "dark", color: "#1a1a1a" },
-  {
-    name: "青绿色",
-    value: "teal",
-    gradient: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-  },
-  {
-    name: "紫",
-    value: "purple",
-    gradient: "linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)",
-  },
-  {
-    name: "黄色",
-    value: "yellow",
-    gradient: "linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%)",
-  },
-  {
-    name: "珊瑚色",
-    value: "coral",
-    gradient: "linear-gradient(135deg, #fd79a8 0%, #fdcb6e 100%)",
-  },
-];
 
 // 表单数据
 const configForm = reactive({
   theme: "standard",
   backgroundType: "solid",
-  backgroundColor: "dark",
+  backgroundColor: "lavender",
   customBackgroundColor: "#1a1a1a",
   fontColor: "auto",
   saleOptions: ["inquiry", "makeOffer"],
@@ -367,6 +275,10 @@ const configForm = reactive({
   contactPhone: "",
   companyName: "",
   customCSS: "",
+  mainTitle: "域名正在出售",
+  subTitle: "这个优质域名正在出售中",
+  footerTitle: "© 2024 域名大师 - 专业域名交易平台",
+  copyrightTitle: "保留所有权利",
 });
 
 // 选择背景颜色
@@ -382,15 +294,11 @@ function updatePreview() {
 
 // 生成预览HTML
 function generatePreviewHTML() {
-  const selectedBgColor = backgroundColors.find(
+  const selectedBgColor = backgroundColors.value.find(
     (c) => c.value === configForm.backgroundColor
   );
-  const bgStyle =
-    configForm.backgroundColor === "custom"
-      ? `background: ${configForm.customBackgroundColor}`
-      : selectedBgColor
-      ? `background: ${selectedBgColor.gradient || selectedBgColor.color}`
-      : "background: #1a1a1a";
+  const bgStyle = `background: ${selectedBgColor?.primary}`
+  console.log(bgStyle)
 
   const fontColorStyle =
     configForm.fontColor === "dark"
@@ -459,11 +367,13 @@ function generatePreviewHTML() {
         .contact-section p { margin: 8px 0; }
         .features { margin: 50px 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
         .feature { padding: 20px; background: rgba(255,255,255,0.1); border-radius: 8px; }
+        .footer { margin-top: 60px; padding: 20px; font-size: 14px; opacity: 0.7; }
+        .copyright-info { font-size: 12px; margin-top: 8px; opacity: 0.8; }
         ${configForm.customCSS}
       </style>
       <div class="preview-container">
         <h1 class="domain-title">example.com</h1>
-        <p class="domain-subtitle">这个优质域名正在出售中</p>
+        <p class="domain-subtitle">${configForm.subTitle}</p>
         
         ${priceHTML}
         
@@ -496,7 +406,7 @@ function generatePreviewHTML() {
           configForm.saleOptions.includes("inquiry")
             ? `
           <div class="inquiry-form" style="margin-top: 40px; padding: 30px; background: rgba(255,255,255,0.1); border-radius: 10px; max-width: 500px; margin-left: auto; margin-right: auto;">
-            <h3>询价表单</h3>
+            <h3>${configForm.mainTitle}</h3>
             <form style="display: grid; gap: 15px; text-align: left;">
               <input type="text" placeholder="您的姓名" style="padding: 10px; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); border-radius: 4px; color: inherit;">
               <input type="email" placeholder="联系邮箱" style="padding: 10px; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); border-radius: 4px; color: inherit;">
@@ -510,6 +420,11 @@ function generatePreviewHTML() {
         }
         
         ${contactHTML}
+        
+        <div class="footer">
+          ${configForm.footerTitle}
+          ${configForm.copyrightTitle ? `<div class="copyright-info">${configForm.copyrightTitle}</div>` : ''}
+        </div>
       </div>
     </div>
   `;
@@ -553,6 +468,10 @@ function resetConfig() {
     contactPhone: "",
     companyName: "",
     customCSS: "",
+    mainTitle: "域名正在出售",
+    subTitle: "这个优质域名正在出售中",
+    footerTitle: "© 2024 域名大师 - 专业域名交易平台",
+    copyrightTitle: "保留所有权利",
   });
   updatePreview();
   ElMessage.success("已重置为默认配置");

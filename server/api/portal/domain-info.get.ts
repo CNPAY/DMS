@@ -15,7 +15,10 @@ export default defineEventHandler(async (event) => {
       landingPageContent: true,  // 着陆页内容
       landingPageType: true,     // 着陆页类型
       clickBehavior: true,       // 点击行为
-      externalUrl: true          // 外部链接URL
+      externalUrl: true,         // 外部链接URL
+      seoTitle: true,
+      seoKeywords: true,
+      seoDescription: true
     }
   })
   if (!info) return ResponseData.error('未找到该域名', 404)
@@ -29,7 +32,10 @@ export default defineEventHandler(async (event) => {
     content: info.landingPageContent,
     landingPageType: info.landingPageType,
     clickBehavior: info.clickBehavior,
-    externalUrl: info.externalUrl
+    externalUrl: info.externalUrl,
+    seoTitle: info.seoTitle,
+    seoKeywords: info.seoKeywords,
+    seoDescription: info.seoDescription
   }
   
   return ResponseData.success(formattedInfo)

@@ -201,6 +201,10 @@ model Domain {
   clickBehavior       String?  @map("click_behavior") @db.VarChar(20)  // 点击行为: landing(着陆页)/popup(弹窗)/external(外部链接)
   externalUrl         String?  @map("external_url") @db.VarChar(500)  // 外部链接URL
   
+  seoTitle        String?  @map("seo_title") @db.VarChar(255)      // SEO标题
+  seoDescription  String?  @map("seo_description") @db.Text        // SEO描述
+  seoKeywords     String?  @map("seo_keywords") @db.VarChar(500)   // SEO关键词
+  
   createdAt           DateTime @default(now()) @map("created_at")
   updatedAt           DateTime @updatedAt @map("updated_at")
 

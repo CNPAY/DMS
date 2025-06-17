@@ -78,6 +78,24 @@
           </el-col>
         </el-row>
 
+         
+        <!-- 点击行为设置 -->
+        <el-divider content-position="left">
+          <span style="color: #409eff; font-weight: 600">🔗 点击行为</span>
+        </el-divider>
+        
+        <el-form-item label="点击行为" prop="clickBehavior">
+          <el-select v-model="form.clickBehavior" placeholder="请选择域名点击行为" style="width: 100%">
+            <el-option label="跳转到着陆页" value="landing" />
+            <el-option label="显示询价弹窗" value="popup" />
+            <el-option label="跳转到外部链接" value="external" />
+          </el-select>
+        </el-form-item>
+        
+        <el-form-item v-if="form.clickBehavior === 'external'" label="外部链接" prop="externalUrl">
+          <el-input v-model="form.externalUrl" placeholder="请输入外部链接URL，例如：https://example.com" />
+        </el-form-item>
+
         <!-- 价格设置 -->
         <el-divider content-position="left">
           <span style="color: #67c23a; font-weight: 600">💰 价格设置</span>
@@ -125,7 +143,7 @@
 
         <!-- 域名描述 -->
         <el-divider content-position="left">
-          <span style="color: #e6a23c; font-weight: 600">📝 域名描述</span>
+          <span style="color: #e6a23c; font-weight: 600">📝 域名介绍</span>
         </el-divider>
 
         <el-form-item label="域名含义" prop="domainMeaning">
@@ -143,23 +161,21 @@
             </el-button>
           </div>
         </el-form-item>
-        
-        <!-- 点击行为设置 -->
+
+        <!-- 域名SEO -->
         <el-divider content-position="left">
-          <span style="color: #409eff; font-weight: 600">🔗 点击行为</span>
+          <span style="color: #e6a23c; font-weight: 600">📝 SEO优化</span>
         </el-divider>
-        
-        <el-form-item label="点击行为" prop="clickBehavior">
-          <el-select v-model="form.clickBehavior" placeholder="请选择域名点击行为" style="width: 100%">
-            <el-option label="跳转到着陆页" value="landing" />
-            <el-option label="显示询价弹窗" value="popup" />
-            <el-option label="跳转到外部链接" value="external" />
-          </el-select>
+        <el-form-item label="SEO标题" prop="seoTitle">
+          <el-input v-model="form.seoTitle" placeholder="请输入SEO标题" />
         </el-form-item>
-        
-        <el-form-item v-if="form.clickBehavior === 'external'" label="外部链接" prop="externalUrl">
-          <el-input v-model="form.externalUrl" placeholder="请输入外部链接URL，例如：https://example.com" />
+        <el-form-item label="SEO关键词" prop="seoKeywords">
+          <el-input v-model="form.seoKeywords" placeholder="请输入SEO关键词" />
         </el-form-item>
+        <el-form-item label="SEO描述" prop="seoDescription">
+          <el-input v-model="form.seoDescription" placeholder="请输入SEO描述" />
+        </el-form-item>
+       
 
         <!-- 技术信息 -->
         <el-divider content-position="left">
@@ -318,8 +334,11 @@ function reset() {
     salesStatus: 1,
     categoryId: null,
     tagIds: [],
-    clickBehavior: 'landing',
+    clickBehavior: 'popup',
     externalUrl: null,
+    seoTitle: null,
+    seoKeywords: null,
+    seoDescription: null,
   };
   if (domainRef.value) {
     domainRef.value.resetFields();

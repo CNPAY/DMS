@@ -282,6 +282,12 @@
             <div style="font-size: 12px; color: #666; margin-top: -16px; margin-bottom: 18px; margin-left: 120px;">
               开启后将自动加载更多内容，不显示分页按钮
             </div>
+         
+
+            <!-- 视觉配置 Section -->
+            <el-divider content-position="left">
+              <span style="color: #f56c6c; font-weight: 600;">🎨 视觉配置</span>
+            </el-divider>
             <el-form-item label="米表主题" prop="colorTheme">
               <el-select v-model="form.colorTheme" placeholder="选择米表主题风格" style="width: 100%">
                 <el-option
@@ -297,12 +303,6 @@
                 </el-option>
               </el-select>
             </el-form-item>
-
-            <!-- 视觉配置 Section -->
-            <el-divider content-position="left">
-              <span style="color: #f56c6c; font-weight: 600;">🎨 视觉配置</span>
-            </el-divider>
-
             <el-form-item label="网站Logo">
               <div style="display: flex; flex-direction: column; gap: 12px;">
                 <el-upload

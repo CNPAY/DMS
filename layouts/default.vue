@@ -1,5 +1,5 @@
 <template>
-  <div class="main-container portal-theme">
+  <div class="main-container">
     <slot />
   </div>
 </template>

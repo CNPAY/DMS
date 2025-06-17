@@ -76,6 +76,9 @@ export default defineEventHandler(async (event) => {
       category: domain.category?.name,
       clickBehavior: domain.clickBehavior,  // 点击行为
       externalUrl: domain.externalUrl,      // 外部链接URL
+      seoTitle: domain.seoTitle,
+      seoKeywords: domain.seoKeywords,
+      seoDescription: domain.seoDescription,
       tags: domain.tags.map((tagMap: any) => ({
         id: tagMap.tag.id,
         name: tagMap.tag.name

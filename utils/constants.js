@@ -11,15 +11,15 @@ export const LAYOUT_TEMPLATES = [
 // 颜色主题选项
 export const COLOR_THEMES = [
   // { value: 'moonlight', label: '🌙 月光白', description: '简约纯净风格' },
-  { value: 'ocean', label: '🌊 海洋蓝', description: '清新专业风格' },
-  { value: 'forest', label: '🌿 森林绿', description: '自然生机风格' },
-  { value: 'sunset', label: '🌅 暖阳橙', description: '温暖活力风格' },
-  { value: 'rose', label: '🌹 玫瑰红', description: '优雅浪漫风格' },
-  { value: 'lavender', label: '💜 薰衣草', description: '梦幻柔美风格' },
-  { value: 'midnight', label: '🌃 暗夜黑', description: '深沉神秘风格' },
-  { value: 'sakura', label: '🌸 樱花粉', description: '清雅甜美风格' },
-  { value: 'emerald', label: '💎 翡翠绿', description: '典雅高贵风格' },
-  { value: 'amber', label: '✨ 琥珀金', description: '奢华品质风格' }
+  { value: 'ocean', label: '🌊 海洋蓝', description: '清新专业风格' ,primary: '#2196f3',secondary: '#4caf50',tertiary: '#e3f2fd'},
+  { value: 'forest', label: '🌿 森林绿', description: '自然生机风格',primary: '#4caf50',secondary: '#8bc34a',tertiary: '#e8f5e8'},
+  { value: 'sunset', label: '🌅 暖阳橙', description: '温暖活力风格' ,primary: '#ff9800',secondary: '#ffc107',tertiary: '#fff3e0'},
+  { value: 'rose', label: '🌹 玫瑰红', description: '优雅浪漫风格' ,primary: '#e91e63',secondary: '#9c27b0',tertiary: '#fce4ec'},
+  { value: 'lavender', label: '💜 薰衣草', description: '梦幻柔美风格' ,primary: '#673ab7',secondary: '#9c27b0',tertiary: '#f3e5f5'},
+  { value: 'midnight', label: '🌃 暗夜黑', description: '深沉神秘风格' ,primary: '#424242',secondary: '#212121',tertiary: '#e8eaf6'},
+  { value: 'sakura', label: '🌸 樱花粉', description: '清雅甜美风格' ,primary: '#f06292',secondary: '#f48fb1',tertiary: '#fce4ec'},
+  { value: 'emerald', label: '💎 翡翠绿', description: '典雅高贵风格' ,primary: '#00796b',secondary: '#00695c',tertiary: '#e0f2f1'},
+  { value: 'amber', label: '✨ 琥珀金', description: '奢华品质风格' ,primary: '#ff8f00',secondary: '#ffd54f',tertiary: '#fff8e1'}
 ]
 
 // 域名状态选项

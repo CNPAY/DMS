@@ -685,6 +685,10 @@ function handleUpdate(row) {
     salesStatus: row.salesStatus,
     categoryId: row.categoryId,
     tagIds: row.tags ? row.tags.map((tagMap) => tagMap.tag.id) : [],
+    clickBehavior: row.clickBehavior || null,
+    seoTitle: row.seoTitle || null,
+    seoKeywords: row.seoKeywords || null,
+    seoDescription: row.seoDescription || null,
   };
 
   open.value = true;

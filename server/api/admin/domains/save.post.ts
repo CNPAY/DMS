@@ -61,7 +61,16 @@ const domainSchema = Joi.object({
   }).messages({
     'string.max': '外部URL不能超过500个字符'
   }),
-  tagIds: Joi.array().items(Joi.number().integer()).optional()
+  tagIds: Joi.array().items(Joi.number().integer()).optional(),
+  seoTitle: Joi.string().max(255).allow('', null).optional().messages({
+    'string.max': 'SEO标题不能超过255个字符'
+  }),
+  seoKeywords: Joi.string().max(500).allow('', null).optional().messages({
+    'string.max': 'SEO关键词不能超过500个字符'
+  }),
+  seoDescription: Joi.string().max(500).allow('', null).optional().messages({
+    'string.max': 'SEO描述不能超过500个字符'
+  })
 })
 
 export default defineEventHandler(async (event) => {
@@ -149,8 +158,11 @@ export default defineEventHandler(async (event) => {
             priceExpiry: domainData.priceExpiry,
             domainMeaning: domainData.domainMeaning || null,
             domainDescription: domainData.domainDescription || null,
-            clickBehavior: domainData.clickBehavior || 'landing',
-            externalUrl: domainData.externalUrl || null
+            clickBehavior: domainData.clickBehavior || 'popup',
+            externalUrl: domainData.externalUrl || null,
+            seoTitle: domainData.seoTitle || null,
+            seoKeywords: domainData.seoKeywords || null,
+            seoDescription: domainData.seoDescription || null
           }
         })
 
@@ -248,7 +260,10 @@ export default defineEventHandler(async (event) => {
             domainMeaning: domainData.domainMeaning || null,
             domainDescription: domainData.domainDescription || null,
             clickBehavior: domainData.clickBehavior || 'popup',
-            externalUrl: domainData.externalUrl || null
+            externalUrl: domainData.externalUrl || null,
+            seoTitle: domainData.seoTitle || null,
+            seoKeywords: domainData.seoKeywords || null,
+            seoDescription: domainData.seoDescription || null
           }
         })
 

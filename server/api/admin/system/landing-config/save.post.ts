@@ -19,6 +19,10 @@ export default defineEventHandler(async (event) => {
       contactPhone: body.contactPhone || '',
       companyName: body.companyName || '',
       customCSS: body.customCSS || '',
+      mainTitle: body.mainTitle || '',
+      subTitle: body.subTitle || '',
+      footerTitle: body.footerTitle || '',
+      copyrightTitle: body.copyrightTitle || '',
       updatedAt: new Date().toISOString()
     }
     
