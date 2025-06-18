@@ -5,7 +5,7 @@
   "version": "1.0.0",
   "description": "DMS - 域名资产管理与展示系统",
   "scripts": {
-    "build": "npx prisma generate && npx prisma db push && npx tsx server/utils/init-db.ts && nuxt build",
+    "build": "node scripts/auto-db-setup.cjs && nuxt build",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
@@ -14,8 +14,9 @@
     "db:migrate": "prisma migrate dev",
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
-    "db:init": "node server/utils/init-db.js",
-    "db:setup": "prisma db push && node server/utils/init-db.js"
+    "db:init": "node scripts/init-db.js",
+    "db:setup": "node scripts/auto-db-setup.cjs",
+    "validate-schemas": "node scripts/validate-schemas.cjs"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",
@@ -26,6 +27,7 @@
     "@types/joi": "^17.2.2",
     "bcryptjs": "^2.4.3",
     "dayjs": "^1.11.13",
+    "dotenv": "^16.3.1",
     "echarts": "^5.6.0",
     "element-plus": "^2.8.0",
     "joi": "^17.13.3",
@@ -36,6 +38,7 @@
     "nodemailer": "^6.9.7",
     "nuxt": "^3.17.5",
     "openai": "^5.3.0",
+    "pg": "^8.11.3",
     "pinia": "^2.2.0",
     "vue": "^3.5.16",
     "vue-router": "^4.5.1",
@@ -50,6 +53,7 @@
     "@types/node": "^20.10.0",
     "@types/node-cron": "^3.0.11",
     "@types/nodemailer": "^6.4.14",
+    "@types/pg": "^8.10.9",
     "eslint": "^8.57.0",
     "prisma": "^5.6.0",
     "sass": "^1.69.5",

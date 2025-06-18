@@ -1,0 +1,193 @@
+---
+description: 双数据库数据库架构同步开发规范
+globs: 
+alwaysApply: false
+---
+# 数据库架构同步开发规范
+
+## 概述
+
+本文档定义了在DMS项目中进行数据库设计变更时必须遵循的流程，确保MySQL和PostgreSQL两种数据库的架构保持完全一致。
+
+## 核心原则
+
+1. **双数据库同步**：任何数据库变更必须同时适用于MySQL和PostgreSQL
+2. **架构一致性**：两个数据库的表结构、字段定义、索引、关系必须完全一致
+3. **类型适配**：针对不同数据库的特定数据类型进行正确映射
+4. **验证流程**：每次变更后必须验证两个数据库架构的正确性
+
+## 文件结构
+
+```
+prisma/
+├── schema.prisma          # 构建时动态生成的活动schema
+├── schema.mysql.prisma    # MySQL数据库架构定义
+└── schema.postgres.prisma # PostgreSQL数据库架构定义
+```
+
+## 开发流程
+
+### 1. 数据库变更前准备
+
+- [ ] 确认当前两个schema文件状态一致
+- [ ] 备份现有数据库结构
+- [ ] 明确变更需求和影响范围
+
+### 2. 架构修改步骤
+
+#### 2.1 修改MySQL架构
+1. 编辑 `prisma/schema.mysql.prisma`
+2. 进行所需的表结构变更
+3. 确保使用MySQL兼容的数据类型
+
+#### 2.2 同步PostgreSQL架构
+1. 将MySQL的变更同步到 `prisma/schema.postgres.prisma`
+2. 适配PostgreSQL特定的数据类型：
+   - `@db.TinyInt` → `Int`
+   - `@db.LongText` → `@db.Text`
+   - `@db.MediumText` → `@db.Text`
+   - 其他MySQL特有类型按需映射
+
+#### 2.3 保持一致性检查点
+- [ ] 字段名称完全一致
+- [ ] 字段类型正确映射
+- [ ] 默认值设置一致
+- [ ] 索引定义同步
+- [ ] 关系定义匹配
+- [ ] 注释内容相同
+
+### 3. 验证流程
+
+#### 3.1 语法验证
+```bash
+# 验证MySQL架构
+npx prisma validate --schema=prisma/schema.mysql.prisma
+
+# 验证PostgreSQL架构
+npx prisma validate --schema=prisma/schema.postgres.prisma
+```
+
+#### 3.2 差异检查
+```bash
+# 检查两个schema文件的结构差异（忽略provider）
+diff -u prisma/schema.mysql.prisma prisma/schema.postgres.prisma | grep -v "provider"
+```
+
+#### 3.3 构建测试
+```bash
+# 测试MySQL环境构建
+DATABASE_PROVIDER="mysql" npm run build
+
+# 测试PostgreSQL环境构建  
+DATABASE_PROVIDER="postgres" npm run build
+```
+
+### 4. 常见数据类型映射
+
+| MySQL类型 | PostgreSQL类型 | Prisma定义 |
+|-----------|----------------|------------|
+| `@db.TinyInt` | `Int` | `Int @default(0)` |
+| `@db.LongText` | `@db.Text` | `String? @db.Text` |
+| `@db.MediumText` | `@db.Text` | `String? @db.Text` |
+| `@db.VarChar(n)` | `@db.VarChar(n)` | `String @db.VarChar(n)` |
+| `@db.Text` | `@db.Text` | `String? @db.Text` |
+
+### 5. 自动化工具使用
+
+#### 5.1 自动数据库设置脚本
+```bash
+# 脚本会根据DATABASE_PROVIDER自动选择正确的schema
+npm run build
+```
+
+#### 5.2 环境变量配置
+```env
+# MySQL配置
+DATABASE_PROVIDER="mysql"
+DATABASE_URL="mysql://user:password@host:port/database"
+
+# PostgreSQL配置  
+DATABASE_PROVIDER="postgres"
+DATABASE_URL="postgres://user:password@host:port/database"
+```
+
+## 质量检查清单
+
+### 修改完成后必须检查：
+
+- [ ] 两个schema文件的模型数量一致
+- [ ] 每个模型的字段数量和名称一致
+- [ ] 字段类型正确映射到对应数据库
+- [ ] 关系定义（@relation）完全一致
+- [ ] 索引定义同步
+- [ ] 默认值设置一致
+- [ ] 注释和文档同步更新
+- [ ] 两个schema文件都通过prisma validate
+- [ ] 构建测试通过
+
+## 常见错误和解决方案
+
+### 1. 字段类型不匹配
+**错误**：PostgreSQL不支持`@db.TinyInt`
+**解决**：改为普通的`Int`类型
+
+### 2. 文本字段长度问题
+**错误**：`@db.LongText`在PostgreSQL中无效
+**解决**：统一使用`@db.Text`
+
+### 3. 默认值不一致
+**错误**：一个schema有默认值，另一个没有
+**解决**：确保默认值定义完全一致
+
+### 4. 关系定义不匹配
+**错误**：外键关系在两个schema中不一致
+**解决**：检查@relation定义，确保字段名和引用一致
+
+## 最佳实践
+
+1. **小步快跑**：每次只修改一个模型或少量字段
+2. **及时验证**：每次修改后立即运行验证命令
+3. **文档先行**：重大变更前先更新设计文档
+4. **测试驱动**：先写测试用例，再进行数据库变更
+5. **版本控制**：每次变更都要提交git，便于回滚
+
+## 应急处理
+
+### 如果发现架构不一致：
+1. 立即停止开发工作
+2. 比较两个schema文件找出差异
+3. 修复不一致的地方
+4. 重新运行验证流程
+5. 确认修复后继续开发
+
+### 数据库迁移失败：
+1. 检查错误日志
+2. 确认数据类型映射是否正确
+3. 检查是否有数据冲突
+4. 必要时使用`--accept-data-loss`参数
+
+## 工具和命令参考
+
+```bash
+# 复制MySQL架构到PostgreSQL（手动适配后使用）
+cp prisma/schema.mysql.prisma prisma/schema.postgres.prisma
+
+# 查看两个schema的差异
+diff -u prisma/schema.mysql.prisma prisma/schema.postgres.prisma
+
+# 验证特定schema文件
+npx prisma validate --schema=prisma/schema.mysql.prisma
+
+# 生成客户端（基于当前活动schema）
+npx prisma generate
+
+# 推送数据库结构
+npx prisma db push --accept-data-loss
+
+# 重置数据库
+npx prisma db push --force-reset
+```
+
+---
+
+**重要提醒**：遵循此规范可以确保DMS系统在MySQL和PostgreSQL之间无缝切换，避免因数据库架构不一致导致的运行时错误。
