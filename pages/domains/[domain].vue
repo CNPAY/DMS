@@ -1,5 +1,6 @@
 <template>
   <div class="domain-container portal-theme" :data-theme="landing.backgroundColorInfo.value">
+    
     <div class="container-wrap">
       <!-- 域名展示卡片 -->
       <div class="card parking-card">
@@ -102,6 +103,7 @@ import { useRoute, useHead, useRuntimeConfig, useFetch, useAsyncData } from '#im
 import { 
   COLOR_THEMES, 
 } from '~/utils/constants.js'
+import { useTrack } from '~/composables/useTrack'
 const route = useRoute()
 const config = useRuntimeConfig()
 const domain = route.params.domain
@@ -118,6 +120,9 @@ const domainInfo = reactive({
   externalUrl: '',
   image: ''
 })
+
+// 使用访问统计组合式函数
+const { trackDomain } = useTrack()
 
 const landing = reactive({
   backgroundColorInfo: {},
@@ -219,6 +224,11 @@ onMounted(() => {
   // 监听窗口大小变化，调整域名字体大小
   if (process.client) {
     window.addEventListener('resize', autoFitDomain)
+  }
+
+  // 如果有域名ID，记录访问
+  if (domainInfo.id) {
+    trackDomain(domainInfo.id)
   }
 })
 

@@ -36,8 +36,13 @@ const domains = ref([])
 const pending = ref(true)
 const error = ref(null)
 
+// 导入访问统计组合式函数
+import { useTrack } from '~/composables/useTrack'
+const { trackPortfolio } = useTrack()
+
 import { useTheme } from '@/composables/useTheme'
 const { setTheme } = useTheme()
+
 // 数据加载函数
 async function loadPortfolioData() {
   try {
@@ -75,6 +80,12 @@ async function loadPortfolioData() {
     // 3. 处理米表数据
     if (portfolioData?.code === 200 && portfolioData.data) {
       portfolio.value = portfolioData.data
+      
+      // 记录米表访问
+      if (portfolio.value.id) {
+        trackPortfolio(portfolio.value.id)
+      }
+      
       // setTheme(portfolio.value.colorTheme)
       // 设置页面SEO - 使用米表配置的SEO信息
       const portfolioConfig = portfolio.value

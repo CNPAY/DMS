@@ -1,5 +1,6 @@
 import prisma from '~/server/utils/db'
 import { ResponseData } from '~/server/utils/response'
+import { recordDomainVisit, VisitType } from '~/server/utils/visitor'
 
 export default defineEventHandler(async (event) => {
   try {
@@ -8,7 +9,7 @@ export default defineEventHandler(async (event) => {
 
     // 根据是否有slug决定查询条件
     const whereCondition = slug 
-      ? { slug }  // 有slug时按slug查询
+      ? { slug: String(slug) }  // 有slug时按slug查询，确保类型为字符串
       : { isDefault: true }  // 无slug时查询默认米表
 
     const defaultPortfolio = await prisma.portfolio.findFirst({
@@ -55,9 +56,10 @@ export default defineEventHandler(async (event) => {
       return ResponseData.error('未找到默认米表')
     }
 
+
     // 解析headerPages/footerPages字段，批量查出静态页信息（只返回必要字段）
-    let headerPagesData = [];
-    let footerPagesData = [];
+    let headerPagesData: any[] = [];
+    let footerPagesData: any[] = [];
     try {
       const headerIds = defaultPortfolio.headerPages ? JSON.parse(defaultPortfolio.headerPages) : [];
       const footerIds = defaultPortfolio.footerPages ? JSON.parse(defaultPortfolio.footerPages) : [];

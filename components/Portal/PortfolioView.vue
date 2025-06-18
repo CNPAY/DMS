@@ -611,7 +611,6 @@ onUnmounted(() => {
 
 // 监听域名数据变化，重新提取后缀和标签
 watch(() => props.domains, () => {
-  console.log('域名数据:', props.domains.slice(0, 3)) // 只打印前3个域名的数据结构
   extractSuffixes()
   extractTags()
 }, { immediate: true })

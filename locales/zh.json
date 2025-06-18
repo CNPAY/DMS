@@ -47,6 +47,8 @@
     "welcome": "欢迎使用 DMS",
     "loginToManage": "登录到管理后台",
     "email": "邮箱",
+    "account": "账号",
+    "accountPlaceholder": "用户名或邮箱",
     "password": "密码",
     "login": "登录",
     "loggingIn": "登录中...",
@@ -54,6 +56,7 @@
     "loginFailed": "登录失败",
     "emailRequired": "请输入邮箱地址",
     "emailInvalid": "请输入有效的邮箱地址",
+    "accountRequired": "请输入用户名或邮箱",
     "passwordRequired": "请输入密码",
     "passwordMinLength": "密码长度不能少于6位",
     "demoHint": "演示账户信息："

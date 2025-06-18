@@ -461,4 +461,29 @@ model StaticPage {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("static_pages")
-} 
+}
+
+// 访问跟踪记录表
+model Track {
+  id              Int       @id @default(autoincrement())
+  target          String    @db.VarChar(100)  // 目标ID：域名ID、米表ID或事件标识符
+  targetType      String    @map("target_type") @db.VarChar(20) // 目标类型: domain, portfolio, event
+  ipAddress       String    @map("ip_address") @db.VarChar(45)
+  userAgent       String?   @map("user_agent") @db.Text
+  referer         String?   @db.VarChar(500)
+  country         String?   @db.VarChar(50)
+  region          String?   @db.VarChar(100)
+  city            String?   @db.VarChar(100)
+  deviceType      String?   @map("device_type") @db.VarChar(20)  // desktop, mobile, tablet
+  browserName     String?   @map("browser_name") @db.VarChar(50)
+  osName          String?   @map("os_name") @db.VarChar(50)
+  visitTime       DateTime  @default(now()) @map("visit_time")
+  sessionId       String?   @map("session_id") @db.VarChar(100)
+  isUnique        Boolean   @default(true) @map("is_unique")  // 是否为独立访客
+  eventData       String?   @map("event_data") @db.Text      // 事件相关数据(JSON格式)
+
+  @@index([target, targetType])
+  @@index([targetType])
+  @@index([visitTime])
+  @@map("tracks")
+}

@@ -14,10 +14,10 @@
           class="login-form"
           @submit.prevent="handleLogin"
         >
-          <el-form-item prop="email">
+          <el-form-item prop="account">
             <el-input
-              v-model="loginForm.email"
-              :placeholder="$t('auth.email')"
+              v-model="loginForm.account"
+              :placeholder="$t('auth.accountPlaceholder')"
               size="large"
               prefix-icon="User"
               clearable
@@ -53,7 +53,7 @@
         <div class="login-footer">
           <p class="demo-hint">{{ $t('auth.demoHint') }}</p>
           <p class="demo-credentials">
-            {{ $t('auth.email') }}: admin@dms.com<br>
+            {{ $t('auth.account') }}: admin@dms.com 或 admin<br>
             {{ $t('auth.password') }}: admin123
           </p>
         </div>
@@ -80,15 +80,14 @@ const { t } = useI18n()
 
 // 表单数据
 const loginForm = reactive({
-  email: 'admin@dms.com',
+  account: 'admin@dms.com',
   password: 'admin123'
 })
 
 // 表单验证规则
 const loginRules: FormRules = {
-  email: [
-    { required: true, message: t('auth.emailRequired'), trigger: 'blur' },
-    { type: 'email', message: t('auth.emailInvalid'), trigger: 'blur' }
+  account: [
+    { required: true, message: t('auth.accountRequired'), trigger: 'blur' }
   ],
   password: [
     { required: true, message: t('auth.passwordRequired'), trigger: 'blur' },
@@ -112,7 +111,7 @@ const handleLogin = async () => {
     }>('/api/auth/login', {
       method: 'POST',
       body: {
-        email: loginForm.email,
+        account: loginForm.account,
         password: loginForm.password
       }
     })

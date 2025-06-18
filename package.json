@@ -14,7 +14,6 @@
     "db:migrate": "prisma migrate dev",
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
-    "db:init": "node scripts/init-db.js",
     "db:setup": "node scripts/auto-db-setup.cjs",
     "validate-schemas": "node scripts/validate-schemas.cjs"
   },

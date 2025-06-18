@@ -1,12 +1,13 @@
 import { ResponseData } from '~/server/utils/response'
 import prisma from '~/server/utils/db'
+import { recordDomainVisit, VisitType } from '~/server/utils/visitor'
 
 export default defineEventHandler(async (event) => {
   const { domain } = getQuery(event)
   if (!domain) return ResponseData.error('缺少 domain 参数', 400)
   // 查询数据库（此处假设有 Domain 表和相关字段）
   const info = await prisma.domain.findFirst({
-    where: { domainName: domain },
+    where: { domainName: String(domain) },
     select: {
       id: true,
       domainName: true,
@@ -22,6 +23,7 @@ export default defineEventHandler(async (event) => {
     }
   })
   if (!info) return ResponseData.error('未找到该域名', 404)
+  
   
   // 格式化数据以保持一致性
   const formattedInfo = {

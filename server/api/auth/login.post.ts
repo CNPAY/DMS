@@ -3,18 +3,23 @@ import jwt from 'jsonwebtoken'
 import prisma from '~/server/utils/db'
 
 export default defineEventHandler(async (event) => {
-  const { email, password } = await readBody(event)
+  const { account, password } = await readBody(event)
 
-  if (!email || !password) {
+  if (!account || !password) {
     throw createError({
       statusCode: 400,
-      statusMessage: '邮箱和密码不能为空'
+      statusMessage: '账号和密码不能为空'
     })
   }
 
-  // 查找用户
-  const user = await prisma.user.findUnique({
-    where: { email }
+  // 查找用户 - 支持用户名或邮箱登录
+  const user = await prisma.user.findFirst({
+    where: {
+      OR: [
+        { email: account },
+        { username: account }
+      ]
+    }
   })
 
   if (!user) {
