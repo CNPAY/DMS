@@ -231,29 +231,33 @@ onMounted(() => {
     trackDomain(domainInfo.id)
   }
 })
+const headers = process.server ? useRequestHeaders(['host', 'x-forwarded-host','x-forwarded-proto']) : undefined
 
-// 动态生成SEO图片URL
-const getSeoImageUrl = computed(() => {
-  if (domainInfo.image) return domainInfo.image
-  
+const getBaseUrl = () => {
   // 获取当前站点的URL
   let baseUrl = ''
   if (process.client) {
     baseUrl = window.location.origin
   } else {
-    // 在服务器端，使用请求的host或配置的URL
-    baseUrl = config.public.appUrl || `https://${domain}`
+       // SSR：尝试通过 useRequestHeaders 获取 Host
+    const host = headers['x-forwarded-host'] || headers.host
+    const protocol =  headers['x-forwarded-proto'] || 'https'
+    baseUrl = `${protocol}://${host}`
   }
+  return baseUrl
+}
+// 动态生成SEO图片URL
+const getSeoImageUrl = computed(() => {
+  if (domainInfo.image) return domainInfo.image
   
+  // 获取当前站点的URL
+  let baseUrl = getBaseUrl()
   return `${baseUrl}/api/portal/seo-image?domain=${encodeURIComponent(domainInfo.domainName)}&description=${encodeURIComponent(domainInfo.domainDescription || '')}&price=${encodeURIComponent(domainInfo.price || '')}`
 })
 
 // 计算规范的URL
 const canonicalUrl = computed(() => {
-  if (process.client) {
-    return window.location.href
-  }
-  return `https://${domain}/domains/${domain}`
+  return `${getBaseUrl()}/domains/${domain}`
 })
 
 // 增强的SEO/OG/Twitter Card meta
