@@ -61,10 +61,6 @@ export default defineNuxtConfig({
     experimental: {
       wasm: true
     },
-    externals: {
-      // 将canvas包标记为外部依赖，只在服务器端使用
-      inline: ['canvas']
-    }
   },
 
   // TypeScript configuration
