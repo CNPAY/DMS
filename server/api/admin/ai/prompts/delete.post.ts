@@ -18,7 +18,7 @@ export default defineEventHandler(async (event) => {
     }
 
     const { ids } = value
-    const userId = 1 // 单用户系统，固定用户ID为1
+    const userId =  event.context.auth.userId // 单用户系统，固定用户ID为1
 
     // 检查要删除的提示词是否都存在且属于当前用户
     const existingPrompts = await prisma.aiPrompt.findMany({

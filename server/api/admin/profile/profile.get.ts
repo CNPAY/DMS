@@ -3,7 +3,7 @@ import prisma from '~/server/utils/db'
 
 export default defineEventHandler(async (event) => {
   try {
-    const userId = 1 // 固定用户ID为1
+    const userId =  event.context.auth.userId // 固定用户ID为1
     
     const user = await prisma.user.findUnique({
       where: { id: userId },

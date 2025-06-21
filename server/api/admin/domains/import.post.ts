@@ -8,7 +8,7 @@ export default defineEventHandler(async (event) => {
     const { data, config } = body
     
     // TODO: 从session或token中获取用户ID
-    const userId = 1 // 临时硬编码，实际应该从认证中获取
+    const userId =  event.context.auth.userId // 临时硬编码，实际应该从认证中获取
     
     if (!data || !Array.isArray(data)) {
       return {

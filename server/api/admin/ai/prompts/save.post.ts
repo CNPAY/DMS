@@ -24,7 +24,7 @@ export default defineEventHandler(async (event) => {
     }
 
     const { id, sceneCode, sceneName, systemPromptDefault, userPromptCustom, modelPreference, enabled } = value
-    const userId = 1 // 单用户系统，固定用户ID为1
+    const userId =  event.context.auth.userId // 单用户系统，固定用户ID为1
 
     let savedPrompt
 

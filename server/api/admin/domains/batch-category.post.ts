@@ -7,7 +7,7 @@ export default defineEventHandler(async (event) => {
     const { domainIds, categoryId } = body
     
     // TODO: 从session或token中获取用户ID
-    const userId = 1 // 临时硬编码，实际应该从认证中获取
+    const userId =  event.context.auth.userId // 临时硬编码，实际应该从认证中获取
     
     if (!domainIds || !Array.isArray(domainIds) || domainIds.length === 0) {
       return ResponseData.error('请选择要操作的域名', 400)

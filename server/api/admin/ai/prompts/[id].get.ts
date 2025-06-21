@@ -9,7 +9,7 @@ export default defineEventHandler(async (event) => {
       return ResponseData.error('无效的提示词ID', 400)
     }
 
-    const userId = 1 // 单用户系统，固定用户ID为1
+    const userId =  event.context.auth.userId // 单用户系统，固定用户ID为1
 
     // 查询提示词详情
     const prompt = await prisma.aiPrompt.findFirst({

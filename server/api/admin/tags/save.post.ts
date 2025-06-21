@@ -23,7 +23,7 @@ export default defineEventHandler(async (event) => {
     }
 
     // 获取用户信息（从认证中间件或 session）
-    const userId = 1 // 临时硬编码，实际应从认证获取
+    const userId =  event.context.auth.userId // 临时硬编码，实际应从认证获取
 
     if (value.id) {
       // 编辑模式

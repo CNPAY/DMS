@@ -9,7 +9,7 @@ export default defineEventHandler(async (event) => {
   try {
     const query = getQuery(event)
     const search = query.search as string || ''
-    const userId = 1 // 单用户系统，固定用户ID为1
+    const userId =  event.context.auth.userId // 单用户系统，固定用户ID为1
 
     
     const systemCodes = systemScenes.map(s => s.code)

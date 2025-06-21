@@ -29,7 +29,7 @@ export default defineEventHandler(async (event) => {
     // 将配置转换为JSON字符串保存到数据库
     const configValue = JSON.stringify(config)
     const settingKey = 'landing_page_config'
-    const userId = 1 // 单用户系统，固定用户ID为1
+    const userId =  event.context.auth.userId // 单用户系统，固定用户ID为1
     
     // 使用Prisma保存配置 (使用类型断言来避免类型检查问题)
     await (prisma.systemSetting as any).upsert({

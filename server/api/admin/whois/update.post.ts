@@ -23,7 +23,7 @@ export default defineEventHandler(async (event) => {
     const { domainId } = body
     
     // TODO: 从session或token中获取用户ID
-    const userId = 1 // 临时硬编码，实际应该从认证中获取
+    const userId =  event.context.auth.userId // 临时硬编码，实际应该从认证中获取
     
     if (!domainId) {
       return ResponseData.error('域名ID不能为空', 400)

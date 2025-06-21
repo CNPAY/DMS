@@ -14,7 +14,7 @@ interface CostData {
 export default defineEventHandler(async (event) => {
   try {
     // 暂时使用固定的用户ID 1 进行测试
-    const userId = 1
+    const userId =  event.context.auth.userId
     
     const body = await readBody(event)
     const { action, data } = body as { action: 'create' | 'update' | 'delete' | 'batchDelete' | 'batchCreate', data: any }

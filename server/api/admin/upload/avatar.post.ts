@@ -37,7 +37,7 @@ export default defineEventHandler(async (event) => {
     await writeFile(filePath, file.data)
 
     // 更新用户头像
-    const userId = 1 // 固定用户ID为1
+    const userId =  event.context.auth.userId // 固定用户ID为1
     await prisma.user.update({
       where: { id: userId },
       data: {

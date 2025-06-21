@@ -4,7 +4,7 @@ import { ResponseData } from '~/server/utils/response'
 export default defineEventHandler(async (event) => {
   try {
     // 暂时使用固定的用户ID 1 进行测试
-    const userId = 1
+    const userId =  event.context.auth.userId
 
     // 获取用户的域名列表
     const domains = await prisma.domain.findMany({
